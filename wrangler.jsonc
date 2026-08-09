@@ -4,10 +4,11 @@
   "main": "server/index.ts",
   "compatibility_date": "2026-08-09",
   "routes": [
-    {
-      "pattern": "transit.pordondeviene.ar",
-      "custom_domain": true
-    }
+    "pordondeviene.com.ar/*",
+    "www.pordondeviene.com.ar/*",
+    "pordondeviene.ar/*",
+    "www.pordondeviene.ar/*",
+    "transit.pordondeviene.ar/*"
   ],
   "assets": {
     "directory": "./dist",
