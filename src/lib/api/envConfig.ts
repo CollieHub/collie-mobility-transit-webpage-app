@@ -43,5 +43,5 @@ export function getWsUrl(): string {
   if (env === 'local') {
     return 'ws://localhost:6001';
   }
-  return import.meta.env.VITE_TRANSIT_WS_URL || 'wss://ws.pordondeviene.ar';
+  return import.meta.env.VITE_TRANSIT_WS_URL || '';
 }

@@ -25,7 +25,7 @@ app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 // Ads Endpoint
 app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
 
-// 1. Líneas / Empresas públicas (Retorna la lista de etiquetas para el selector de líneas)
+// 1. Líneas / Empresas públicas
 app.get('/v1/catalog/public/lines', async (c) => {
   try {
     return c.json({ success: true, lines: ['SIT'] });
@@ -65,10 +65,11 @@ app.get('/v1/catalog/public/data', async (c) => {
     const branches = branchesRes.results;
 
     const routes = await Promise.all(branches.map(async (b: any) => {
-      // Shapes / Trazados
+      // Shapes / Trazados (se incluyen ambos campos 'type' y 'direction' para compatibilidad total con el mapa React-Leaflet)
       const shapesRes = await c.env.DB.prepare('SELECT * FROM route_shapes WHERE branch_id = ?').bind(b.branch_id).all();
       const directions = shapesRes.results.map((s: any) => ({
         type: s.direction,
+        direction: s.direction,
         coordinates: JSON.parse(s.coordinates_json || '[]'),
         distance: s.total_distance_km
       }));
