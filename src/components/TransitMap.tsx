@@ -3714,9 +3714,6 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         if (userPos && userPos.length === 2 && userPos[0] && userPos[1]) {
           lat = userPos[0];
           lng = userPos[1];
-        } else if (center && center.length === 2 && center[0] && center[1]) {
-          lat = center[0];
-          lng = center[1];
         } else {
           lat = -34.11703;
           lng = -59.07735;
@@ -3772,7 +3769,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         return next;
       });
 
-      console.log(`📡 [GPS Colaborativo] Telemetría enviada por WebSocket (${lat.toFixed(5)}, ${lng.toFixed(5)}).`);
+      console.log(`📡 [GPS Colaborativo] Telemetría enviada por WebSocket (${(lat ?? 0).toFixed(5)}, ${(lng ?? 0).toFixed(5)}).`);
     };
 
     sendCollaborativePing();
@@ -4208,20 +4205,13 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         import.meta.env.VITE_TRANSIT_API_URL,
         'http://localhost:6005/v1'
       ].filter(Boolean);
-      let bboxParam = '';
-      if (mapRef.current) {
-        try {
-          const b = mapRef.current.getBounds();
-          bboxParam = `?bbox=${b.getWest().toFixed(4)},${b.getSouth().toFixed(4)},${b.getEast().toFixed(4)},${b.getNorth().toFixed(4)}`;
-        } catch (e) {}
-      }
+      const uniqueCandidates = Array.from(new Set(candidates));
 
       for (const targetUrl of uniqueCandidates) {
         try {
           const cleanUrl = (targetUrl as string).replace(/\/$/, '');
           const token = await getPublicToken(cleanUrl);
-          const rawEndpoint = cleanUrl.endsWith('/v1') ? `${cleanUrl}/transit/buses/live` : `${cleanUrl}/v1/transit/buses/live`;
-          const liveEndpoint = bboxParam ? `${rawEndpoint}${bboxParam}` : rawEndpoint;
+          const liveEndpoint = cleanUrl.endsWith('/v1') ? `${cleanUrl}/transit/buses/live` : `${cleanUrl}/v1/transit/buses/live`;
           const res = await fetch(liveEndpoint, {
             headers: { 
               'X-Application-ID': 'COLLIE-TRANSIT-WEB',
@@ -4294,7 +4284,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     // 1. Si el mapa está alejado (zoom <= 12) y sin selección: 20s (20000ms).
     // 2. Si el usuario está enfocado (zoom > 12) o sigue un colectivo/ramal: 5s (5000ms).
     let effectiveIntervalMs = 20000;
-    if (selectedRouteId || followedBusId || currentZoom > 12) {
+    if ((selectedRouteIds && selectedRouteIds.size > 0) || currentZoom > 12) {
       effectiveIntervalMs = 5000;
     }
 
@@ -4305,7 +4295,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     return () => {
       clearInterval(pollInterval);
     };
-  }, [manualRefreshTrigger, livePollingEnabled, livePollingIntervalSec, simulateBusesLocally, wsStatus, currentZoom, selectedRouteId, followedBusId]);
+  }, [manualRefreshTrigger, livePollingEnabled, livePollingIntervalSec, simulateBusesLocally, wsStatus, currentZoom, selectedRouteIds]);
 
   // ----------------- PARADA ANCLADA (ESTILO ANDROID) -----------------
   const pinnedArrivals = useMemo(() => {

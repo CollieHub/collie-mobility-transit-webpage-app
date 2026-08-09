@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad - ¿Por dónde viene?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;
+            --border: rgba(255, 255, 255, 0.06);
+            --radius-md: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h2::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .section p, .section ul {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .section ul {
+            list-style: none;
+            padding-left: 1.5rem;
+        }
+
+        .section ul li {
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .section ul li::before {
+            content: '→';
+            position: absolute;
+            left: -1.5rem;
+            color: var(--accent);
+        }
+
+        .warning {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Política de Privacidad</h1>
+        <p class="date">Última actualización: 2 de mayo de 2026</p>
+    </div>
+
+    <div class="panel">
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            En <strong>¿Por dónde viene?</strong> (Transporte Zárate), valoramos su privacidad y la seguridad de sus datos. En cumplimiento con la <strong>Ley N° 25.326</strong> de Protección de Datos Personales de la República Argentina, esta Política de Privacidad describe cómo recolectamos, usamos y protegemos la información.
+        </p>
+
+        <div class="warning">
+            <strong>AVISO IMPORTANTE:</strong> Esta aplicación es una herramienta de monitoreo y logística de transporte. Los datos de ubicación mostrados corresponden a las unidades de transporte público (colectivos), no al dispositivo del usuario, a menos que el usuario lo permita explícitamente para ver su posición en el mapa.
+        </div>
+
+        <div class="section">
+            <h2>1. Información que recopilamos</h2>
+            <p>La aplicación principal funciona como un visor de telemetría y recopila:</p>
+            <ul>
+                <li><strong>Datos de Ubicación (Unidades de Transporte):</strong> Recopilamos y mostramos la ubicación de las unidades que están transmitiendo telemetría en tiempo real.</li>
+                <li><strong>Ubicación del Usuario (Opcional):</strong> Si usted otorga permisos de ubicación en su dispositivo, la aplicación utilizará su GPS únicamente para mostrar su posición en el mapa localmente. <strong>Esta ubicación no se almacena ni se transmite a nuestros servidores.</strong></li>
+                <li><strong>Datos de análisis y rendimiento:</strong> Recopilamos información anónima sobre fallos y rendimiento de la app (Crashlytics) para mejorar la estabilidad.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. Uso de la Información</h2>
+            <p>Los datos recopilados se utilizan exclusivamente para:</p>
+            <ul>
+                <li>Visualizar los colectivos y recorridos en tiempo real sobre el mapa.</li>
+                <li>Proporcionar publicidad local segmentada (banners de comercios de la zona).</li>
+                <li>Mejorar la precisión y rendimiento de nuestra plataforma.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>3. Terceros y Publicidad</h2>
+            <p>La aplicación puede mostrar anuncios o banners promocionales de comercios locales. Estos banners se gestionan internamente a través de nuestro backend y no utilizamos redes publicitarias invasivas de terceros que rastreen su actividad en otras aplicaciones.</p>
+        </div>
+
+        <div class="section">
+            <h2>4. Seguridad de los Datos</h2>
+            <p>Implementamos medidas técnicas y de seguridad en la infraestructura de la nube (AWS) para proteger las conexiones entre la aplicación y nuestros servidores mediante protocolos seguros (HTTPS/SSL).</p>
+        </div>
+
+        <div class="section">
+            <h2>5. Derechos del Usuario (ARCO)</h2>
+            <p>Como usuario, tiene derecho a solicitar información, rectificación o eliminación de cualquier dato personal que nos haya proporcionado, comunicándose a través de nuestros canales oficiales.</p>
+        </div>
+
+        <div class="section">
+            <h2>6. Contacto</h2>
+            <p>Para cualquier consulta legal o relacionada con esta política de privacidad, por favor contáctenos a: <br>
+            <a href="mailto:dev.collietech@gmail.com">dev.collietech@gmail.com</a></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Al utilizar ¿Por dónde viene?, usted acepta los términos descritos en esta política de privacidad.</p>
+        <p style="margin-top: 1rem;">© 2026 CollieTech. Todos los derechos reservados.</p>
+    </div>
+
+</body>
+</html>

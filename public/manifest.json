@@ -1,0 +1,48 @@
+{
+  "short_name": "¿Por dónde viene?",
+  "name": "¿Por dónde viene? - Tu app de transportes",
+  "icons": [
+    {
+      "src": "/assets/images/favicon.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/images/favicon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "background_color": "#0a0a0f",
+  "theme_color": "#1e8e3e",
+  "display": "standalone",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Horarios de Colectivos",
+      "short_name": "Horarios",
+      "url": "/?shortcut=schedules",
+      "icons": [{ "src": "/assets/images/bus-icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Ver Parada Anclada",
+      "short_name": "Anclado",
+      "url": "/?shortcut=pinned",
+      "icons": [{ "src": "/assets/images/bus-icon.png", "sizes": "192x192" }]
+    }
+  ],
+  "widgets": [
+    {
+      "name": "¿Por dónde viene?",
+      "short_name": "Arribos",
+      "description": "Estado y arribos de colectivos en tu parada favorita",
+      "tag": "stop-arrivals",
+      "template": "arrivals-template",
+      "ms_ac_template": "/arrivals-template.json",
+      "data": "/arrivals-data.json",
+      "type": "application/json",
+      "autoupdate": 30
+    }
+  ]
+}
