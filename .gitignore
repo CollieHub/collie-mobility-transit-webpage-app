@@ -2,7 +2,7 @@
 node_modules
 .pnpm-store
 
-# production
+# production build
 dist
 .dev.vars
 .wrangler
