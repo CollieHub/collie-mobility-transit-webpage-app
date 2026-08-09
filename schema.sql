@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS day_types (
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     description TEXT,
+    display_order INTEGER NOT NULL DEFAULT 1,
     aws_schedule_type_prefix TEXT NOT NULL
 );
 

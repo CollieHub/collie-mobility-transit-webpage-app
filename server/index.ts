@@ -210,23 +210,23 @@ app.get('/v1/catalog/public/timetables', async (c) => {
 // 3.b Tipos de Día (Day Types) para Selección de Horarios
 app.get('/v1/catalog/public/day_types', async (c) => {
   try {
-    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, aws_schedule_type_prefix FROM day_types ORDER BY id ASC').all();
+    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, display_order, aws_schedule_type_prefix FROM day_types ORDER BY display_order ASC').all();
     return c.json({ success: true, day_types: results, combos: results });
   } catch (err: any) {
     return c.json({
       success: true,
       day_types: [
-        { id: 'lunes_a_viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
-        { id: 'sabados', code: 'sabados', name: 'Sábados' },
-        { id: 'domingos_feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
-        { id: 'especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
+        { id: 'lunes_a_viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
+        { id: 'sabados', code: 'sabados', name: 'Sábados', display_order: 2 },
+        { id: 'domingos_feriados', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
+        { id: 'especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
       ]
     });
   }
 });
 app.get('/v1/catalog/public/day_combos', async (c) => {
   try {
-    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, aws_schedule_type_prefix FROM day_types ORDER BY id ASC').all();
+    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, display_order, aws_schedule_type_prefix FROM day_types ORDER BY display_order ASC').all();
     return c.json({ success: true, combos: results, day_types: results });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
