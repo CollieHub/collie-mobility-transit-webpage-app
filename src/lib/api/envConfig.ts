@@ -12,9 +12,7 @@ export function getTargetEnv(): TargetEnv {
     if (stored === 'local') return 'local';
   }
   
-  const envUrl = import.meta.env.VITE_TRANSIT_API_URL || '';
-  if (envUrl.includes('pordondeviene.ar')) return 'prod';
-  return 'prod'; // Apuntar a PROD por defecto
+  return 'prod';
 }
 
 export function setTargetEnv(env: TargetEnv) {
@@ -25,6 +23,14 @@ export function setTargetEnv(env: TargetEnv) {
 }
 
 export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const host = window.location.host;
+    // Si estamos corriendo en la app aislada Full-Stack Edge (Vite/Wrangler o Dominio Edge)
+    if (host.includes('5185') || host.includes('8787') || host.includes('pages.dev') || host.includes('workers.dev')) {
+      return `${window.location.protocol}//${host}/v1`;
+    }
+  }
+
   const env = getTargetEnv();
   if (env === 'local') {
     return 'http://localhost:6005/v1';
