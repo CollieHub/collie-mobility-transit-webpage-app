@@ -25,8 +25,8 @@ export function setTargetEnv(env: TargetEnv) {
 export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
     const host = window.location.host;
-    // Si estamos corriendo en la app aislada Full-Stack Edge (Vite/Wrangler o Dominio Edge)
-    if (host.includes('5185') || host.includes('8787') || host.includes('pages.dev') || host.includes('workers.dev')) {
+    // Si estamos corriendo en la app aislada Full-Stack Edge (Vite/Wrangler o Dominio Edge Cloudflare)
+    if (host.includes('5185') || host.includes('8787') || host.includes('transit.pordondeviene.ar') || host.includes('pages.dev') || host.includes('workers.dev')) {
       return `${window.location.protocol}//${host}/v1`;
     }
   }
@@ -35,7 +35,7 @@ export function getApiBaseUrl(): string {
   if (env === 'local') {
     return 'http://localhost:6005/v1';
   }
-  return import.meta.env.VITE_TRANSIT_API_URL || 'https://api.pordondeviene.ar/v1';
+  return import.meta.env.VITE_TRANSIT_API_URL || 'https://transit.pordondeviene.ar/v1';
 }
 
 export function getWsUrl(): string {
