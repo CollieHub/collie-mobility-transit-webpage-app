@@ -10,8 +10,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "collie-transit-db",
-      "database_id": "collie-transit-db-id"
+      "database_name": "collie-mobility-transit-db",
+      "database_id": "local-db-id"
     }
   ],
   "kv_namespaces": [
