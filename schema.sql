@@ -1,10 +1,10 @@
--- 1. Líneas de Colectivo Publicadas
+-- 1. Líneas de Colectivo Publicadas (Sin fallbacks ni valores DEFAULT)
 CREATE TABLE IF NOT EXISTS lines (
     id TEXT PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    color TEXT DEFAULT '#000000',
-    jurisdiction TEXT DEFAULT 'Municipal',
+    color TEXT NOT NULL,
+    jurisdiction TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS branches (
 CREATE TABLE IF NOT EXISTS stops (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
-    direction TEXT CHECK(direction IN ('ida', 'vuelta')),
+    direction TEXT NOT NULL CHECK(direction IN ('ida', 'vuelta')),
     stop_order INTEGER NOT NULL,
     name TEXT NOT NULL,
     lat REAL NOT NULL,
     lng REAL NOT NULL,
-    proj_lat REAL,
-    proj_lng REAL,
+    proj_lat REAL NOT NULL,
+    proj_lng REAL NOT NULL,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS stops (
 CREATE TABLE IF NOT EXISTS route_shapes (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
-    direction TEXT CHECK(direction IN ('ida', 'vuelta')),
+    direction TEXT NOT NULL CHECK(direction IN ('ida', 'vuelta')),
     coordinates_json TEXT NOT NULL,
-    total_distance_km REAL DEFAULT 0,
+    total_distance_km REAL NOT NULL,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS route_shapes (
 CREATE TABLE IF NOT EXISTS timetables (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
-    direction TEXT CHECK(direction IN ('ida', 'vuelta')),
-    day_type TEXT CHECK(day_type IN ('habil', 'sabado', 'domingo', 'feriado')),
+    direction TEXT NOT NULL CHECK(direction IN ('ida', 'vuelta')),
+    day_type TEXT NOT NULL CHECK(day_type IN ('habil', 'sabado', 'domingo', 'feriado')),
     departure_time TEXT NOT NULL,
-    dispatch_order INTEGER,
+    dispatch_order INTEGER NOT NULL,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
