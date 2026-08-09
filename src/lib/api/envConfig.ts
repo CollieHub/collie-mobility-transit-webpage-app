@@ -25,8 +25,8 @@ export function setTargetEnv(env: TargetEnv) {
 export function getApiBaseUrl(): string {
   if (typeof window !== 'undefined') {
     const host = window.location.host;
-    // Si estamos corriendo en la app aislada Full-Stack Edge (Vite/Wrangler o Dominio Edge Cloudflare)
-    if (host.includes('5185') || host.includes('8787') || host.includes('transit.pordondeviene.ar') || host.includes('pages.dev') || host.includes('workers.dev')) {
+    // Si estamos corriendo en la app aislada Full-Stack Edge (pordondeviene.com.ar, pordondeviene.ar, etc.)
+    if (host.includes('pordondeviene') || host.includes('5185') || host.includes('8787') || host.includes('pages.dev') || host.includes('workers.dev')) {
       return `${window.location.protocol}//${host}/v1`;
     }
   }
