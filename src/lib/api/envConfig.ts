@@ -35,7 +35,7 @@ export function getApiBaseUrl(): string {
   if (env === 'local') {
     return 'http://localhost:6005/v1';
   }
-  return import.meta.env.VITE_TRANSIT_API_URL || 'https://transit.pordondeviene.ar/v1';
+  return import.meta.env.VITE_TRANSIT_API_URL || 'https://pordondeviene.com.ar/v1';
 }
 
 export function getWsUrl(): string {

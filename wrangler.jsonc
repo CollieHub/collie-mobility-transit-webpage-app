@@ -7,8 +7,7 @@
     "pordondeviene.com.ar/*",
     "www.pordondeviene.com.ar/*",
     "pordondeviene.ar/*",
-    "www.pordondeviene.ar/*",
-    "transit.pordondeviene.ar/*"
+    "www.pordondeviene.ar/*"
   ],
   "assets": {
     "directory": "./dist",
