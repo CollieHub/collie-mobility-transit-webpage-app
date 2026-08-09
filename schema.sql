@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS route_shapes (
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
--- 5. Horarios de Salida (Timetables)
+-- 5. Horarios de Salida y Puntos Intermedios (Timetables)
 CREATE TABLE IF NOT EXISTS timetables (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
@@ -52,6 +52,8 @@ CREATE TABLE IF NOT EXISTS timetables (
     day_type TEXT NOT NULL CHECK(day_type IN ('habil', 'sabado', 'domingo', 'feriado')),
     departure_time TEXT NOT NULL,
     dispatch_order INTEGER NOT NULL,
+    trip_times_json TEXT,
+    headers_json TEXT,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 

@@ -108,7 +108,7 @@ app.get('/v1/catalog/public/data', async (c) => {
   }
 });
 
-// 3. Horarios (Timetables)
+// 3. Horarios (Timetables) Multicolumna con Puntos Intermedios
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
@@ -129,17 +129,35 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       const key = `${dayType}_${dirType}`;
 
       if (!schedulesDict[key]) {
+        let headers: string[] = ['Salida'];
+        if (row.headers_json) {
+          try {
+            headers = JSON.parse(row.headers_json);
+          } catch (_) {}
+        }
         schedulesDict[key] = {
           dayType: dayType,
-          headers: ['Salida'],
+          headers: headers,
           matrix: [],
           rows: []
         };
       }
 
-      if (row.departure_time) {
-        schedulesDict[key].matrix.push([row.departure_time]);
-        schedulesDict[key].rows.push([row.departure_time]);
+      let tripTimes: string[] = [];
+      if (row.trip_times_json) {
+        try {
+          tripTimes = JSON.parse(row.trip_times_json);
+        } catch (_) {}
+      }
+      if (!tripTimes || tripTimes.length === 0) {
+        if (row.departure_time) {
+          tripTimes = [row.departure_time];
+        }
+      }
+
+      if (tripTimes.length > 0) {
+        schedulesDict[key].matrix.push(tripTimes);
+        schedulesDict[key].rows.push(tripTimes);
       }
     });
 
