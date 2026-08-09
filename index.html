@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/assets/images/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Seguimiento en tiempo real de colectivos. Consultá recorridos, horarios, paradas y ubicación en vivo de todas las líneas de transporte público." />
+    <meta name="theme-color" content="#0a0a0f" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="¿Por dónde viene?" />
+    <link rel="apple-touch-icon" href="/assets/images/favicon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="robots" content="index, follow" />
+    <meta name="google-site-verification" content="%VITE_GOOGLE_SITE_VERIFICATION%" />
+
+    <!-- Open Graph / Meta datos de Google -->
+    <meta property="og:title" content="¿Por dónde viene? - Tu app de transportes" />
+    <meta property="og:description" content="Seguimiento en tiempo real de colectivos. Consultá recorridos, horarios, paradas y ubicación en vivo de todas las líneas de transporte público." />
+    <meta property="og:image" content="https://pordondeviene.com.ar/assets/images/bus-icon.png" />
+    <meta property="og:url" content="https://pordondeviene.com.ar/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Datos Estructurados Schema.org para Google Search -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "¿Por dónde viene? - Tu app de transportes",
+      "url": "https://pordondeviene.com.ar/",
+      "logo": "https://pordondeviene.com.ar/assets/images/bus-icon.png",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "All",
+      "description": "Seguimiento en tiempo real de colectivos. Consultá recorridos, horarios, paradas y ubicación en vivo de todas las líneas de transporte público."
+    }
+    </script>
+
+    <!-- Google AdSense Verification Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2657816467577244" crossorigin="anonymous"></script>
+    <script>
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window.deferredPrompt = e;
+      });
+    </script>
+    <title>¿Por dónde viene? - Tu app de transportes</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

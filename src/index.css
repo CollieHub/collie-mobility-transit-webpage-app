@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f3f4;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --text-muted: #70757a;
+  --accent: #1a73e8;
+  --accent-glow: rgba(26, 115, 232, 0.1);
+  --success: #1e8e3e;
+  --success-glow: rgba(30, 142, 62, 0.1);
+  --border: #dadce0;
+  --border-light: #e8eaed;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --shadow-sm: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  --shadow-md: 0 1px 2px 0 rgba(60,64,67,0.3), 0 2px 6px 2px rgba(60,64,67,0.15);
+  --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.legal-content-container,
+.legal-content-container * {
+  color: #334155 !important;
+}
+
+.legal-content-container h1,
+.legal-content-container h2,
+.legal-content-container h3,
+.legal-content-container h4 {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.legal-content-container strong,
+.legal-content-container b {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+.legal-content-container p, 
+.legal-content-container li,
+.legal-content-container span {
+  font-size: 0.95rem !important;
+  line-height: 1.7 !important;
+  font-weight: 400 !important;
+}
+
+.legal-content-container a {
+  color: #2563eb !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes busGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.4)); }
+  50% { filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.8)); }
+}
+
+/* Map overrides */
+.leaflet-container {
+  background: var(--bg-primary) !important;
+  border-radius: var(--radius-lg);
+}
+
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-control-zoom a {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--bg-secondary) !important;
+}
+
+.custom-bus-icon, .custom-stop-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #ffffff !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.leaflet-popup-tip {
+  background: #ffffff !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+}
+
+@media print {
+  body {
+    display: none !important;
+  }
+}
+
+/* Cabecera Map Tooltip styles */
+.cabecera-tooltip {
+  background: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  padding: 4px 8px !important;
+  white-space: nowrap;
+}
+
+.cabecera-tooltip::before {
+  border-top-color: rgba(15, 23, 42, 0.85) !important;
+}
+
+/* Ocultar barra de scroll pero mantener funcionalidad de deslizado */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;  /* IE y Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Evitar que los botones de control se achiquen para forzar el scroll horizontal */
+.no-scrollbar > button,
+.no-scrollbar > span {
+  flex-shrink: 0 !important;
+}
+
+
+
+/* Reposicionar controles de mapa móviles si la tarjeta Bottom Sheet de parada está abierta */
+@media (max-width: 768px) {
+  body:has(.pinned-stop-card) .mobile-map-controls {
+    bottom: 230px !important;
+  }
+}
+
+/* Animation for Stop badge on buses */
+@keyframes stopPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4);
+  }
+  100% {
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.8), 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
+}
