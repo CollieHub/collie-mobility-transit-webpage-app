@@ -112,16 +112,42 @@ app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
     if (!routeId) {
-      return c.json({ error: 'route_id query parameter is required' }, 400);
+      return c.json({ success: false, error: 'route_id query parameter is required' }, 400);
     }
 
     const ttRes = await c.env.DB.prepare(
-      'SELECT t.* FROM timetables t JOIN branches b ON t.branch_id = b.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY t.dispatch_order ASC'
+      'SELECT t.*, b.code as branch_code FROM timetables t JOIN branches b ON t.branch_id = b.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY t.dispatch_order ASC'
     ).bind(routeId, routeId, routeId).all();
 
-    return c.json({ route_id: routeId, timetables: ttRes.results });
+    const rows = ttRes.results || [];
+    const schedulesDict: Record<string, any> = {};
+
+    rows.forEach((row: any) => {
+      const dayType = row.day_type === 'habil' ? 'weekday' : row.day_type;
+      const dirType = row.direction; // 'ida' or 'vuelta'
+      const key = `${dayType}_${dirType}`;
+
+      if (!schedulesDict[key]) {
+        schedulesDict[key] = { matrix: [] };
+      }
+
+      if (row.departure_time) {
+        schedulesDict[key].matrix.push({ times: [row.departure_time] });
+      }
+    });
+
+    return c.json({
+      success: true,
+      data: [
+        {
+          id: routeId,
+          timetables: rows,
+          schedules: schedulesDict
+        }
+      ]
+    });
   } catch (err: any) {
-    return c.json({ error: 'Failed to fetch timetables', details: err.message }, 500);
+    return c.json({ success: false, error: 'Failed to fetch timetables', details: err.message }, 500);
   }
 });
 
