@@ -20,7 +20,17 @@ CREATE TABLE IF NOT EXISTS lines (
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 
--- 3. Ramales de cada Línea (Branches)
+-- 3. Estado Operativo del Ramal (Branch Statuses)
+CREATE TABLE IF NOT EXISTS branch_statuses (
+    id TEXT PRIMARY KEY,
+    code TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    description TEXT,
+    color TEXT NOT NULL DEFAULT '#10B981',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Ramales de cada Línea (Branches)
 CREATE TABLE IF NOT EXISTS branches (
     id TEXT PRIMARY KEY,
     line_id TEXT NOT NULL,
@@ -28,12 +38,14 @@ CREATE TABLE IF NOT EXISTS branches (
     name TEXT NOT NULL,
     company_id TEXT NOT NULL DEFAULT 'company-sit',
     company TEXT NOT NULL DEFAULT 'SIT',
+    branch_statuses_id TEXT NOT NULL DEFAULT 'status-active',
     description TEXT,
     FOREIGN KEY (line_id) REFERENCES lines(id) ON DELETE CASCADE,
-    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (branch_statuses_id) REFERENCES branch_statuses(id) ON DELETE CASCADE
 );
 
--- 4. Paradas de Colectivos (Stops)
+-- 5. Paradas de Colectivos (Stops)
 CREATE TABLE IF NOT EXISTS stops (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
@@ -47,7 +59,7 @@ CREATE TABLE IF NOT EXISTS stops (
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
--- 5. Trazado Vectorial de Recorridos (Route Shapes)
+-- 6. Trazado Vectorial de Recorridos (Route Shapes)
 CREATE TABLE IF NOT EXISTS route_shapes (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
@@ -57,7 +69,7 @@ CREATE TABLE IF NOT EXISTS route_shapes (
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
 );
 
--- 6. Tipos de Día para la Selección de Horarios (Day Types)
+-- 7. Tipos de Día para la Selección de Horarios (Day Types)
 CREATE TABLE IF NOT EXISTS day_types (
     id TEXT PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
@@ -66,7 +78,7 @@ CREATE TABLE IF NOT EXISTS day_types (
     aws_schedule_type_prefix TEXT NOT NULL
 );
 
--- 7. Horarios de Salida y Puntos Intermedios (Schedules)
+-- 8. Horarios de Salida y Puntos Intermedios (Schedules)
 CREATE TABLE IF NOT EXISTS schedules (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
@@ -85,5 +97,6 @@ CREATE TABLE IF NOT EXISTS schedules (
 -- Índices de alto rendimiento
 CREATE INDEX IF NOT EXISTS idx_lines_company ON lines(company_id);
 CREATE INDEX IF NOT EXISTS idx_branches_line ON branches(line_id);
+CREATE INDEX IF NOT EXISTS idx_branches_status ON branches(branch_statuses_id);
 CREATE INDEX IF NOT EXISTS idx_stops_branch ON stops(branch_id, direction);
 CREATE INDEX IF NOT EXISTS idx_schedules_branch ON schedules(branch_id, day_types_id);

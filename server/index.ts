@@ -216,16 +216,10 @@ app.get('/v1/catalog/public/day_types', async (c) => {
     return c.json({
       success: true,
       day_types: [
-        { id: 'combo-lunes-a-viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
-        { id: 'combo-sabados', code: 'sabados', name: 'Sábados' },
-        { id: 'combo-domingos-feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
-        { id: 'combo-especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
-      ],
-      combos: [
-        { id: 'combo-lunes-a-viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
-        { id: 'combo-sabados', code: 'sabados', name: 'Sábados' },
-        { id: 'combo-domingos-feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
-        { id: 'combo-especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
+        { id: 'lunes_a_viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
+        { id: 'sabados', code: 'sabados', name: 'Sábados' },
+        { id: 'domingos_feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
+        { id: 'especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
       ]
     });
   }
@@ -236,6 +230,24 @@ app.get('/v1/catalog/public/day_combos', async (c) => {
     return c.json({ success: true, combos: results, day_types: results });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// 3.c Estados de Ramal (Branch Statuses)
+app.get('/v1/catalog/public/branch_statuses', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, color FROM branch_statuses ORDER BY id ASC').all();
+    return c.json({ success: true, branch_statuses: results });
+  } catch (err: any) {
+    return c.json({
+      success: true,
+      branch_statuses: [
+        { id: 'status-active', code: 'active', name: 'Activo / Normal', color: '#10B981' },
+        { id: 'status-interrupted', code: 'interrupted', name: 'Interrumpido', color: '#EF4444' },
+        { id: 'status-reduced', code: 'reduced', name: 'Servicio Reducido', color: '#F59E0B' },
+        { id: 'status-suspended', code: 'suspended', name: 'Suspendido', color: '#6B7280' }
+      ]
+    });
   }
 });
 
