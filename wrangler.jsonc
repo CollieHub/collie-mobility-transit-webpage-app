@@ -3,6 +3,12 @@
   "name": "collie-mobility-transit-webpage-app",
   "main": "server/index.ts",
   "compatibility_date": "2026-08-09",
+  "routes": [
+    {
+      "pattern": "transit.pordondeviene.ar",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
@@ -11,13 +17,13 @@
     {
       "binding": "DB",
       "database_name": "collie-mobility-transit-db",
-      "database_id": "local-db-id"
+      "database_id": "89e9372a-bed6-44fc-a488-277e067402fa"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "FLEET_KV",
-      "id": "collie-fleet-kv-id"
+      "id": "6b83a6787fa44af1b84775d95cf729f8"
     }
   ]
 }
