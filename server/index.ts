@@ -129,11 +129,17 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       const key = `${dayType}_${dirType}`;
 
       if (!schedulesDict[key]) {
-        schedulesDict[key] = { matrix: [] };
+        schedulesDict[key] = {
+          dayType: dayType,
+          headers: ['Salida'],
+          matrix: [],
+          rows: []
+        };
       }
 
       if (row.departure_time) {
-        schedulesDict[key].matrix.push({ times: [row.departure_time] });
+        schedulesDict[key].matrix.push([row.departure_time]);
+        schedulesDict[key].rows.push([row.departure_time]);
       }
     });
 

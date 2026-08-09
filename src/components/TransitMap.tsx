@@ -3851,7 +3851,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
       
       const wsUrl = getWsUrl();
       
-      if (retryCount >= maxRetries) {
+      if (!wsUrl || retryCount >= maxRetries) {
         setWsStatus('disconnected');
         return;
       }
