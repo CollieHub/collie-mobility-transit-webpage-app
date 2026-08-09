@@ -108,7 +108,7 @@ app.get('/v1/catalog/public/data', async (c) => {
   }
 });
 
-// 3. Horarios (Timetables) Multicolumna con Puntos Intermedios
+// 3. Horarios (Schedules) Multicolumna con Puntos Intermedios
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
@@ -117,27 +117,58 @@ app.get('/v1/catalog/public/timetables', async (c) => {
     }
 
     const ttRes = await c.env.DB.prepare(
-      'SELECT t.*, b.code as branch_code FROM timetables t JOIN branches b ON t.branch_id = b.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY t.dispatch_order ASC'
+      'SELECT s.*, b.code as branch_code FROM schedules s JOIN branches b ON s.branch_id = b.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY s.dispatch_order ASC'
     ).bind(routeId, routeId, routeId).all();
 
     const rows = ttRes.results || [];
     const schedulesDict: Record<string, any> = {};
 
     rows.forEach((row: any) => {
-      const dayType = row.day_type === 'habil' ? 'weekday' : row.day_type;
+      const dayTypesId = row.day_types_id === 'habil' ? 'weekday' : (row.day_types_id || row.day_type);
       const dirType = row.direction; // 'ida' or 'vuelta'
-      const key = `${dayType}_${dirType}`;
+      const key = `${dayTypesId}_${dirType}`;
 
       if (!schedulesDict[key]) {
-        let headers: string[] = ['Salida'];
+        let defaultHeaders: string[] = ['Salida'];
         if (row.headers_json) {
           try {
-            headers = JSON.parse(row.headers_json);
+            defaultHeaders = JSON.parse(row.headers_json);
           } catch (_) {}
         }
+
+        let headerAliases: string[] = [];
+        if (row.header_aliases_json) {
+          try {
+            headerAliases = JSON.parse(row.header_aliases_json);
+          } catch (_) {}
+        }
+
+        let stopAddresses: string[] = [];
+        if (row.stop_addresses_json) {
+          try {
+            stopAddresses = JSON.parse(row.stop_addresses_json);
+          } catch (_) {}
+        }
+
+        // Lógica de resolución: por defecto se muestra el alias cargado; si no tiene valor, se muestra la dirección de la parada
+        const resolvedHeaders = defaultHeaders.map((h, i) => {
+          const alias = headerAliases[i];
+          if (alias && alias.trim() !== '') {
+            return alias.trim();
+          }
+          const addr = stopAddresses[i];
+          if (addr && addr.trim() !== '') {
+            return addr.trim();
+          }
+          return h;
+        });
+
         schedulesDict[key] = {
-          dayType: dayType,
-          headers: headers,
+          dayType: dayTypesId,
+          dayTypesId: dayTypesId,
+          headers: resolvedHeaders,
+          aliases: headerAliases,
+          addresses: stopAddresses,
           matrix: [],
           rows: []
         };
@@ -173,6 +204,38 @@ app.get('/v1/catalog/public/timetables', async (c) => {
     });
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch timetables', details: err.message }, 500);
+  }
+});
+
+// 3.b Tipos de Día (Day Types) para Selección de Horarios
+app.get('/v1/catalog/public/day_types', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, aws_schedule_type_prefix FROM day_types ORDER BY id ASC').all();
+    return c.json({ success: true, day_types: results, combos: results });
+  } catch (err: any) {
+    return c.json({
+      success: true,
+      day_types: [
+        { id: 'combo-lunes-a-viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
+        { id: 'combo-sabados', code: 'sabados', name: 'Sábados' },
+        { id: 'combo-domingos-feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
+        { id: 'combo-especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
+      ],
+      combos: [
+        { id: 'combo-lunes-a-viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes' },
+        { id: 'combo-sabados', code: 'sabados', name: 'Sábados' },
+        { id: 'combo-domingos-feriados', code: 'domingos_feriados', name: 'Domingos y Feriados' },
+        { id: 'combo-especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)' }
+      ]
+    });
+  }
+});
+app.get('/v1/catalog/public/day_combos', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, aws_schedule_type_prefix FROM day_types ORDER BY id ASC').all();
+    return c.json({ success: true, combos: results, day_types: results });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
   }
 });
 
