@@ -1,0 +1,12 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# production
+dist
+.dev.vars
+.wrangler
+
+# temp
+*.log
+.DS_Store
