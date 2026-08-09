@@ -117,16 +117,16 @@ app.get('/v1/catalog/public/timetables', async (c) => {
     }
 
     const ttRes = await c.env.DB.prepare(
-      'SELECT s.*, b.code as branch_code FROM schedules s JOIN branches b ON s.branch_id = b.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY s.dispatch_order ASC'
+      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY s.dispatch_order ASC'
     ).bind(routeId, routeId, routeId).all();
 
     const rows = ttRes.results || [];
     const schedulesDict: Record<string, any> = {};
 
     rows.forEach((row: any) => {
-      const dayTypesId = row.day_types_id === 'habil' ? 'weekday' : (row.day_types_id || row.day_type);
+      const dayTypeCode = row.day_type_code || row.day_type || row.day_types_id;
       const dirType = row.direction; // 'ida' or 'vuelta'
-      const key = `${dayTypesId}_${dirType}`;
+      const key = `${dayTypeCode}_${dirType}`;
 
       if (!schedulesDict[key]) {
         let defaultHeaders: string[] = ['Salida'];
@@ -164,8 +164,9 @@ app.get('/v1/catalog/public/timetables', async (c) => {
         });
 
         schedulesDict[key] = {
-          dayType: dayTypesId,
-          dayTypesId: dayTypesId,
+          dayType: dayTypeCode,
+          dayTypesId: row.day_types_id,
+          dayTypeName: row.day_type_name,
           headers: resolvedHeaders,
           aliases: headerAliases,
           addresses: stopAddresses,
@@ -216,10 +217,10 @@ app.get('/v1/catalog/public/day_types', async (c) => {
     return c.json({
       success: true,
       day_types: [
-        { id: 'lunes_a_viernes', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
-        { id: 'sabados', code: 'sabados', name: 'Sábados', display_order: 2 },
-        { id: 'domingos_feriados', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
-        { id: 'especial', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
+        { id: '88f18fc3-ba8e-521a-a093-07db0825cf3a', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
+        { id: '26453d08-1d87-57ea-910e-1e14de95a162', code: 'sabados', name: 'Sábados', display_order: 2 },
+        { id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
+        { id: '4dd8ea7a-abb2-552e-b6da-1bb945d7c515', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
       ]
     });
   }
