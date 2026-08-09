@@ -1,10 +1,11 @@
--- 1. Líneas de Colectivo Publicadas (Sin fallbacks ni valores DEFAULT)
+-- 1. Líneas de Colectivo Publicadas
 CREATE TABLE IF NOT EXISTS lines (
     id TEXT PRIMARY KEY,
     code TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     color TEXT NOT NULL,
     jurisdiction TEXT NOT NULL,
+    company TEXT NOT NULL DEFAULT 'SIT',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS branches (
     line_id TEXT NOT NULL,
     code TEXT NOT NULL,
     name TEXT NOT NULL,
+    company TEXT NOT NULL DEFAULT 'SIT',
     description TEXT,
     FOREIGN KEY (line_id) REFERENCES lines(id) ON DELETE CASCADE
 );
@@ -56,3 +58,4 @@ CREATE TABLE IF NOT EXISTS timetables (
 -- Índices de alto rendimiento
 CREATE INDEX IF NOT EXISTS idx_stops_branch ON stops(branch_id, direction);
 CREATE INDEX IF NOT EXISTS idx_timetables_branch ON timetables(branch_id, day_type);
+CREATE INDEX IF NOT EXISTS idx_branches_company ON branches(company);

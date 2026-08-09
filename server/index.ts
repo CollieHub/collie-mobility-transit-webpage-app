@@ -25,10 +25,12 @@ app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 // Ads Endpoint
 app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
 
-// 1. Líneas / Empresas públicas
+// 1. Líneas / Empresas públicas (Retorna las empresas reales disponibles en D1)
 app.get('/v1/catalog/public/lines', async (c) => {
   try {
-    return c.json({ success: true, lines: ['SIT'] });
+    const companiesRes = await c.env.DB.prepare("SELECT DISTINCT company FROM branches WHERE company IS NOT NULL AND company != '' ORDER BY company ASC").all();
+    const companies = companiesRes.results.map((r: any) => r.company);
+    return c.json({ success: true, lines: companies.length > 0 ? companies : ['SIT'] });
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch lines', details: err.message }, 500);
   }
@@ -39,10 +41,9 @@ app.get('/v1/catalog/public/data', async (c) => {
   try {
     const idsParam = c.req.query('ids');
     const companyParam = c.req.query('company');
-    const summaryParam = c.req.query('summary');
 
     let branchesQuery = `
-      SELECT b.id as branch_id, b.code as branch_code, b.name as branch_name, b.description,
+      SELECT b.id as branch_id, b.code as branch_code, b.name as branch_name, b.company as branch_company, b.description,
              l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color, l.jurisdiction
       FROM branches b
       JOIN lines l ON b.line_id = l.id
@@ -53,10 +54,10 @@ app.get('/v1/catalog/public/data', async (c) => {
       const idsList = idsParam.split(',').map(s => s.trim()).filter(Boolean);
       branchesQuery += ` WHERE b.id IN (${idsList.map(() => '?').join(',')}) OR b.code IN (${idsList.map(() => '?').join(',')}) OR l.id IN (${idsList.map(() => '?').join(',')})`;
       params = [...idsList, ...idsList, ...idsList];
-    } else if (companyParam && companyParam.toUpperCase() !== 'SIT' && companyParam.toUpperCase() !== 'ALL') {
+    } else if (companyParam && companyParam.toUpperCase() !== 'ALL') {
       const filter = `%${companyParam.trim()}%`;
-      branchesQuery += ` WHERE b.name LIKE ? OR b.code LIKE ? OR l.name LIKE ? OR l.code LIKE ?`;
-      params = [filter, filter, filter, filter];
+      branchesQuery += ` WHERE b.company LIKE ? OR l.company LIKE ?`;
+      params = [filter, filter];
     }
 
     branchesQuery += ' ORDER BY l.code ASC, b.code ASC';
@@ -94,7 +95,7 @@ app.get('/v1/catalog/public/data', async (c) => {
         code: b.branch_code,
         name: b.branch_name,
         color: b.line_color,
-        company: 'SIT',
+        company: b.branch_company || 'SIT',
         jurisdiction: b.jurisdiction,
         directions,
         stops
