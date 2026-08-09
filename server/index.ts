@@ -25,30 +25,10 @@ app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 // Ads Endpoint
 app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
 
-// 1. Líneas públicas
+// 1. Líneas / Empresas públicas (Retorna la lista de etiquetas para el selector de líneas)
 app.get('/v1/catalog/public/lines', async (c) => {
   try {
-    const linesRes = await c.env.DB.prepare('SELECT * FROM lines ORDER BY code ASC').all();
-    const branchesRes = await c.env.DB.prepare('SELECT * FROM branches').all();
-    
-    const lines = linesRes.results.map((l: any) => ({
-      id: l.id,
-      code: l.code,
-      name: l.name,
-      color: l.color,
-      jurisdiction: l.jurisdiction,
-      company: 'SIT',
-      branches: branchesRes.results
-        .filter((b: any) => b.line_id === l.id)
-        .map((b: any) => ({
-          id: b.id,
-          code: b.code,
-          name: b.name,
-          description: b.description
-        }))
-    }));
-
-    return c.json({ success: true, lines });
+    return c.json({ success: true, lines: ['SIT'] });
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch lines', details: err.message }, 500);
   }
