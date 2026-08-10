@@ -45,7 +45,34 @@ CREATE TABLE IF NOT EXISTS branches (
     FOREIGN KEY (branch_statuses_id) REFERENCES branch_statuses(id) ON DELETE CASCADE
 );
 
--- 5. Paradas de Colectivos (Stops)
+-- 5. Grupos de Paradas Unificadas / Estaciones (Stop Groups)
+CREATE TABLE IF NOT EXISTS stop_groups (
+    id TEXT PRIMARY KEY,
+    code TEXT UNIQUE,
+    name TEXT NOT NULL,
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
+    description TEXT,
+    is_enabled INTEGER NOT NULL DEFAULT 1
+);
+
+-- 5b. Detalles y Coordenadas Específicas de Grupos de Paradas (Stop Group Details)
+CREATE TABLE IF NOT EXISTS stop_group_details (
+    id TEXT PRIMARY KEY,
+    stop_group_id TEXT NOT NULL,
+    name TEXT,
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
+    address TEXT,
+    platform_code TEXT,
+    description TEXT,
+    display_order INTEGER NOT NULL DEFAULT 1,
+    FOREIGN KEY (stop_group_id) REFERENCES stop_groups(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_stop_group_details_stop_group_id ON stop_group_details(stop_group_id);
+
+-- 6. Paradas de Colectivos (Stops)
 CREATE TABLE IF NOT EXISTS stops (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
@@ -56,8 +83,12 @@ CREATE TABLE IF NOT EXISTS stops (
     lng REAL NOT NULL,
     proj_lat REAL NOT NULL,
     proj_lng REAL NOT NULL,
-    FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE
+    stop_group_id TEXT,
+    FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE,
+    FOREIGN KEY (stop_group_id) REFERENCES stop_groups(id) ON DELETE SET NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_stops_stop_group_id ON stops(stop_group_id);
 
 -- 6. Trazado Vectorial de Recorridos (Route Shapes)
 CREATE TABLE IF NOT EXISTS route_shapes (

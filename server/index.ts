@@ -87,7 +87,8 @@ app.get('/v1/catalog/public/data', async (c) => {
         direction: st.direction,
         order: st.stop_order,
         color: b.line_color,
-        code: b.branch_code
+        code: b.branch_code,
+        stop_group_id: st.stop_group_id || null
       }));
 
       return {
@@ -105,6 +106,47 @@ app.get('/v1/catalog/public/data', async (c) => {
     return c.json({ success: true, routes });
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch catalog data', details: err.message }, 500);
+  }
+});
+
+// 2b. Grupos de Paradas Unificadas / Estaciones (Stop Groups)
+app.get('/v1/catalog/public/stop_groups', async (c) => {
+  try {
+    const includeDisabled = c.req.query('include_disabled') === 'true';
+    let query = 'SELECT * FROM stop_groups';
+    if (!includeDisabled) {
+      query += ' WHERE is_enabled = 1';
+    }
+    query += ' ORDER BY name ASC';
+
+    const stopGroupsRes = await c.env.DB.prepare(query).all();
+    const stop_groups = stopGroupsRes.results;
+
+    // Para cada grupo de paradas, incluir los detalles/coordenadas específicas y la lista de paradas asociadas
+    const enrichedStopGroups = await Promise.all(stop_groups.map(async (sg: any) => {
+      const detailsRes = await c.env.DB.prepare('SELECT * FROM stop_group_details WHERE stop_group_id = ? ORDER BY display_order ASC').bind(sg.id).all();
+
+      const stopsRes = await c.env.DB.prepare(`
+        SELECT s.id as stop_id, s.name as stop_name, s.lat, s.lng, s.direction, s.stop_order,
+               b.id as branch_id, b.code as branch_code, b.name as branch_name,
+               l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color
+        FROM stops s
+        JOIN branches b ON s.branch_id = b.id
+        JOIN lines l ON b.line_id = l.id
+        WHERE s.stop_group_id = ?
+        ORDER BY l.code ASC, b.code ASC
+      `).bind(sg.id).all();
+
+      return {
+        ...sg,
+        details: detailsRes.results,
+        stops: stopsRes.results
+      };
+    }));
+
+    return c.json({ success: true, stop_groups: enrichedStopGroups });
+  } catch (err: any) {
+    return c.json({ success: false, error: 'Failed to fetch stop groups', details: err.message }, 500);
   }
 });
 
