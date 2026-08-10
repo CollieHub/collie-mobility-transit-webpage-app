@@ -1843,6 +1843,7 @@ function App() {
       <AdminLoginView 
         onLoginSuccess={(token) => {
           localStorage.setItem('collie_admin_token', token);
+          localStorage.setItem('dev_access', 'true');
           window.location.href = '/';
         }}
         onCancel={() => {
@@ -3709,7 +3710,17 @@ function App() {
                   >
                     Acerca de
                   </span>
-                  {isAdmin && (
+                  {!isAdmin ? (
+                    <>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>•</span>
+                      <span 
+                        onClick={() => { window.location.href = '/login'; }}
+                        style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}
+                      >
+                        Ingresar (Google)
+                      </span>
+                    </>
+                  ) : (
                     <>
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>•</span>
                       <span 
