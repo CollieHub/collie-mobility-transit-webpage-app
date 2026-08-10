@@ -25,22 +25,98 @@ app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 // Ads Endpoint
 app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
 
-// 1. Líneas / Empresas públicas (Retorna las empresas reales disponibles en D1)
+// Helper para obtener la versión actual de la caché (invalida instantáneamente todo al cambiar de versión)
+async function getCacheVersion(kv: any): Promise<string> {
+  if (!kv) return 'v1';
+  try {
+    const v = await kv.get('cache:global:version');
+    return v || 'v1';
+  } catch (_) {
+    return 'v1';
+  }
+}
+
+// Endpoint de Purga / Invalidation de Caché del Servidor
+const handleCachePurge = async (c: any) => {
+  try {
+    if (!c.env.FLEET_KV) {
+      return c.json({ success: false, error: 'KV Namespace not configured' }, 500);
+    }
+    const currentV = await getCacheVersion(c.env.FLEET_KV);
+    const versionNum = parseInt(currentV.replace('v', ''), 10) || 1;
+    const newVersion = `v${versionNum + 1}`;
+
+    await c.env.FLEET_KV.put('cache:global:version', newVersion);
+
+    return c.json({
+      success: true,
+      message: 'Todas las cachés del servidor fueron invalidadas exitosamente',
+      previous_version: currentV,
+      new_version: newVersion,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+};
+
+app.post('/v1/admin/cache/purge', handleCachePurge);
+app.get('/v1/admin/cache/purge', handleCachePurge);
+
+// 1. Líneas / Empresas públicas (Retorna las empresas reales disponibles en D1) + Caché KV (15 min)
 app.get('/v1/catalog/public/lines', async (c) => {
   try {
+    const v = await getCacheVersion(c.env.FLEET_KV);
+    const cacheKey = `cache:${v}:lines`;
+
+    if (c.env.FLEET_KV) {
+      try {
+        const cachedStr = await c.env.FLEET_KV.get(cacheKey);
+        if (cachedStr) {
+          c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cachedStr));
+        }
+      } catch (_) {}
+    }
+
     const companiesRes = await c.env.DB.prepare("SELECT DISTINCT company FROM branches WHERE company IS NOT NULL AND company != '' ORDER BY company ASC").all();
     const companies = companiesRes.results.map((r: any) => r.company);
-    return c.json({ success: true, lines: companies.length > 0 ? companies : ['SIT'] });
+    const payload = { success: true, lines: companies.length > 0 ? companies : ['SIT'] };
+
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 900 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch lines', details: err.message }, 500);
   }
 });
 
-// 2. Data completa del catálogo (Routes, Shapes, Stops)
+// 2. Data completa del catálogo (Routes, Shapes, Stops) + Caché KV (15 min)
 app.get('/v1/catalog/public/data', async (c) => {
   try {
-    const idsParam = c.req.query('ids');
-    const companyParam = c.req.query('company');
+    const idsParam = c.req.query('ids') || '';
+    const companyParam = c.req.query('company') || '';
+
+    const v = await getCacheVersion(c.env.FLEET_KV);
+    const cacheKey = `cache:${v}:data:${idsParam.trim()}:${companyParam.trim()}`;
+
+    if (c.env.FLEET_KV) {
+      try {
+        const cachedStr = await c.env.FLEET_KV.get(cacheKey);
+        if (cachedStr) {
+          c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cachedStr));
+        }
+      } catch (_) {}
+    }
 
     let branchesQuery = `
       SELECT b.id as branch_id, b.code as branch_code, b.name as branch_name, b.company as branch_company, b.description,
@@ -66,7 +142,7 @@ app.get('/v1/catalog/public/data', async (c) => {
     const branches = branchesRes.results;
 
     const routes = await Promise.all(branches.map(async (b: any) => {
-      // Shapes / Trazados (se incluyen ambos campos 'type' y 'direction' para compatibilidad total con el mapa React-Leaflet)
+      // Shapes / Trazados
       const shapesRes = await c.env.DB.prepare('SELECT * FROM route_shapes WHERE branch_id = ?').bind(b.branch_id).all();
       const directions = shapesRes.results.map((s: any) => ({
         type: s.direction,
@@ -103,16 +179,41 @@ app.get('/v1/catalog/public/data', async (c) => {
       };
     }));
 
-    return c.json({ success: true, routes });
+    const payload = { success: true, routes };
+
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 900 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch catalog data', details: err.message }, 500);
   }
 });
 
-// 2b. Grupos de Paradas Unificadas / Estaciones (Stop Groups)
+// 2b. Grupos de Paradas Unificadas / Estaciones (Stop Groups) + Caché KV (15 min)
 app.get('/v1/catalog/public/stop_groups', async (c) => {
   try {
     const includeDisabled = c.req.query('include_disabled') === 'true';
+
+    const v = await getCacheVersion(c.env.FLEET_KV);
+    const cacheKey = `cache:${v}:stop_groups:${includeDisabled}`;
+
+    if (c.env.FLEET_KV) {
+      try {
+        const cachedStr = await c.env.FLEET_KV.get(cacheKey);
+        if (cachedStr) {
+          c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cachedStr));
+        }
+      } catch (_) {}
+    }
+
     let query = 'SELECT * FROM stop_groups';
     if (!includeDisabled) {
       query += ' WHERE is_enabled = 1';
@@ -122,7 +223,6 @@ app.get('/v1/catalog/public/stop_groups', async (c) => {
     const stopGroupsRes = await c.env.DB.prepare(query).all();
     const stop_groups = stopGroupsRes.results;
 
-    // Para cada grupo de paradas, incluir los detalles/coordenadas específicas y la lista de paradas asociadas
     const enrichedStopGroups = await Promise.all(stop_groups.map(async (sg: any) => {
       const detailsRes = await c.env.DB.prepare('SELECT * FROM stop_group_details WHERE stop_group_id = ? ORDER BY display_order ASC').bind(sg.id).all();
 
@@ -144,7 +244,17 @@ app.get('/v1/catalog/public/stop_groups', async (c) => {
       };
     }));
 
-    return c.json({ success: true, stop_groups: enrichedStopGroups });
+    const payload = { success: true, stop_groups: enrichedStopGroups };
+
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 900 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: 'Failed to fetch stop groups', details: err.message }, 500);
   }
@@ -156,7 +266,7 @@ function resolveCurrentDayType(nowDate = new Date()) {
     timeZone: 'America/Argentina/Buenos_Aires',
     weekday: 'short'
   });
-  const weekdayStr = formatter.format(nowDate).toLowerCase(); // 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.', 'dóm.'
+  const weekdayStr = formatter.format(nowDate).toLowerCase();
 
   if (weekdayStr.startsWith('sáb') || weekdayStr.startsWith('sab')) {
     return {
@@ -178,7 +288,7 @@ function resolveCurrentDayType(nowDate = new Date()) {
   };
 }
 
-// 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios + Caché KV (10 min)
+// 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios + Caché KV (15 min)
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
@@ -186,14 +296,15 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       return c.json({ success: false, error: 'route_id query parameter is required' }, 400);
     }
 
-    const cacheKey = `cache:timetable:v1:${routeId.trim().toLowerCase()}`;
+    const v = await getCacheVersion(c.env.FLEET_KV);
+    const cacheKey = `cache:${v}:timetable:${routeId.trim().toLowerCase()}`;
 
-    // 1. Intentar responder desde Cloudflare KV (Caché servidor global 10 min)
+    // 1. Intentar responder desde Cloudflare KV (Caché servidor global 15 min)
     if (c.env.FLEET_KV) {
       try {
         const cachedStr = await c.env.FLEET_KV.get(cacheKey);
         if (cachedStr) {
-          c.header('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=120');
+          c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
           c.header('X-Cache-Status', 'HIT-KV');
           return c.json(JSON.parse(cachedStr));
         }
@@ -306,14 +417,14 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       ]
     };
 
-    // Guardar en Cloudflare KV con TTL de 10 minutos (600 s) para servir a otros usuarios de forma global
+    // Guardar en Cloudflare KV con TTL de 15 minutos (900 s) para servir a otros usuarios de forma global
     if (c.env.FLEET_KV) {
       try {
-        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 600 });
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 900 });
       } catch (_) {}
     }
 
-    c.header('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=120');
+    c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
     c.header('X-Cache-Status', 'MISS-D1');
     return c.json(payload);
   } catch (err: any) {
@@ -321,24 +432,51 @@ app.get('/v1/catalog/public/timetables', async (c) => {
   }
 });
 
-// 3.b Tipos de Día (Day Types) para Selección de Horarios
+// 3.b Tipos de Día (Day Types) para Selección de Horarios + Caché KV (15 min)
 app.get('/v1/catalog/public/day_types', async (c) => {
   try {
     const includeDisabled = c.req.query('include_disabled') === 'true';
+
+    const v = await getCacheVersion(c.env.FLEET_KV);
+    const cacheKey = `cache:${v}:day_types:${includeDisabled}`;
+
+    if (c.env.FLEET_KV) {
+      try {
+        const cachedStr = await c.env.FLEET_KV.get(cacheKey);
+        if (cachedStr) {
+          c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cachedStr));
+        }
+      } catch (_) {}
+    }
+
     const sql = includeDisabled 
       ? 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types ORDER BY display_order ASC'
       : 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC';
-      
+
     const currentDayTypeInfo = resolveCurrentDayType();
-    const { results } = await c.env.DB.prepare(sql).all();
-    return c.json({
+    const res = await c.env.DB.prepare(sql).all();
+    const results = res.results || [];
+
+    const payload = {
       success: true,
       currentDayType: currentDayTypeInfo.code,
       currentDayTypeName: currentDayTypeInfo.name,
       currentDayTypeId: currentDayTypeInfo.id,
       day_types: results,
       combos: results
-    });
+    };
+
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 900 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=900, s-maxage=900, stale-while-revalidate=120');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
   } catch (err: any) {
     const currentDayTypeInfo = resolveCurrentDayType();
     const fallbackTypes = [
