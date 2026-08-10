@@ -101,14 +101,12 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   }, [selectedDay, data]);
 
   const formatSpecialLabel = (id: string) => {
-    if (id === 'weekday' || id === 'lunes_a_viernes') return 'Lunes a Viernes';
-    if (id === 'saturday' || id === 'sabado' || id === 'sabados') return 'Sábado';
-    if (id === 'sunday_holiday' || id === 'sunday' || id === 'holiday' || id === 'domingos_feriados') return 'Domingos y Feriados';
-    if (id === 'special' || id === 'especial') return 'Especial (Horario Extraordinario / Invierno)';
-    if (id.startsWith('special_')) {
-      return id.replace('special_', '').replace(/_/g, ' ')
-        .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    }
+    if (!id) return 'Lunes a Viernes';
+    const clean = id.trim().toLowerCase();
+    if (clean === 'weekday' || clean === 'lunes_a_viernes' || clean.startsWith('lunes_a_viernes_') || clean.startsWith('weekday_') || clean === 'lunes a viernes') return 'Lunes a Viernes';
+    if (clean === 'saturday' || clean === 'sabado' || clean === 'sabados' || clean.startsWith('sabados_') || clean.startsWith('saturday_') || clean === 'sábados' || clean === 'sábado') return 'Sábado';
+    if (clean === 'sunday_holiday' || clean === 'sunday' || clean === 'holiday' || clean === 'domingos_feriados' || clean.startsWith('domingos_feriados_') || clean.startsWith('sunday_') || clean === 'domingos y feriados') return 'Domingos y Feriados';
+    if (clean === 'special' || clean === 'especial' || clean.startsWith('especial_') || clean.startsWith('special_')) return 'Especial (Horario Extraordinario / Invierno)';
     return id;
   };
 
@@ -165,25 +163,10 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
       const types = new Set<string>();
       Object.entries(data.schedules).forEach(([key, s]: [string, any]) => {
         if (!s) return;
-        let dayType = s.dayType || s.dayTypesId;
-        if (!dayType) {
-          if (key.startsWith('weekday_') || key === 'weekday' || key.startsWith('lunes_')) dayType = 'weekday';
-          else if (key.startsWith('saturday_') || key === 'saturday' || key.startsWith('sabado_') || key.startsWith('sabados_')) dayType = 'saturday';
-          else if (key.startsWith('sunday_') || key.startsWith('holiday_') || key.startsWith('sunday_holiday_') || key.startsWith('domingo_') || key.startsWith('domingos_feriados_')) dayType = 'sunday_holiday';
-          else if (key.startsWith('especial_') || key.startsWith('special_')) dayType = 'especial';
-          else {
-            const parts = key.split('_');
-            if (parts.length > 0 && parts[0]) dayType = parts[0];
-          }
-        }
-        if (dayType === 'weekday' || dayType === 'lunes_a_viernes') types.add('Lunes a Viernes');
-        else if (dayType === 'saturday' || dayType === 'sabado' || dayType === 'sabados') types.add('Sábado');
-        else if (dayType === 'sunday_holiday' || dayType === 'domingos_feriados' || dayType === 'sunday' || dayType === 'holiday') {
-          types.add('Domingos y Feriados');
-        } else if (dayType === 'especial' || dayType === 'special') {
-          types.add('Especial (Horario Extraordinario / Invierno)');
-        } else if (dayType) {
-          types.add(formatSpecialLabel(dayType));
+        const rawLabel = s.dayTypeName || s.name || s.dayType || s.dayTypesId || key;
+        const label = formatSpecialLabel(rawLabel);
+        if (label) {
+          types.add(label);
         }
       });
       const DAY_ORDER = ['Lunes a Viernes', 'Sábado', 'Domingos y Feriados', 'Especial (Horario Extraordinario / Invierno)'];
