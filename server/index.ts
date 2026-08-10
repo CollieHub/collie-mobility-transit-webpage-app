@@ -656,9 +656,16 @@ app.notFound(async (c) => {
 
   if (c.env.ASSETS) {
     try {
-      const url = new URL(c.req.url);
-      url.pathname = '/index.html';
-      return await c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw));
+      const rootUrl = new URL(c.req.url);
+      rootUrl.pathname = '/';
+      const rootRes = await c.env.ASSETS.fetch(new Request(rootUrl.toString(), c.req.raw));
+      return new Response(rootRes.body, {
+        status: 200,
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'public, max-age=0, must-revalidate'
+        }
+      });
     } catch (_) {}
   }
 

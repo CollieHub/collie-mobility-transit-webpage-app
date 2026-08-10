@@ -1838,7 +1838,8 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
 
   // === EARLY RETURNS (must be after ALL hooks) ===
-  if (currentPath === '/login') {
+  const normalizedPath = (currentPath || window.location.pathname).replace(/\/$/, '').toLowerCase();
+  if (normalizedPath === '/login' || window.location.pathname.replace(/\/$/, '').toLowerCase() === '/login') {
     return (
       <AdminLoginView 
         onLoginSuccess={(token) => {
