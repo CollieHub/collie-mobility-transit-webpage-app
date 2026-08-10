@@ -178,7 +178,7 @@ function resolveCurrentDayType(nowDate = new Date()) {
   };
 }
 
-// 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios
+// 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios + Caché KV (10 min)
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
@@ -186,7 +186,21 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       return c.json({ success: false, error: 'route_id query parameter is required' }, 400);
     }
 
-    // 1. Consultar grillas maestras (schedules)
+    const cacheKey = `cache:timetable:v1:${routeId.trim().toLowerCase()}`;
+
+    // 1. Intentar responder desde Cloudflare KV (Caché servidor global 10 min)
+    if (c.env.FLEET_KV) {
+      try {
+        const cachedStr = await c.env.FLEET_KV.get(cacheKey);
+        if (cachedStr) {
+          c.header('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=120');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cachedStr));
+        }
+      } catch (_) {}
+    }
+
+    // 2. Consultar grillas maestras en D1 (schedules)
     const schRes = await c.env.DB.prepare(
       'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ?'
     ).bind(routeId, routeId, routeId).all();
@@ -195,7 +209,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
     const schedulesDict: Record<string, any> = {};
 
     if (schedulesList.length > 0) {
-      // 2. Obtener los ítems de horarios (schedule_items) para todas las grillas de este ramal
+      // Obtener los ítems de horarios (schedule_items) para todas las grillas de este ramal
       const scheduleIds = schedulesList.map((s: any) => s.id);
       const placeholders = scheduleIds.map(() => '?').join(',');
       
@@ -277,7 +291,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       dayTypesList = dtRes.results || [];
     } catch (_) {}
 
-    return c.json({
+    const payload = {
       success: true,
       data: [
         {
@@ -290,7 +304,18 @@ app.get('/v1/catalog/public/timetables', async (c) => {
           schedules: schedulesDict
         }
       ]
-    });
+    };
+
+    // Guardar en Cloudflare KV con TTL de 10 minutos (600 s) para servir a otros usuarios de forma global
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 600 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=600, s-maxage=600, stale-while-revalidate=120');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
   }

@@ -1061,6 +1061,15 @@ function App() {
           routeIdParam = route.id || route.code;
         }
 
+        // 1. Verificar si está guardado en la caché en memoria del cliente (10 minutos)
+        const cachedClientData = getClientCachedTimetable(routeIdParam);
+        if (cachedClientData) {
+          setTimetableDetail(cachedClientData);
+          setIsTimetableLoading(false);
+          return;
+        }
+
+        // 2. Si expiró o no existe en cliente, consultar al backend (que consulta la caché KV del servidor / CDN)
         const token = await getPublicToken(baseUrl);
         const res = await fetch(`${baseUrl}/catalog/public/timetables?route_id=${routeIdParam}`, {
           headers: await getSignedHeaders('GET', '/catalog/public/timetables', token)
@@ -1083,6 +1092,8 @@ function App() {
             } else {
               consolidatedRoute = route || { id: routeIdParam, code: routeIdParam, schedules: {} };
             }
+            // Guardar en la caché en memoria del cliente por 10 minutos
+            setClientCachedTimetable(routeIdParam, consolidatedRoute);
             setTimetableDetail(consolidatedRoute);
           }
         }
@@ -5063,6 +5074,22 @@ function App() {
       )}
     </div>
   );
+}
+
+// Caché en Memoria del Cliente (10 minutos / 600.000 ms)
+const TIMETABLE_CLIENT_CACHE: Record<string, { data: any; timestamp: number }> = {};
+const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+function getClientCachedTimetable(cacheKey: string) {
+  const entry = TIMETABLE_CLIENT_CACHE[cacheKey];
+  if (entry && (Date.now() - entry.timestamp) < CLIENT_CACHE_TTL_MS) {
+    return entry.data;
+  }
+  return null;
+}
+
+function setClientCachedTimetable(cacheKey: string, data: any) {
+  TIMETABLE_CLIENT_CACHE[cacheKey] = { data, timestamp: Date.now() };
 }
 
 export default App;
