@@ -76,7 +76,8 @@ CREATE TABLE IF NOT EXISTS day_types (
     name TEXT NOT NULL,
     description TEXT,
     display_order INTEGER NOT NULL DEFAULT 1,
-    aws_schedule_type_prefix TEXT NOT NULL
+    aws_schedule_type_prefix TEXT NOT NULL,
+    is_enabled INTEGER NOT NULL DEFAULT 1
 );
 
 -- 8. Grillas / Horarios Maestros por Ramal, Sentido y Tipo de Día (Schedules)

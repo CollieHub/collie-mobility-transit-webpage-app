@@ -231,7 +231,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
     const currentDayTypeInfo = resolveCurrentDayType();
     let dayTypesList: any[] = [];
     try {
-      const dtRes = await c.env.DB.prepare('SELECT id, code, name, description, display_order FROM day_types ORDER BY display_order ASC').all();
+      const dtRes = await c.env.DB.prepare('SELECT id, code, name, description, display_order, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC').all();
       dayTypesList = dtRes.results || [];
     } catch (_) {}
 
@@ -257,8 +257,13 @@ app.get('/v1/catalog/public/timetables', async (c) => {
 // 3.b Tipos de Día (Day Types) para Selección de Horarios
 app.get('/v1/catalog/public/day_types', async (c) => {
   try {
+    const includeDisabled = c.req.query('include_disabled') === 'true';
+    const sql = includeDisabled 
+      ? 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types ORDER BY display_order ASC'
+      : 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC';
+      
     const currentDayTypeInfo = resolveCurrentDayType();
-    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, display_order, aws_schedule_type_prefix FROM day_types ORDER BY display_order ASC').all();
+    const { results } = await c.env.DB.prepare(sql).all();
     return c.json({
       success: true,
       currentDayType: currentDayTypeInfo.code,
@@ -270,10 +275,9 @@ app.get('/v1/catalog/public/day_types', async (c) => {
   } catch (err: any) {
     const currentDayTypeInfo = resolveCurrentDayType();
     const fallbackTypes = [
-      { id: '88f18fc3-ba8e-521a-a093-07db0825cf3a', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
-      { id: '26453d08-1d87-57ea-910e-1e14de95a162', code: 'sabados', name: 'Sábados', display_order: 2 },
-      { id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
-      { id: '4dd8ea7a-abb2-552e-b6da-1bb945d7c515', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
+      { id: '88f18fc3-ba8e-521a-a093-07db0825cf3a', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1, is_enabled: 1 },
+      { id: '26453d08-1d87-57ea-910e-1e14de95a162', code: 'sabados', name: 'Sábados', display_order: 2, is_enabled: 1 },
+      { id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3, is_enabled: 1 }
     ];
     return c.json({
       success: true,
@@ -287,7 +291,11 @@ app.get('/v1/catalog/public/day_types', async (c) => {
 });
 app.get('/v1/catalog/public/day_combos', async (c) => {
   try {
-    const { results } = await c.env.DB.prepare('SELECT id, code, name, description, display_order, aws_schedule_type_prefix FROM day_types ORDER BY display_order ASC').all();
+    const includeDisabled = c.req.query('include_disabled') === 'true';
+    const sql = includeDisabled 
+      ? 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types ORDER BY display_order ASC'
+      : 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC';
+    const { results } = await c.env.DB.prepare(sql).all();
     return c.json({ success: true, combos: results, day_types: results });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
