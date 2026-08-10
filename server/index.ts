@@ -317,10 +317,10 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       } catch (_) {}
     }
 
-    // 2. Consultar grillas maestras en D1 (schedules)
+    const upperRouteId = routeId.trim().toUpperCase();
     const schRes = await c.env.DB.prepare(
-      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ?'
-    ).bind(routeId, routeId, routeId).all();
+      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? OR b.code = ?'
+    ).bind(routeId, routeId, routeId, upperRouteId).all();
 
     const schedulesList = schRes.results || [];
     const schedulesDict: Record<string, any> = {};
