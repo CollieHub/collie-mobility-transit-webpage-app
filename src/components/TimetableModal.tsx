@@ -48,6 +48,55 @@ function useIsMobile() {
   return width < 768;
 }
 
+export const formatSpecialLabel = (id: string) => {
+  if (!id) return 'Lunes a Viernes';
+  const clean = id.trim().toLowerCase();
+  if (clean === 'weekday' || clean === 'lunes_a_viernes' || clean.startsWith('lunes_a_viernes_') || clean.startsWith('weekday_') || clean === 'lunes a viernes') return 'Lunes a Viernes';
+  if (clean === 'saturday' || clean === 'sabado' || clean === 'sabados' || clean.startsWith('sabados_') || clean.startsWith('saturday_') || clean === 'sábados' || clean === 'sábado') return 'Sábado';
+  if (clean === 'sunday_holiday' || clean === 'sunday' || clean === 'holiday' || clean === 'domingos_feriados' || clean.startsWith('domingos_feriados_') || clean.startsWith('sunday_') || clean === 'domingos y feriados') return 'Domingos y Feriados';
+  if (clean === 'special' || clean === 'especial' || clean.startsWith('especial_') || clean.startsWith('special_')) return 'Especial (Horario Extraordinario / Invierno)';
+  return id;
+};
+
+export const getTodayDayLabel = (routeObjToUse?: any, calendarExceptions: any[] = []) => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${y}-${m}-${d}`;
+
+  let companyName = 'Otras';
+  if (routeObjToUse) {
+    const code = routeObjToUse.code || '';
+    const isSIT = code.toLowerCase().startsWith('rz') || routeObjToUse.id?.toLowerCase().includes('sit');
+    if (isSIT) {
+      companyName = 'SIT';
+    } else {
+      companyName = routeObjToUse.company || 'Otras';
+    }
+  }
+
+  const matchedException = calendarExceptions.find(
+    (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all')
+  );
+
+  if (matchedException) {
+    if (matchedException.overrideDayType === 'weekday') return 'Lunes a Viernes';
+    if (matchedException.overrideDayType === 'saturday') return 'Sábado';
+    if (matchedException.overrideDayType === 'sunday') return 'Domingos y Feriados';
+    return formatSpecialLabel(matchedException.overrideDayType);
+  }
+
+  if (isHoliday(now)) {
+    return 'Domingos y Feriados';
+  }
+  const day = now.getDay();
+  if (day === 0) return 'Domingos y Feriados';
+  if (day === 6) return 'Sábado';
+
+  return 'Lunes a Viernes';
+};
+
 export default function TimetableModal({ routeCode, onClose, routeData, isLoadingDetail, routeObj, calendarExceptions = [] }: TimetableModalProps) {
   const isMobile = useIsMobile();
   const [activeDirection, setActiveDirection] = useState<'ida' | 'vuelta'>('ida');
@@ -58,14 +107,13 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     return null;
   }, [routeData, routeObj]);
 
-  // Find route in the backend data
   const data = useMemo(() => {
     if (routeData) return routeData;
     return routeObjToUse;
   }, [routeData, routeObjToUse]);
 
   const [dayTypes, setDayTypes] = useState<string[]>([]);
-  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedDay, setSelectedDay] = useState<string>(() => getTodayDayLabel(routeObj || routeData?.route, calendarExceptions));
   const activeIdaRowRef = useRef<HTMLTableRowElement>(null);
   const activeVueltaRowRef = useRef<HTMLTableRowElement>(null);
 
@@ -91,113 +139,60 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     return matchedException?.description || null;
   }, [calendarExceptions, routeObjToUse]);
 
-  useEffect(() => {
-    if (activeIdaRowRef.current) {
-      activeIdaRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    if (activeVueltaRowRef.current) {
-      activeVueltaRowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [selectedDay, data]);
-
-  const formatSpecialLabel = (id: string) => {
-    if (!id) return 'Lunes a Viernes';
-    const clean = id.trim().toLowerCase();
-    if (clean === 'weekday' || clean === 'lunes_a_viernes' || clean.startsWith('lunes_a_viernes_') || clean.startsWith('weekday_') || clean === 'lunes a viernes') return 'Lunes a Viernes';
-    if (clean === 'saturday' || clean === 'sabado' || clean === 'sabados' || clean.startsWith('sabados_') || clean.startsWith('saturday_') || clean === 'sábados' || clean === 'sábado') return 'Sábado';
-    if (clean === 'sunday_holiday' || clean === 'sunday' || clean === 'holiday' || clean === 'domingos_feriados' || clean.startsWith('domingos_feriados_') || clean.startsWith('sunday_') || clean === 'domingos y feriados') return 'Domingos y Feriados';
-    if (clean === 'special' || clean === 'especial' || clean.startsWith('especial_') || clean.startsWith('special_')) return 'Especial (Horario Extraordinario / Invierno)';
-    return id;
-  };
-
-  const getTodayDayLabel = () => {
-    const now = new Date();
-    
-    // Formatear fecha actual como YYYY-MM-DD
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const dateStr = `${y}-${m}-${d}`;
-
-    // Resolver empresa del ramal
-    let companyName = 'Otras';
-    if (routeObjToUse) {
-      const code = routeObjToUse.code || '';
-      const isSIT = code.toLowerCase().startsWith('rz') || routeObjToUse.id?.toLowerCase().includes('sit');
-      if (isSIT) {
-        companyName = 'SIT';
-      } else {
-        companyName = routeObjToUse.company || 'Otras';
-      }
-    }
-
-    // Buscar excepción activa
-    const matchedException = calendarExceptions.find(
-      (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all')
-    );
-
-    if (matchedException) {
-      console.log(`💡 [TimetableModal] Aplicando excepción de calendario para ${companyName} hoy (${dateStr}): ${matchedException.overrideDayType}`);
-      if (matchedException.overrideDayType === 'weekday') return 'Lunes a Viernes';
-      if (matchedException.overrideDayType === 'saturday') return 'Sábado';
-      if (matchedException.overrideDayType === 'sunday') return 'Domingos y Feriados';
-      return formatSpecialLabel(matchedException.overrideDayType);
-    }
-
-    if (isHoliday(now)) {
-      return 'Domingos y Feriados';
-    }
-    const day = now.getDay(); // 0 = Domingo, 6 = Sábado, 1-5 = Lunes a Viernes
-    if (day === 0) return 'Domingos y Feriados';
-    if (day === 6) return 'Sábado';
-
-    return 'Lunes a Viernes';
-  };
-
+  // Scroll suave único diferido para evitar parpadeos y saltos
   useEffect(() => {
     if (!data) return;
-
-    const todayLabel = getTodayDayLabel();
-
-    if (data.schedules) {
-      const types = new Set<string>();
-      Object.entries(data.schedules).forEach(([key, s]: [string, any]) => {
-        if (!s) return;
-        const rawLabel = s.dayTypeName || s.name || s.dayType || s.dayTypesId || key;
-        const label = formatSpecialLabel(rawLabel);
-        if (label) {
-          types.add(label);
-        }
-      });
-      const DAY_ORDER = ['Lunes a Viernes', 'Sábado', 'Domingos y Feriados', 'Especial (Horario Extraordinario / Invierno)'];
-      
-      // Si la excepcion forzó un dayType custom y no existen horarios configurados, 
-      // lo agregamos igual para que el modal indique el día y no falle silenciosamente al Lunes a Viernes regular
-      if (todayLabel !== 'Lunes a Viernes' && todayLabel !== 'Sábado' && todayLabel !== 'Domingos y Feriados') {
-        types.add(todayLabel);
+    const timer = setTimeout(() => {
+      if (activeIdaRowRef.current) {
+        activeIdaRowRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
       }
-
-      const options = Array.from(types).sort((a, b) => {
-        const iA = DAY_ORDER.indexOf(a);
-        const iB = DAY_ORDER.indexOf(b);
-        if (iA !== -1 && iB !== -1) return iA - iB;
-        if (iA !== -1) return -1;
-        if (iB !== -1) return 1;
-        return a.localeCompare(b);
-      });
-
-      if (options.length > 0) {
-        setDayTypes(options);
-        setSelectedDay(options.includes(todayLabel) ? todayLabel : options[0]);
-      } else {
-        setDayTypes(['Lunes a Viernes']);
-        setSelectedDay(todayLabel);
+      if (activeVueltaRowRef.current) {
+        activeVueltaRowRef.current.scrollIntoView({ behavior: 'auto', block: 'center' });
       }
-    } else {
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [selectedDay, data]);
+
+  useEffect(() => {
+    if (!data || !data.schedules) {
       setDayTypes([]);
+      return;
+    }
+
+    const todayLabel = getTodayDayLabel(routeObjToUse, calendarExceptions);
+    const types = new Set<string>();
+
+    Object.entries(data.schedules).forEach(([key, s]: [string, any]) => {
+      if (!s) return;
+      const rawLabel = s.dayTypeName || s.name || s.dayType || s.dayTypesId || key;
+      const label = formatSpecialLabel(rawLabel);
+      if (label) {
+        types.add(label);
+      }
+    });
+
+    const DAY_ORDER = ['Lunes a Viernes', 'Sábado', 'Domingos y Feriados', 'Especial (Horario Extraordinario / Invierno)'];
+    
+    if (todayLabel !== 'Lunes a Viernes' && todayLabel !== 'Sábado' && todayLabel !== 'Domingos y Feriados') {
+      types.add(todayLabel);
+    }
+
+    const options = Array.from(types).sort((a, b) => {
+      const iA = DAY_ORDER.indexOf(a);
+      const iB = DAY_ORDER.indexOf(b);
+      if (iA !== -1 && iB !== -1) return iA - iB;
+      if (iA !== -1) return -1;
+      if (iB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    setDayTypes(options);
+    if (options.length > 0) {
+      setSelectedDay(prev => (prev && options.includes(prev) ? prev : (options.includes(todayLabel) ? todayLabel : options[0])));
+    } else {
       setSelectedDay(todayLabel);
     }
-  }, [data, calendarExceptions]);
+  }, [data, calendarExceptions, routeObjToUse]);
 
   const getDisplayName = () => {
     if (routeObjToUse) {
@@ -229,93 +224,52 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '20px', backdropFilter: 'blur(5px)'
       }}>
-        <div style={{ color: 'white', fontSize: '1.2rem', display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <Clock size={24} className="animate-spin" /> Cargando horarios...
+        <div style={{
+          background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)',
+          padding: '40px', textAlign: 'center', color: 'var(--text-primary)',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid var(--border)'
+        }}>
+          <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '10px' }}>Cargando horarios...</div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Obteniendo grilla del ramal {routeCode}</div>
         </div>
       </div>
     );
   }
 
-  if (!data || !data.schedules) {
-    return (
-      <div style={{
-        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(0,0,0,0.8)', zIndex: 9999,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '20px', backdropFilter: 'blur(5px)'
-      }}>
-        <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: '8px', color: 'var(--text-primary)' }}>
-          <h3>No hay horarios disponibles</h3>
-          <p>Los horarios de la {getDisplayName()} no se encuentran en el sistema.</p>
-          <button onClick={onClose} style={{ marginTop: '10px', padding: '8px 16px', background: 'var(--accent)', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer' }}>Cerrar</button>
-        </div>
-      </div>
-    );
-  }
+  const getScheduleForDayAndDirection = (dayLabel: string, direction: 'ida' | 'vuelta') => {
+    if (!data || !data.schedules) return null;
 
-  const getScheduleForDayAndDirection = (dayLabel: string, direction: string) => {
-    if (!data?.schedules) return null;
-    let dayType = '';
-    if (dayLabel === 'Lunes a Viernes') dayType = 'weekday';
-    else if (dayLabel === 'Sábado') dayType = 'saturday';
-    else if (dayLabel === 'Domingos y Feriados') {
-      const mainKey = `sunday_holiday_${direction}`;
-      if (data.schedules[mainKey]) return data.schedules[mainKey];
-      const sundayKey = `sunday_${direction}`;
-      if (data.schedules[sundayKey]) return data.schedules[sundayKey];
-      const holidayKey = `holiday_${direction}`;
-      if (data.schedules[holidayKey]) return data.schedules[holidayKey];
-      dayType = 'sunday_holiday';
-    } else {
-      for (const key of Object.keys(data.schedules)) {
-        if (!key.endsWith(`_${direction}`)) continue;
-        const sch = data.schedules[key];
-        if (!sch) continue;
-        const scheduleDayType = sch.dayType || '';
-        const formattedSchedule = formatSpecialLabel(scheduleDayType).toLowerCase();
-        const dayLabelLower = dayLabel.toLowerCase();
-        if (
-          scheduleDayType === dayLabel || 
-          formattedSchedule === dayLabelLower ||
-          (dayLabelLower.includes('invierno') && (key.toLowerCase().includes('invierno') || scheduleDayType.toLowerCase().includes('invierno'))) ||
-          (dayLabelLower.includes('especial') && (scheduleDayType.toLowerCase().startsWith('special') || key.toLowerCase().includes('special')))
-        ) {
-           return sch;
-        }
-      }
-      dayType = dayLabel; 
-    }
+    let targetCode = 'lunes_a_viernes';
+    if (dayLabel === 'Lunes a Viernes') targetCode = 'lunes_a_viernes';
+    else if (dayLabel === 'Sábado' || dayLabel === 'Sábados') targetCode = 'sabados';
+    else if (dayLabel === 'Domingos y Feriados') targetCode = 'domingos_feriados';
+    else if (dayLabel.startsWith('Especial')) targetCode = 'especial';
 
-    const key = `${dayType}_${direction}`;
-    if (data.schedules[key]) return data.schedules[key];
-    
-    // Fallback 1: buscar cualquier clave que termine en _direction y coincida parcialmente con el nombre del día
-    for (const k of Object.keys(data.schedules)) {
-      if (k.endsWith(`_${direction}`) && (k.toLowerCase().includes(dayType.toLowerCase()) || dayType.toLowerCase().includes(k.toLowerCase()))) {
-        return data.schedules[k];
+    // 1. Buscar coincidencia exacta por clave de la schedule (e.g. lunes_a_viernes_ida, domingos_feriados_vuelta)
+    const exactKey = `${targetCode}_${direction}`;
+    if (data.schedules[exactKey]) return data.schedules[exactKey];
+
+    // 2. Buscar por dayType/dayTypeName coincidente
+    for (const [key, sch] of Object.entries(data.schedules) as [string, any][]) {
+      if (!key.endsWith(`_${direction}`) && sch.direction !== direction) continue;
+      const formatted = formatSpecialLabel(sch.dayTypeName || sch.dayType || sch.dayTypesId || key);
+      if (formatted === dayLabel) {
+        return sch;
       }
     }
 
-    // Fallback 2: si es un período especial/excepción de Lunes a Viernes (ej. Invierno), caer al horario regular Lunes a Viernes (weekday)
-    const lowerDay = dayLabel.toLowerCase();
-    if (lowerDay.includes('weekday') || lowerDay.includes('lunes') || lowerDay.includes('invierno') || lowerDay.includes('especial')) {
-      // Primero intentar con claves special_* que contengan la dirección
-      for (const k of Object.keys(data.schedules)) {
-        if (k.endsWith(`_${direction}`) && k.toLowerCase().includes('special')) {
-          return data.schedules[k];
-        }
-      }
+    // 3. Fallbacks compatibles con AWS legacy (weekday, saturday, sunday_holiday)
+    if (dayLabel === 'Lunes a Viernes') {
       if (data.schedules[`weekday_${direction}`]) return data.schedules[`weekday_${direction}`];
-      if (data.schedules[`lunes_a_viernes_${direction}`]) return data.schedules[`lunes_a_viernes_${direction}`];
-    } else if (lowerDay.includes('saturday') || lowerDay.includes('sabado')) {
+    } else if (dayLabel === 'Sábado') {
       if (data.schedules[`saturday_${direction}`]) return data.schedules[`saturday_${direction}`];
-    } else if (lowerDay.includes('sunday') || lowerDay.includes('domingo') || lowerDay.includes('feriado')) {
+    } else if (dayLabel === 'Domingos y Feriados') {
       if (data.schedules[`sunday_holiday_${direction}`]) return data.schedules[`sunday_holiday_${direction}`];
       if (data.schedules[`sunday_${direction}`]) return data.schedules[`sunday_${direction}`];
       if (data.schedules[`holiday_${direction}`]) return data.schedules[`holiday_${direction}`];
     }
 
-    // Fallback 3: retornar cualquier horario disponible para esa dirección
+    // 4. Fallback final: cualquier horario disponible para esa dirección
     for (const k of Object.keys(data.schedules)) {
       if (k.endsWith(`_${direction}`)) {
         return data.schedules[k];
@@ -352,54 +306,48 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     ? `${vueltaHeaders[0].replace(/\s*\(.*?\)/g, '').trim()} a ${vueltaHeaders[vueltaHeaders.length - 1].replace(/\s*\(.*?\)/g, '').trim()}` 
     : 'Trayecto de Vuelta';
 
-  const idaTitle = originTitle && destTitle ? `${originTitle} a ${destTitle}` : cleanIdaHeader;
-  const vueltaTitle = originTitle && destTitle ? `${destTitle} a ${originTitle}` : cleanVueltaHeader;
-  
-  const isSelectedException = selectedDay === getTodayDayLabel() && activeExceptionMsg;
+  const idaTitle = (originTitle && destTitle) ? `${originTitle} a ${destTitle}` : cleanIdaHeader;
+  const vueltaTitle = (originTitle && destTitle) ? `${destTitle} a ${originTitle}` : cleanVueltaHeader;
+
+  const activeSchedule = activeDirection === 'ida' ? scheduleIda : scheduleVuelta;
+  const activeTimetables = activeDirection === 'ida' ? currentIdaTimetables : currentVueltaTimetables;
+  const activeHeaders = activeDirection === 'ida' ? idaHeaders : vueltaHeaders;
+  const activeTitle = activeDirection === 'ida' ? idaTitle : vueltaTitle;
+  const activeRowRef = activeDirection === 'ida' ? activeIdaRowRef : activeVueltaRowRef;
+  const isSelectedException = selectedDay === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg;
 
   if (isMobile) {
-    const activeSchedule = activeDirection === 'ida' ? scheduleIda : scheduleVuelta;
-    const activeTimetables: string[][] = activeSchedule?.rows || activeSchedule?.matrix || [];
-    const activeHeaders: string[] = activeSchedule?.headers || [];
-    const activeRowRef = activeDirection === 'ida' ? activeIdaRowRef : activeVueltaRowRef;
     const hasIda = currentIdaTimetables.length > 0;
     const hasVuelta = currentVueltaTimetables.length > 0;
 
     return (
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        background: 'var(--bg-card)', zIndex: 9999,
+        background: 'rgba(0,0,0,0.85)', zIndex: 9999,
         display: 'flex', flexDirection: 'column',
-        userSelect: 'none', WebkitUserSelect: 'none'
+        backdropFilter: 'blur(5px)'
       }}>
-        {/* Mobile Premium Header */}
+        {/* Mobile Header */}
         <div style={{
-          padding: '14px 16px', borderBottom: '1px solid var(--border)',
-          background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '12px'
+          padding: '16px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border)',
+          display: 'flex', flexDirection: 'column', gap: '12px', userSelect: 'none', WebkitUserSelect: 'none'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ 
-                  background: routeObjToUse?.color ? `#${routeObjToUse.color}` : 'var(--accent)', 
-                  color: 'white', 
-                  padding: '2px 8px', 
-                  borderRadius: '6px', 
-                  fontSize: '0.8rem',
-                  fontWeight: 800 
-                }}>
-                  {routeObjToUse?.code || routeCode}
-                </span>
-                <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Horarios de Ramal</h3>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, fontWeight: 500, paddingLeft: '4px' }}>
-                {routeObjToUse ? (routeObjToUse.title || routeObjToUse.name) : (data?.title || data?.name)}
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ 
+                background: routeObjToUse?.color ? `#${routeObjToUse.color}` : 'var(--accent)', 
+                color: 'white', padding: '4px 10px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 800 
+              }}>
+                {getDisplayName()}
+              </span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Horarios
+              </span>
             </div>
-            <button onClick={onClose} style={{
-              background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%',
-              width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--text-primary)', cursor: 'pointer'
+            <button onClick={onClose} style={{ 
+              background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', 
+              width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              color: 'var(--text-primary)', cursor: 'pointer' 
             }}>
               <X size={18} />
             </button>
@@ -425,7 +373,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
               >
                 {dayTypes.map(d => (
                     <option key={d} value={d}>
-                      {d === getTodayDayLabel() && activeExceptionMsg ? activeExceptionMsg : d}
+                      {d === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg ? activeExceptionMsg : d}
                     </option>
                 ))}
               </select>
@@ -447,63 +395,70 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
               gap: '12px'
             }}>
               <CalendarDays size={40} style={{ color: 'var(--text-muted)', opacity: 0.5, marginBottom: '4px' }} />
-              <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>Horarios no configurados</h3>
-              <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: '1.4', maxWidth: '280px', color: 'var(--text-muted)' }}>
-                Este ramal aún no cuenta con una grilla de horarios activa para <strong>{selectedDay}</strong>.
+              <h4 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.1rem' }}>Sin horarios disponibles</h4>
+              <p style={{ margin: 0, fontSize: '0.85rem', maxWidth: '300px' }}>
+                No hay horarios registrados para <strong>{selectedDay}</strong>.
               </p>
             </div>
         )}
+
         {(hasIda || hasVuelta) && (
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'var(--bg-primary)' }}>
+          <div style={{ 
+            display: 'flex', background: 'var(--bg-card)', borderBottom: '1px solid var(--border)',
+            padding: '4px 8px', gap: '8px', userSelect: 'none', WebkitUserSelect: 'none'
+          }}>
             {hasIda && (
               <button 
                 onClick={() => setActiveDirection('ida')}
                 style={{
-                  flex: 1, padding: '12px', background: 'transparent', border: 'none',
-                  borderBottom: activeDirection === 'ida' ? '3px solid #3b82f6' : '3px solid transparent',
+                  flex: 1, padding: '10px 8px', borderRadius: '8px', border: 'none',
+                  background: activeDirection === 'ida' ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
                   color: activeDirection === 'ida' ? '#3b82f6' : 'var(--text-muted)',
-                  fontWeight: activeDirection === 'ida' ? 700 : 500, fontSize: '0.85rem', outline: 'none'
+                  fontWeight: activeDirection === 'ida' ? 700 : 500, fontSize: '0.85rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  cursor: 'pointer', transition: 'all 0.2s ease'
                 }}
-              >{idaTitle}</button>
+              >
+                <span>➡️</span> {idaTitle}
+              </button>
             )}
             {hasVuelta && (
               <button 
                 onClick={() => setActiveDirection('vuelta')}
                 style={{
-                  flex: 1, padding: '12px', background: 'transparent', border: 'none',
-                  borderBottom: activeDirection === 'vuelta' ? '3px solid #a855f7' : '3px solid transparent',
+                  flex: 1, padding: '10px 8px', borderRadius: '8px', border: 'none',
+                  background: activeDirection === 'vuelta' ? 'rgba(168, 85, 247, 0.15)' : 'transparent',
                   color: activeDirection === 'vuelta' ? '#a855f7' : 'var(--text-muted)',
-                  fontWeight: activeDirection === 'vuelta' ? 700 : 500, fontSize: '0.85rem', outline: 'none'
+                  fontWeight: activeDirection === 'vuelta' ? 700 : 500, fontSize: '0.85rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  cursor: 'pointer', transition: 'all 0.2s ease'
                 }}
-              >{vueltaTitle}</button>
+              >
+                <span>⬅️</span> {vueltaTitle}
+              </button>
             )}
           </div>
         )}
 
-        {/* Content Table for Mobile */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, padding: '12px' }}>
+        {/* Mobile Content */}
+        <div style={{ flex: 1, overflow: 'auto', background: 'var(--bg-card)', position: 'relative' }}>
           {activeTimetables.length > 0 ? (
-            <div style={{ flex: 1, borderRadius: '12px', border: '1px solid var(--border)', overflow: 'auto', clipPath: 'inset(0 round 12px)', position: 'relative' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', textAlign: 'center' }}>
-                <thead style={{
-                  position: 'sticky', top: 0, zIndex: 10,
-                  background: activeDirection === 'ida' ? '#e1effe' : '#f3e8ff',
-                  boxShadow: '0 1px 0 var(--border)'
-                }}>
+            <div style={{ overflowX: 'auto', minWidth: '100%' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', textAlign: 'center' }}>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: activeDirection === 'ida' ? '#e1effe' : '#f3e8ff', boxShadow: '0 1px 0 var(--border)' }}>
                   <tr>
-                    <th style={{ padding: '10px 8px', fontWeight: 600, borderBottom: '1px solid var(--border)', width: '30px', color: 'var(--text-muted)' }}>#</th>
+                    <th style={{ padding: '10px 6px', fontWeight: 600, borderBottom: '1px solid var(--border)', width: '30px', color: 'var(--text-muted)' }}>#</th>
                     {activeHeaders.map((s: string, i: number) => (
-                      <th key={i} style={{
-                        padding: '10px 8px', fontWeight: 600, borderBottom: '1px solid var(--border)',
-                        whiteSpace: 'normal', minWidth: '75px', maxWidth: '120px', wordWrap: 'break-word',
-                        lineHeight: '1.2', color: 'var(--text-primary)'
+                      <th key={i} style={{ 
+                        padding: '10px 8px', fontWeight: 600, borderBottom: '1px solid var(--border)', 
+                        whiteSpace: 'normal', minWidth: '85px', maxWidth: '120px', wordWrap: 'break-word', lineHeight: '1.2', color: 'var(--text-primary)'
                       }}>{s}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {activeTimetables.map((row, r_idx) => {
-                    const isCorrectDay = selectedDay === getTodayDayLabel();
+                    const isCorrectDay = selectedDay === getTodayDayLabel(routeObjToUse, calendarExceptions);
                     const inRange = isCorrectDay && isRowInRange(row);
                     return (
                       <tr 
@@ -606,7 +561,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                 >
                     {dayTypes.map(d => (
                       <option key={d} value={d}>
-                        {d === getTodayDayLabel() && activeExceptionMsg ? activeExceptionMsg : d}
+                        {d === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg ? activeExceptionMsg : d}
                       </option>
                     ))}
                 </select>
@@ -688,7 +643,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                     </thead>
                     <tbody>
                       {currentIdaTimetables.map((row, r_idx) => {
-                        const isCorrectDay = selectedDay === getTodayDayLabel();
+                        const isCorrectDay = selectedDay === getTodayDayLabel(routeObjToUse, calendarExceptions);
                         const inRange = isCorrectDay && isRowInRange(row);
                         return (
                           <tr 
@@ -701,11 +656,6 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                               transition: 'all 0.3s ease'
                             }}
                           >
-                            {/* IMPORTANTE: NUNCA usar borderLeft en el <tr> para marcar la fila activa. 
-                                Eso deforma el colapso de bordes (border-collapse: collapse) en tablas y 
-                                provoca que la cabecera sticky (thead) tenga espacios y bordes blancos vacíos 
-                                en la esquina superior izquierda. Se debe usar obligatoriamente boxShadow inset 
-                                en este primer <td>. */}
                             <td style={{ 
                               padding: '8px', 
                               borderBottom: '1px solid var(--border)', 
@@ -769,7 +719,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                     </thead>
                     <tbody>
                       {currentVueltaTimetables.map((row, r_idx) => {
-                        const isCorrectDay = selectedDay === getTodayDayLabel();
+                        const isCorrectDay = selectedDay === getTodayDayLabel(routeObjToUse, calendarExceptions);
                         const inRange = isCorrectDay && isRowInRange(row);
                         return (
                           <tr 
@@ -782,11 +732,6 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                               transition: 'all 0.3s ease'
                             }}
                           >
-                            {/* IMPORTANTE: NUNCA usar borderLeft en el <tr> para marcar la fila activa. 
-                                Eso deforma el colapso de bordes (border-collapse: collapse) en tablas y 
-                                provoca que la cabecera sticky (thead) tenga espacios y bordes blancos vacíos 
-                                en la esquina superior izquierda. Se debe usar obligatoriamente boxShadow inset 
-                                en este primer <td>. */}
                             <td style={{ 
                               padding: '8px', 
                               borderBottom: '1px solid var(--border)', 
@@ -807,7 +752,6 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                 </div>
               </div>
             )}
-
           </div>
           )}
         </div>
