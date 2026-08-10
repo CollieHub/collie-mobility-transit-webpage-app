@@ -570,4 +570,81 @@ app.post('/v1/internal/sync-catalog', async (c) => {
   return c.json({ status: 'synced', received_lines: payload.lines?.length || 0 });
 });
 
+// 7. Endpoint de Administración: Actualizar Estado Operativo de Ramales desde Consola / Transit Core
+const handleBranchStatusUpdate = async (c: any) => {
+  try {
+    const authHeader = c.req.header('Authorization') || c.req.header('authorization');
+    if (!authHeader) {
+      return c.json({ success: false, error: 'Authorization header is required (Bearer token)' }, 401);
+    }
+
+    let body: any = {};
+    if (c.req.method === 'POST' || c.req.method === 'PUT') {
+      try { body = await c.req.json(); } catch (_) {}
+    }
+
+    const branchIdentifier = body.branch_id || body.branch_code || body.code || c.req.query('branch_code') || c.req.query('branch_id');
+    const statusCode = body.status_code || body.status || c.req.query('status_code') || c.req.query('status');
+
+    if (!branchIdentifier) {
+      return c.json({ success: false, error: 'branch_code or branch_id parameter is required' }, 400);
+    }
+    if (!statusCode) {
+      return c.json({ success: false, error: 'status_code parameter is required (e.g. active, interrupted, reduced, suspended)' }, 400);
+    }
+
+    // 1. Validar que el estado solicitado exista en branch_statuses
+    const cleanStatusCode = statusCode.trim().toLowerCase();
+    const statusRes = await c.env.DB.prepare(
+      'SELECT id, code, name, color FROM branch_statuses WHERE LOWER(code) = ? OR LOWER(name) = ? OR id = ?'
+    ).bind(cleanStatusCode, cleanStatusCode, statusCode).all();
+
+    const statusObj = statusRes.results?.[0];
+    if (!statusObj) {
+      return c.json({
+        success: false,
+        error: `Invalid status_code: '${statusCode}'. Valid codes: active, interrupted, reduced, suspended`
+      }, 400);
+    }
+
+    // 2. Actualizar el ramal en la tabla branches
+    const updateRes = await c.env.DB.prepare(
+      'UPDATE branches SET branch_statuses_id = ? WHERE id = ? OR LOWER(code) = ?'
+    ).bind(statusObj.id, branchIdentifier, branchIdentifier.trim().toLowerCase()).run();
+
+    if (updateRes.meta.changes === 0) {
+      return c.json({ success: false, error: `Branch not found with code or id: '${branchIdentifier}'` }, 444);
+    }
+
+    // 3. Invalidador automático de caché global en KV (Auto-Purge)
+    let cachePurged = false;
+    if (c.env.FLEET_KV) {
+      try {
+        const currentV = await getCacheVersion(c.env.FLEET_KV);
+        const versionNum = parseInt(currentV.replace('v', ''), 10) || 1;
+        const newVersion = `v${versionNum + 1}`;
+        await c.env.FLEET_KV.put('cache:global:version', newVersion);
+        cachePurged = true;
+      } catch (_) {}
+    }
+
+    return c.json({
+      success: true,
+      message: `Estado del ramal '${branchIdentifier}' actualizado a '${statusObj.name}'`,
+      branch_identifier: branchIdentifier,
+      status_code: statusObj.code,
+      status_name: statusObj.name,
+      status_color: statusObj.color,
+      cache_purged: cachePurged,
+      updated_at: new Date().toISOString()
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+};
+
+app.post('/v1/admin/branches/status', handleBranchStatusUpdate);
+app.put('/v1/admin/branches/status', handleBranchStatusUpdate);
+app.get('/v1/admin/branches/status', handleBranchStatusUpdate);
+
 export default app;
