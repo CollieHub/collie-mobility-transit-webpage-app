@@ -113,7 +113,11 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   }, [routeData, routeObjToUse]);
 
   const [dayTypes, setDayTypes] = useState<string[]>([]);
-  const [selectedDay, setSelectedDay] = useState<string>(() => getTodayDayLabel(routeObj || routeData?.route, calendarExceptions));
+  const [selectedDay, setSelectedDay] = useState<string>(() => {
+    if (data?.currentDayTypeName) return data.currentDayTypeName;
+    if (data?.currentDayType) return formatSpecialLabel(data.currentDayType);
+    return getTodayDayLabel(routeObj || routeData?.route, calendarExceptions);
+  });
   const activeIdaRowRef = useRef<HTMLTableRowElement>(null);
   const activeVueltaRowRef = useRef<HTMLTableRowElement>(null);
 
@@ -159,7 +163,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
       return;
     }
 
-    const todayLabel = getTodayDayLabel(routeObjToUse, calendarExceptions);
+    const todayLabel = data.currentDayTypeName || (data.currentDayType ? formatSpecialLabel(data.currentDayType) : getTodayDayLabel(routeObjToUse, calendarExceptions));
     const types = new Set<string>();
 
     Object.entries(data.schedules).forEach(([key, s]: [string, any]) => {

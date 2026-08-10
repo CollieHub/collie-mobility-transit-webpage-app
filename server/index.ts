@@ -108,6 +108,34 @@ app.get('/v1/catalog/public/data', async (c) => {
   }
 });
 
+// Helper function to resolve the current active day type in Argentina Time (UTC-3)
+function resolveCurrentDayType(nowDate = new Date()) {
+  const formatter = new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    weekday: 'short'
+  });
+  const weekdayStr = formatter.format(nowDate).toLowerCase(); // 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.', 'dóm.'
+
+  if (weekdayStr.startsWith('sáb') || weekdayStr.startsWith('sab')) {
+    return {
+      code: 'sabados',
+      name: 'Sábado',
+      id: '26453d08-1d87-57ea-910e-1e14de95a162'
+    };
+  } else if (weekdayStr.startsWith('dom') || weekdayStr.startsWith('dóm')) {
+    return {
+      code: 'domingos_feriados',
+      name: 'Domingos y Feriados',
+      id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e'
+    };
+  }
+  return {
+    code: 'lunes_a_viernes',
+    name: 'Lunes a Viernes',
+    id: '88f18fc3-ba8e-521a-a093-07db0825cf3a'
+  };
+}
+
 // 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
@@ -200,11 +228,22 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       });
     }
 
+    const currentDayTypeInfo = resolveCurrentDayType();
+    let dayTypesList: any[] = [];
+    try {
+      const dtRes = await c.env.DB.prepare('SELECT id, code, name, description, display_order FROM day_types ORDER BY display_order ASC').all();
+      dayTypesList = dtRes.results || [];
+    } catch (_) {}
+
     return c.json({
       success: true,
       data: [
         {
           id: routeId,
+          currentDayType: currentDayTypeInfo.code,
+          currentDayTypeName: currentDayTypeInfo.name,
+          currentDayTypeId: currentDayTypeInfo.id,
+          dayTypes: dayTypesList,
           timetables: schedulesList,
           schedules: schedulesDict
         }
@@ -218,17 +257,31 @@ app.get('/v1/catalog/public/timetables', async (c) => {
 // 3.b Tipos de Día (Day Types) para Selección de Horarios
 app.get('/v1/catalog/public/day_types', async (c) => {
   try {
+    const currentDayTypeInfo = resolveCurrentDayType();
     const { results } = await c.env.DB.prepare('SELECT id, code, name, description, display_order, aws_schedule_type_prefix FROM day_types ORDER BY display_order ASC').all();
-    return c.json({ success: true, day_types: results, combos: results });
-  } catch (err: any) {
     return c.json({
       success: true,
-      day_types: [
-        { id: '88f18fc3-ba8e-521a-a093-07db0825cf3a', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
-        { id: '26453d08-1d87-57ea-910e-1e14de95a162', code: 'sabados', name: 'Sábados', display_order: 2 },
-        { id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
-        { id: '4dd8ea7a-abb2-552e-b6da-1bb945d7c515', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
-      ]
+      currentDayType: currentDayTypeInfo.code,
+      currentDayTypeName: currentDayTypeInfo.name,
+      currentDayTypeId: currentDayTypeInfo.id,
+      day_types: results,
+      combos: results
+    });
+  } catch (err: any) {
+    const currentDayTypeInfo = resolveCurrentDayType();
+    const fallbackTypes = [
+      { id: '88f18fc3-ba8e-521a-a093-07db0825cf3a', code: 'lunes_a_viernes', name: 'Lunes a Viernes', display_order: 1 },
+      { id: '26453d08-1d87-57ea-910e-1e14de95a162', code: 'sabados', name: 'Sábados', display_order: 2 },
+      { id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e', code: 'domingos_feriados', name: 'Domingos y Feriados', display_order: 3 },
+      { id: '4dd8ea7a-abb2-552e-b6da-1bb945d7c515', code: 'especial', name: 'Especial (Horario Extraordinario / Invierno)', display_order: 4 }
+    ];
+    return c.json({
+      success: true,
+      currentDayType: currentDayTypeInfo.code,
+      currentDayTypeName: currentDayTypeInfo.name,
+      currentDayTypeId: currentDayTypeInfo.id,
+      day_types: fallbackTypes,
+      combos: fallbackTypes
     });
   }
 });
