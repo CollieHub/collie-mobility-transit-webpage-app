@@ -79,20 +79,30 @@ CREATE TABLE IF NOT EXISTS day_types (
     aws_schedule_type_prefix TEXT NOT NULL
 );
 
--- 8. Horarios de Salida y Puntos Intermedios (Schedules)
+-- 8. Grillas / Horarios Maestros por Ramal, Sentido y Tipo de Día (Schedules)
 CREATE TABLE IF NOT EXISTS schedules (
     id TEXT PRIMARY KEY,
     branch_id TEXT NOT NULL,
     direction TEXT NOT NULL CHECK(direction IN ('ida', 'vuelta')),
     day_types_id TEXT NOT NULL,
-    departure_time TEXT NOT NULL,
-    dispatch_order INTEGER NOT NULL,
-    trip_times_json TEXT,
+    name TEXT,
     headers_json TEXT,
     header_aliases_json TEXT,
     stop_addresses_json TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE,
     FOREIGN KEY (day_types_id) REFERENCES day_types(id) ON DELETE CASCADE
+);
+
+-- 9. Despachos / Horarios Individuales (Schedule Items)
+CREATE TABLE IF NOT EXISTS schedule_items (
+    id TEXT PRIMARY KEY,
+    schedule_id TEXT NOT NULL,
+    departure_time TEXT NOT NULL,
+    dispatch_order INTEGER NOT NULL,
+    trip_times_json TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE
 );
 
 -- Índices de alto rendimiento
@@ -101,3 +111,4 @@ CREATE INDEX IF NOT EXISTS idx_branches_line ON branches(line_id);
 CREATE INDEX IF NOT EXISTS idx_branches_status ON branches(branch_statuses_id);
 CREATE INDEX IF NOT EXISTS idx_stops_branch ON stops(branch_id, direction);
 CREATE INDEX IF NOT EXISTS idx_schedules_branch ON schedules(branch_id, day_types_id);
+CREATE INDEX IF NOT EXISTS idx_schedule_items_schedule ON schedule_items(schedule_id, dispatch_order);

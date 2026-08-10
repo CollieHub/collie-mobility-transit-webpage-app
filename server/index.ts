@@ -108,7 +108,7 @@ app.get('/v1/catalog/public/data', async (c) => {
   }
 });
 
-// 3. Horarios (Schedules) Multicolumna con Puntos Intermedios
+// 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
     const routeId = c.req.query('route_id');
@@ -116,95 +116,102 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       return c.json({ success: false, error: 'route_id query parameter is required' }, 400);
     }
 
-    const ttRes = await c.env.DB.prepare(
-      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? ORDER BY s.dispatch_order ASC'
+    // 1. Consultar grillas maestras (schedules)
+    const schRes = await c.env.DB.prepare(
+      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ?'
     ).bind(routeId, routeId, routeId).all();
 
-    const rows = ttRes.results || [];
+    const schedulesList = schRes.results || [];
     const schedulesDict: Record<string, any> = {};
 
-    rows.forEach((row: any) => {
-      const dayTypeCode = row.day_type_code || row.day_type || row.day_types_id;
-      const dirType = row.direction; // 'ida' or 'vuelta'
-      const key = `${dayTypeCode}_${dirType}`;
+    if (schedulesList.length > 0) {
+      // 2. Obtener los ítems de horarios (schedule_items) para todas las grillas de este ramal
+      const scheduleIds = schedulesList.map((s: any) => s.id);
+      const placeholders = scheduleIds.map(() => '?').join(',');
+      
+      const itemsRes = await c.env.DB.prepare(
+        `SELECT si.* FROM schedule_items si WHERE si.schedule_id IN (${placeholders}) ORDER BY si.dispatch_order ASC`
+      ).bind(...scheduleIds).all();
 
-      if (!schedulesDict[key]) {
+      const itemsList = itemsRes.results || [];
+      const itemsByScheduleId: Record<string, any[]> = {};
+      itemsList.forEach((item: any) => {
+        if (!itemsByScheduleId[item.schedule_id]) {
+          itemsByScheduleId[item.schedule_id] = [];
+        }
+        itemsByScheduleId[item.schedule_id].push(item);
+      });
+
+      schedulesList.forEach((row: any) => {
+        const dayTypeCode = row.day_type_code || row.day_types_id;
+        const dirType = row.direction; // 'ida' or 'vuelta'
+        const key = `${dayTypeCode}_${dirType}`;
+
         let defaultHeaders: string[] = ['Salida'];
         if (row.headers_json) {
-          try {
-            defaultHeaders = JSON.parse(row.headers_json);
-          } catch (_) {}
+          try { defaultHeaders = JSON.parse(row.headers_json); } catch (_) {}
         }
 
         let headerAliases: string[] = [];
         if (row.header_aliases_json) {
-          try {
-            headerAliases = JSON.parse(row.header_aliases_json);
-          } catch (_) {}
+          try { headerAliases = JSON.parse(row.header_aliases_json); } catch (_) {}
         }
 
         let stopAddresses: string[] = [];
         if (row.stop_addresses_json) {
-          try {
-            stopAddresses = JSON.parse(row.stop_addresses_json);
-          } catch (_) {}
+          try { stopAddresses = JSON.parse(row.stop_addresses_json); } catch (_) {}
         }
 
-        // Lógica de resolución: por defecto se muestra el alias cargado; si no tiene valor, se muestra la dirección de la parada
         const resolvedHeaders = defaultHeaders.map((h, i) => {
           const alias = headerAliases[i];
-          if (alias && alias.trim() !== '') {
-            return alias.trim();
-          }
+          if (alias && alias.trim() !== '') return alias.trim();
           const addr = stopAddresses[i];
-          if (addr && addr.trim() !== '') {
-            return addr.trim();
-          }
+          if (addr && addr.trim() !== '') return addr.trim();
           return h;
         });
 
+        const items = itemsByScheduleId[row.id] || [];
+        const matrix: string[][] = [];
+
+        items.forEach((item: any) => {
+          let tripTimes: string[] = [];
+          if (item.trip_times_json) {
+            try { tripTimes = JSON.parse(item.trip_times_json); } catch (_) {}
+          }
+          if (!tripTimes || tripTimes.length === 0) {
+            if (item.departure_time) tripTimes = [item.departure_time];
+          }
+          if (tripTimes.length > 0) {
+            matrix.push(tripTimes);
+          }
+        });
+
         schedulesDict[key] = {
+          id: row.id,
           dayType: dayTypeCode,
           dayTypesId: row.day_types_id,
           dayTypeName: row.day_type_name,
           headers: resolvedHeaders,
           aliases: headerAliases,
           addresses: stopAddresses,
-          matrix: [],
-          rows: []
+          matrix: matrix,
+          rows: matrix
         };
-      }
-
-      let tripTimes: string[] = [];
-      if (row.trip_times_json) {
-        try {
-          tripTimes = JSON.parse(row.trip_times_json);
-        } catch (_) {}
-      }
-      if (!tripTimes || tripTimes.length === 0) {
-        if (row.departure_time) {
-          tripTimes = [row.departure_time];
-        }
-      }
-
-      if (tripTimes.length > 0) {
-        schedulesDict[key].matrix.push(tripTimes);
-        schedulesDict[key].rows.push(tripTimes);
-      }
-    });
+      });
+    }
 
     return c.json({
       success: true,
       data: [
         {
           id: routeId,
-          timetables: rows,
+          timetables: schedulesList,
           schedules: schedulesDict
         }
       ]
     });
   } catch (err: any) {
-    return c.json({ success: false, error: 'Failed to fetch timetables', details: err.message }, 500);
+    return c.json({ success: false, error: err.message }, 500);
   }
 });
 
