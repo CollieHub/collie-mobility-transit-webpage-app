@@ -233,8 +233,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
           padding: '40px', textAlign: 'center', color: 'var(--text-primary)',
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid var(--border)'
         }}>
-          <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '10px' }}>Cargando horarios...</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Obteniendo grilla del ramal {routeCode}</div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>Cargando horarios...</div>
         </div>
       </div>
     );
