@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 type Bindings = {
   DB: D1Database;
   FLEET_KV: KVNamespace;
+  ASSETS?: { fetch: (req: Request) => Promise<Response> };
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -646,5 +647,22 @@ const handleBranchStatusUpdate = async (c: any) => {
 app.post('/v1/admin/branches/status', handleBranchStatusUpdate);
 app.put('/v1/admin/branches/status', handleBranchStatusUpdate);
 app.get('/v1/admin/branches/status', handleBranchStatusUpdate);
+
+// SPA Fallback Route: Para cualquier ruta de cliente navegada directamente (ej: /login), servir index.html
+app.notFound(async (c) => {
+  if (c.req.path.startsWith('/v1/') || c.req.path.startsWith('/health')) {
+    return c.json({ error: 'API Endpoint Not Found' }, 404);
+  }
+
+  if (c.env.ASSETS) {
+    try {
+      const url = new URL(c.req.url);
+      url.pathname = '/index.html';
+      return await c.env.ASSETS.fetch(new Request(url.toString(), c.req.raw));
+    } catch (_) {}
+  }
+
+  return c.text('Not Found', 404);
+});
 
 export default app;
