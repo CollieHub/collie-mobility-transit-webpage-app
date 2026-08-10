@@ -120,9 +120,11 @@ app.get('/v1/catalog/public/data', async (c) => {
 
     let branchesQuery = `
       SELECT b.id as branch_id, b.code as branch_code, b.name as branch_name, b.company as branch_company, b.description,
-             l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color, l.jurisdiction
+             l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color, l.jurisdiction,
+             bs.code as status_code, bs.name as status_name, bs.color as status_color
       FROM branches b
       JOIN lines l ON b.line_id = l.id
+      LEFT JOIN branch_statuses bs ON b.branch_statuses_id = bs.id
     `;
     let params: any[] = [];
 
@@ -174,6 +176,9 @@ app.get('/v1/catalog/public/data', async (c) => {
         color: b.line_color,
         company: b.branch_company || 'SIT',
         jurisdiction: b.jurisdiction,
+        status_code: b.status_code || 'active',
+        status_name: b.status_name || 'Activo / Normal',
+        status_color: b.status_color || '#10B981',
         directions,
         stops
       };

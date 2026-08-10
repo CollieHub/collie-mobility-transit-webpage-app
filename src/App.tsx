@@ -2013,7 +2013,16 @@ function App() {
             {(() => {
               const lineAlert = (incidents || []).find(inc => inc.type === 'LINE_STATUS' && inc.active && inc.affectedRoutes?.some(r => r.routeId === route.id));
               const affectedRoute = lineAlert?.affectedRoutes?.find(r => r.routeId === route.id);
-              let status = affectedRoute?.status || 'NORMAL';
+              
+              // Estado base desde D1 (branches.branch_statuses_id -> branch_statuses.code)
+              let defaultStatusCode = 'NORMAL';
+              if (route.status_code === 'interrupted' || route.status_code === 'suspended') {
+                defaultStatusCode = 'INTERRUPTED';
+              } else if (route.status_code === 'reduced' || route.status_code === 'delayed') {
+                defaultStatusCode = 'DELAY';
+              }
+
+              let status = affectedRoute?.status || defaultStatusCode;
               const observation = affectedRoute?.observation;
 
               // REGLA 4: Si se informa "fuera de servicio" (INTERRUPTED) y hay colectivos con GPS transmitiendo en vivo para esta línea,
@@ -2023,8 +2032,9 @@ function App() {
                 status = 'NORMAL';
               }
 
-              let badgeBg = '#007a33';
-              let statusText = 'NORMAL';
+              let badgeBg = route.status_color || '#007a33';
+              let statusText = route.status_name ? route.status_name.toUpperCase() : 'NORMAL';
+              if (statusText === 'ACTIVO / NORMAL') statusText = 'NORMAL';
               
               if (status === 'DELAY') {
                 badgeBg = '#d97706';
