@@ -23,7 +23,7 @@ const WhatsAppIcon = ({ size = 20, color = '#334155' }: { size?: number; color?:
 const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/ejemplo-canal-configurar'; // Reemplazar por la URL oficial cuando se cree el canal
 
 import TransitMap from './components/TransitMap';
-import { getApiBaseUrl, getTargetEnv, setTargetEnv } from './lib/api/envConfig';
+import { getApiBaseUrl } from './lib/api/envConfig';
 import TimetableModal from './components/TimetableModal';
 import DraggableBannerCarousel from './components/DraggableBannerCarousel';
 import { isHoliday } from './lib/holidays';
@@ -4101,30 +4101,6 @@ function App() {
                     <span>Admin</span>
                   </span>
                 )}
-
-                <button
-                  onClick={() => setTargetEnv(getTargetEnv() === 'prod' ? 'local' : 'prod')}
-                  title="Haz clic para cambiar de entorno en vivo (LOCAL <-> PROD)"
-                  style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 700,
-                    color: '#fff',
-                    background: getTargetEnv() === 'prod' ? '#3b82f6' : '#64748b',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)'
-                  }}
-                >
-                  <Radio size={10} />
-                  <span>{getTargetEnv() === 'prod' ? 'PROD' : 'LOCAL'}</span>
-                </button>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '2px 0 0', paddingLeft: '8px', fontWeight: 500 }}>Tu app de transportes</p>
             </div>
