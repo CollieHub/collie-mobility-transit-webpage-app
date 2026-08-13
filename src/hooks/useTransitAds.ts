@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPublicToken } from '../lib/api/publicToken';
+import { getApiBaseUrl } from '../lib/api/envConfig';
 
 export interface TransitAd {
   id: string;
@@ -21,7 +22,7 @@ export function useTransitAds() {
     let mounted = true;
     const fetchAds = async () => {
       try {
-        const url = import.meta.env.VITE_TRANSIT_API_URL || 'http://localhost:6005/v1';
+        const url = getApiBaseUrl();
         const cleanUrl = url.replace(/\/$/, '');
         const token = await getPublicToken(cleanUrl);
         const adsEndpoint = cleanUrl.endsWith('/v1') ? `${cleanUrl}/transit/ads` : `${cleanUrl}/v1/transit/ads`;

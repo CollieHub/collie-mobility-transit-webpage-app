@@ -5,8 +5,7 @@ export async function getPublicToken(baseUrl: string): Promise<string> {
     
     const candidateUrls = [
         baseUrl,
-        import.meta.env.VITE_TRANSIT_API_URL,
-        'http://localhost:6005/v1'
+        import.meta.env.VITE_TRANSIT_API_URL
     ].filter((u): u is string => Boolean(u));
 
     const uniqueUrls = Array.from(new Set(candidateUrls));

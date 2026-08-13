@@ -2394,6 +2394,45 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     return data;
   }, [transitRoutes]);
 
+  // === Timer de Simulación Local por Horarios ===
+  // Ejecuta simulateBusesLocally cada segundo para generar buses simulados
+  // basados en los horarios de la base de datos D1
+  useEffect(() => {
+    const runSimulation = () => {
+      const routes = transitRoutes;
+      if (!routes || routes.length === 0) {
+        setSimulatedBuses([]);
+        return;
+      }
+      // Solo simular rutas que están seleccionadas/visibles
+      const activeSelection = visibleRouteIds.size > 0 ? visibleRouteIds : selectedRouteIds;
+      if (!activeSelection || activeSelection.size === 0) {
+        setSimulatedBuses([]);
+        return;
+      }
+      const selectedRoutes = routes.filter((r: any) => {
+        if (!r) return false;
+        const rIdLower = String(r.id || '').toLowerCase();
+        const rCodeLower = String(r.code || '').toLowerCase();
+        return Array.from(activeSelection).some(selId => {
+          const selLower = String(selId).toLowerCase();
+          return selLower === rIdLower || selLower === rCodeLower ||
+                 `route-${selLower}` === rIdLower || selLower === `route-${rIdLower}`;
+        });
+      });
+      if (selectedRoutes.length === 0) {
+        setSimulatedBuses([]);
+        return;
+      }
+      const simulated = simulateBusesLocally(selectedRoutes);
+      setSimulatedBuses(simulated);
+    };
+
+    runSimulation();
+    const simInterval = setInterval(runSimulation, 1000);
+    return () => clearInterval(simInterval);
+  }, [simulateBusesLocally, transitRoutes, visibleRouteIds, selectedRouteIds]);
+
   const combinedBuses = useMemo(() => {
     // Si el backend ya devuelve buses simulados, usar SOLO backendBuses como fuente autoritativa
     // para evitar duplicar conteos (el backend es la única fuente de verdad para la simulación)

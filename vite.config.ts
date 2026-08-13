@@ -32,6 +32,13 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 5173,
+      proxy: {
+        '/v1': {
+          target: 'http://localhost:6005',
+          changeOrigin: true,
+          secure: false,
+        }
+      },
       ...(hasCustomCert ? {
         https: {
           key: fs.readFileSync(keyPath),

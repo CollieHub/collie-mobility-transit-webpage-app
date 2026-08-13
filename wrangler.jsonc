@@ -25,5 +25,8 @@
       "binding": "FLEET_KV",
       "id": "6b83a6787fa44af1b84775d95cf729f8"
     }
-  ]
+  ],
+  "ai": {
+    "binding": "AI"
+  }
 }

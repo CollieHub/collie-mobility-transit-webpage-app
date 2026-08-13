@@ -93,24 +93,117 @@ export const getTodayDayLabel = (routeObjToUse?: any, calendarExceptions: any[] 
   const day = now.getDay();
   if (day === 0) return 'Domingos y Feriados';
   if (day === 6) return 'Sábado';
-
   return 'Lunes a Viernes';
+};
+
+const CONTROL_POINT_ALIASES: Record<string, string> = {
+  // RZ01
+  "ameghino": "Burgar",
+  "rio colorado": "Terminal NK",
+  "río colorado": "Terminal NK",
+  "c. 6": "Burgar",
+  
+  // RZ02
+  "escalada": "Escalada",
+  "pitrau": "Lavalle y Pitrau",
+  "perito moreno": "Lavalle y Perito Moreno",
+  "san martin": "San Martín",
+  "san martín": "San Martín",
+  "cencerro": "El Cencerro",
+  "larrea": "Los Ceibos",
+  "ceibos": "Los Ceibos",
+
+  // RZ03
+  "evaristo carriego": "Cementerio",
+  "fonavi": "Fonavi",
+  "3101-3299": "Fonavi",
+
+  // RZ04
+  "tala": "Hospital",
+  "florestano": "Hospital",
+
+  // RZ07 / RZ11
+  "km103": "Km 103",
+  "druvich": "Bº Bosch",
+  "baradero": "Lima",
+  "las palmas": "Las Palmas",
+};
+
+export const cleanControlPointHeader = (raw: string): string => {
+  if (!raw) return '';
+  const cleanedLower = raw.trim().toLowerCase();
+
+  for (const [key, alias] of Object.entries(CONTROL_POINT_ALIASES)) {
+    if (cleanedLower.includes(key)) {
+      return alias;
+    }
+  }
+
+  let cleaned = raw.trim();
+  // Strip PlusCodes like "RVVP+45 " or "87XW+22 "
+  cleaned = cleaned.replace(/^[A-Z0-9]{4,8}\+[A-Z0-9]{2,4}\s*/i, '');
+  // Strip trailing street/house numbers like " 821", " 4807", " 3216"
+  cleaned = cleaned.replace(/\s+\d{1,5}$/, '');
+  return cleaned.trim() || raw;
 };
 
 export default function TimetableModal({ routeCode, onClose, routeData, isLoadingDetail, routeObj, calendarExceptions = [] }: TimetableModalProps) {
   const isMobile = useIsMobile();
   const [activeDirection, setActiveDirection] = useState<'ida' | 'vuelta'>('ida');
 
+  const [internalRouteData, setInternalRouteData] = useState<any>(null);
+  const [internalLoading, setInternalLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if ((routeData && routeData.schedules && Object.keys(routeData.schedules).length > 0) ||
+        (routeObj && routeObj.schedules && Object.keys(routeObj.schedules).length > 0)) {
+      return;
+    }
+
+    const param = routeObj?.id || routeObj?.code || routeCode;
+    if (!param) return;
+
+    setInternalLoading(true);
+    fetch(`/v1/catalog/public/timetables?route_id=${encodeURIComponent(param)}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data && json.data.length > 0) {
+          let consolidated: any = routeObj
+            ? { ...routeObj, schedules: {} }
+            : { id: param, code: param, schedules: {} };
+
+          json.data.forEach((item: any) => {
+            if (item.schedules) {
+              consolidated.schedules = {
+                ...consolidated.schedules,
+                ...item.schedules
+              };
+            }
+          });
+          setInternalRouteData(consolidated);
+        }
+      })
+      .catch(err => console.warn('TimetableModal self-fetch error:', err))
+      .finally(() => setInternalLoading(false));
+  }, [routeCode, routeObj, routeData]);
+
+  const effectiveRouteData = useMemo(() => {
+    if (routeData && routeData.schedules && Object.keys(routeData.schedules).length > 0) return routeData;
+    if (routeObj && routeObj.schedules && Object.keys(routeObj.schedules).length > 0) return routeObj;
+    return internalRouteData;
+  }, [routeData, routeObj, internalRouteData]);
+  const effectiveLoading = isLoadingDetail || (internalLoading && (!effectiveRouteData || !effectiveRouteData.schedules));
+
   const routeObjToUse = useMemo(() => {
     if (routeObj) return routeObj;
-    if (routeData && routeData.route) return routeData.route;
+    if (effectiveRouteData && effectiveRouteData.route) return effectiveRouteData.route;
     return null;
-  }, [routeData, routeObj]);
+  }, [effectiveRouteData, routeObj]);
 
   const data = useMemo(() => {
-    if (routeData) return routeData;
+    if (effectiveRouteData) return effectiveRouteData;
     return routeObjToUse;
-  }, [routeData, routeObjToUse]);
+  }, [effectiveRouteData, routeObjToUse]);
 
   const [dayTypes, setDayTypes] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>(() => {
@@ -220,7 +313,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     return `Línea ${rawCode}`;
   };
 
-  if (isLoadingDetail) {
+  if (effectiveLoading) {
     return (
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -287,8 +380,30 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
 
   const currentIdaTimetables: string[][] = scheduleIda?.rows || scheduleIda?.matrix || [];
   const currentVueltaTimetables: string[][] = scheduleVuelta?.rows || scheduleVuelta?.matrix || [];
-  const idaHeaders: string[] = scheduleIda?.headers || [];
-  const vueltaHeaders: string[] = scheduleVuelta?.headers || [];
+  const rawIdaHeaders: string[] = scheduleIda?.headers || scheduleIda?.aliases || scheduleIda?.addresses || scheduleIda?.stop_addresses || [];
+  const rawVueltaHeaders: string[] = scheduleVuelta?.headers || scheduleVuelta?.aliases || scheduleVuelta?.addresses || scheduleVuelta?.stop_addresses || [];
+
+  const idaHeaders = rawIdaHeaders.map((h: string, i: number) => {
+    const alias = scheduleIda?.aliases?.[i];
+    if (alias && alias.trim() !== '' && !alias.startsWith('stop-') && !alias.startsWith('Punto ')) {
+      return cleanControlPointHeader(alias);
+    }
+    if (h && !h.startsWith('Punto ')) return cleanControlPointHeader(h);
+    const addr = scheduleIda?.addresses?.[i] || scheduleIda?.stop_addresses?.[i];
+    if (addr && !addr.startsWith('Punto ')) return cleanControlPointHeader(addr);
+    return `Punto ${i + 1}`;
+  });
+
+  const vueltaHeaders = rawVueltaHeaders.map((h: string, i: number) => {
+    const alias = scheduleVuelta?.aliases?.[i];
+    if (alias && alias.trim() !== '' && !alias.startsWith('stop-') && !alias.startsWith('Punto ')) {
+      return cleanControlPointHeader(alias);
+    }
+    if (h && !h.startsWith('Punto ')) return cleanControlPointHeader(h);
+    const addr = scheduleVuelta?.addresses?.[i] || scheduleVuelta?.stop_addresses?.[i];
+    if (addr && !addr.startsWith('Punto ')) return cleanControlPointHeader(addr);
+    return `Punto ${i + 1}`;
+  });
 
   const routeSubtitle = routeObjToUse ? (routeObjToUse.title || routeObjToUse.name) : (data?.title || data?.name);
   let originTitle = '';
@@ -503,40 +618,30 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.8)', zIndex: 9999,
+      background: 'rgba(0,0,0,0.75)', zIndex: 9999,
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
       padding: '20px', backdropFilter: 'blur(5px)'
     }}>
       <div style={{
-        background: 'var(--bg-card)',
-        borderRadius: 'var(--radius-lg)',
+        background: '#ffffff',
+        borderRadius: '16px',
         width: '95vw', maxWidth: '1400px', maxHeight: '90vh',
         display: 'flex', flexDirection: 'column',
-        border: '1px solid var(--border)',
+        border: '1px solid #e2e8f0',
         boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
         userSelect: 'none',
         WebkitUserSelect: 'none'
       }}>
         {/* Header */}
         <div style={{
-          padding: '20px', borderBottom: '1px solid var(--border)',
+          padding: '20px', borderBottom: '1px solid #e2e8f0',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Clock size={20} color="var(--accent)" /> Horarios Completos
-              <span style={{ 
-                background: routeObjToUse?.color ? `#${routeObjToUse.color}` : 'var(--accent)', 
-                color: 'white', 
-                padding: '2px 10px', 
-                borderRadius: '6px', 
-                fontSize: '0.85rem',
-                fontWeight: 700 
-              }}>
-                {getDisplayName()}
-              </span>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px', color: '#0f172a' }}>
+              <Clock size={20} color="#0284c7" /> Horarios Completos
             </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0 30px' }}>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '4px 0 0 30px', fontWeight: 500 }}>
               {routeObjToUse ? (routeObjToUse.title || routeObjToUse.name) : (data?.title || data?.name)}
             </p>
           </div>
@@ -546,33 +651,30 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
             {dayTypes.length > 0 && (
               <div style={{ 
                 display: 'flex', alignItems: 'center', gap: '10px', 
-                background: isSelectedException ? '#fff3cd' : 'rgba(0,0,0,0.03)', 
+                background: isSelectedException ? '#fff3cd' : '#f8fafc', 
                 padding: '6px 12px', 
                 borderRadius: '8px', 
-                border: isSelectedException ? '1px solid #ffeeba' : '1px solid var(--border)',
-                color: isSelectedException ? '#856404' : 'inherit'
+                border: isSelectedException ? '1px solid #ffeeba' : '1px solid #e2e8f0',
+                color: isSelectedException ? '#856404' : '#0f172a'
               }}>
-                {isSelectedException ? <span title={activeExceptionMsg}>⚠️</span> : <CalendarDays size={16} color="var(--text-muted)" />}
+                {isSelectedException ? <span title={activeExceptionMsg}>⚠️</span> : <CalendarDays size={16} color="#64748b" />}
                 <select 
                   value={selectedDay}
                   onChange={(e) => setSelectedDay(e.target.value)}
                   style={{
-                    background: 'transparent', border: 'none', color: isSelectedException ? '#856404' : 'var(--text-primary)',
+                    background: 'transparent', border: 'none', color: isSelectedException ? '#856404' : '#0f172a',
                     fontFamily: 'Inter, sans-serif', fontSize: '0.85rem', fontWeight: 600,
                     outline: 'none', cursor: 'pointer', appearance: 'none', paddingRight: '15px'
                   }}
                 >
-                    {dayTypes.map(d => (
-                      <option key={d} value={d}>
-                        {d === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg ? activeExceptionMsg : d}
-                      </option>
-                    ))}
+                  {dayTypes.map(d => (
+                    <option key={d} value={d} style={{ color: '#0f172a', background: '#ffffff' }}>{d}</option>
+                  ))}
                 </select>
-                <span style={{ fontSize: '0.7rem', color: isSelectedException ? '#856404' : 'var(--text-muted)', marginLeft: '-5px', pointerEvents: 'none' }}>⌄</span>
               </div>
             )}
             
-            <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '4px' }}>
+            <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}>
               <X size={20} />
             </button>
           </div>

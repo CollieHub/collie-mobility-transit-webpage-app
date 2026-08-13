@@ -1,6 +1,10 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import { Link, Unlink, Bus, MapPin, Clock, ChevronRight, Layers, LocateFixed, X, Maximize2, ChevronDown, Check, CheckSquare, Square, AlertTriangle, Navigation, Flag, Tag, Star, Search, Eye, EyeOff, Image, Sparkles, RotateCw, Hash, Map, Sliders, Info, Wrench, CloudDownload, Download, Menu, Shield, Bell, BellOff, GitCommit, Radio, Share2 } from 'lucide-react';
 import packageInfo from '../package.json';
+
+// Code-Splitting: Carga diferida del panel de administración
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard'));
+const AdminLogin = lazy(() => import('./components/admin/AdminLogin'));
 // Feature branch transit-enhancements-20260716-v1
 // Feature: transit-enhancements-20260723-v2
 
@@ -24,7 +28,7 @@ const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/ejemplo-canal-configu
 
 import TransitMap from './components/TransitMap';
 import { getApiBaseUrl } from './lib/api/envConfig';
-import TimetableModal from './components/TimetableModal';
+import TimetableModal, { getTodayDayLabel, formatSpecialLabel } from './components/TimetableModal';
 import DraggableBannerCarousel from './components/DraggableBannerCarousel';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
@@ -165,7 +169,7 @@ const originalConsole = {
 
 const hasAdminTokenInitially = () => {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem('collie_admin_token') !== null || localStorage.getItem('developer_bypass') === 'true';
+  return localStorage.getItem('collie_admin_token') !== null || sessionStorage.getItem('collie_admin_token') !== null;
 };
 
 if (!hasAdminTokenInitially()) {
@@ -175,13 +179,77 @@ if (!hasAdminTokenInitially()) {
   console.error = () => {};
 }
 
+/** Transforma los datos crudos del endpoint /timetables en items de schedulesList
+ *  compatibles con simulateBusesLocally. Cada item resultante corresponde a una
+ *  dirección (ida/vuelta) y contiene un array .trips con .times, .service_type, etc. */
+function buildSimulationSchedulesList(rawData: any[]): any[] {
+  // Mapeo de códigos D1 (español) a códigos esperados por simulateBusesLocally
+  const dayTypeMap: Record<string, string> = {
+    'lunes_a_viernes': 'weekday',
+    'sabados': 'saturday',
+    'domingos_feriados': 'sunday_holiday',
+    'domingos': 'sunday_holiday',
+    'feriados': 'sunday_holiday',
+    // Los códigos en inglés pasan tal cual
+    'weekday': 'weekday',
+    'saturday': 'saturday',
+    'sunday': 'sunday_holiday',
+    'sunday_holiday': 'sunday_holiday',
+    'holiday': 'sunday_holiday',
+  };
+
+  const normalizeServiceType = (raw: string): string => {
+    const lower = raw.toLowerCase();
+    if (dayTypeMap[lower]) return dayTypeMap[lower];
+    // Mapeo heurístico para códigos especiales (e.g., "special_lunes_a_viernes_invierno")
+    if (lower.includes('lunes') || lower.includes('weekday') || lower.includes('invierno')) return 'weekday';
+    if (lower.includes('sabado') || lower.includes('saturday')) return 'saturday';
+    if (lower.includes('domingo') || lower.includes('sunday') || lower.includes('feriado') || lower.includes('holiday')) return 'sunday_holiday';
+    return raw; // devolver tal cual para service_types desconocidos (especiales)
+  };
+
+  const result: any[] = [];
+  rawData.forEach((item: any) => {
+    if (item.schedules) {
+      const tripsByDir: Record<string, any[]> = {};
+      Object.entries(item.schedules).forEach(([key, sch]: [string, any]) => {
+        const parts = key.split('_');
+        const direction = parts[parts.length - 1]; // 'ida' or 'vuelta'
+        const rawServiceType = parts.slice(0, -1).join('_'); // 'lunes_a_viernes', 'sabados', etc.
+        const serviceType = normalizeServiceType(rawServiceType);
+        const matrix = (sch as any).matrix || (sch as any).rows || [];
+        if (!tripsByDir[direction]) tripsByDir[direction] = [];
+        matrix.forEach((row: string[], rowIdx: number) => {
+          tripsByDir[direction].push({
+            trip_id: `${key}-${rowIdx + 1}`,
+            service_type: serviceType,
+            direction: direction,
+            direction_id: direction === 'ida' ? '0' : '1',
+            times: row,
+            dispatch_order: rowIdx + 1
+          });
+        });
+      });
+      Object.entries(tripsByDir).forEach(([dir, trips]) => {
+        result.push({
+          ...item,
+          direction: dir,
+          direction_id: dir === 'ida' ? '0' : '1',
+          trips: trips
+        });
+      });
+    } else if (item.trips) {
+      result.push(item);
+    }
+  });
+  return result;
+}
+
 function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [adminToken, setAdminToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('developer_bypass') === 'true') {
-      return 'mock-admin-token';
-    }
-    return localStorage.getItem('collie_admin_token');
+    if (typeof window === 'undefined') return null;
+    return sessionStorage.getItem('collie_admin_token') || localStorage.getItem('collie_admin_token');
   });
 
   const isAdmin = useMemo(() => !!adminToken, [adminToken]);
@@ -191,7 +259,6 @@ function App() {
       console.log = originalConsole.log;
       console.info = originalConsole.info;
       console.warn = originalConsole.warn;
-      console.error = originalConsole.error;
     } else {
       console.log = () => {};
       console.info = () => {};
@@ -199,6 +266,42 @@ function App() {
       console.error = () => {};
     }
   }, [isAdmin]);
+
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const isUrlAdmin = currentPath.startsWith('/admin') || currentPath.startsWith('/login') || currentPath.startsWith('/calendar') || searchParams.get('view') === 'admin' || searchParams.get('admin') === 'true';
+
+  if (isUrlAdmin) {
+    if (!adminToken) {
+      return (
+        <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>🛡️ Cargando Consola Admin...</div>}>
+          <AdminLogin
+            onSuccess={(token) => {
+              setAdminToken(token);
+              localStorage.setItem('collie_admin_token', token);
+            }}
+            onCancel={() => {
+              window.history.pushState({}, '', '/');
+              setCurrentPath('/');
+            }}
+          />
+        </Suspense>
+      );
+    }
+
+    return (
+      <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#0f172a', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif' }}>⚡ Cargando Tablas D1...</div>}>
+        <AdminDashboard
+          onLogout={() => {
+            handleLogout();
+          }}
+          onBackToApp={() => {
+            window.history.pushState({}, '', '/');
+            setCurrentPath('/');
+          }}
+        />
+      </Suspense>
+    );
+  }
 
   // Google Analytics dynamic script injection
   useEffect(() => {
@@ -224,9 +327,16 @@ function App() {
     }
   }, []);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback((e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     localStorage.removeItem('collie_admin_token');
+    sessionStorage.removeItem('collie_admin_token');
     localStorage.removeItem('developer_bypass');
+    sessionStorage.removeItem('developer_bypass');
+    localStorage.removeItem('dev_access');
+    sessionStorage.removeItem('dev_access');
+    setAdminToken(null);
     window.location.href = '/';
   }, []);
 
@@ -259,21 +369,21 @@ function App() {
     return stored !== null ? stored === 'true' : false;
   });
   const [selectBothDirections, setSelectBothDirections] = useState(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return false; // Forzar desactivado para no admin
     }
     const stored = localStorage.getItem('collie_select_both_directions');
     return stored !== null ? stored === 'true' : false;
   });
   const [showStops, setShowStops] = useState(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return true; // Forzar activo para no admin
     }
     const stored = localStorage.getItem('collie_show_stops');
     return stored !== null ? stored === 'true' : true;
   });
   const [showStopProjections, setShowStopProjections] = useState(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return false; // Forzar desactivado para no admin
     }
     const stored = localStorage.getItem('collie_show_stop_projections');
@@ -316,13 +426,13 @@ function App() {
   const [detailedRoutes, setDetailedRoutes] = useState<Record<string, any>>({});
   const [liveBuses, setLiveBuses] = useState<any[]>([]);
   const [showStopSequences, setShowStopSequences] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return false; // Forzar desactivado para no admin
     }
     return false;
   });
   const [showWaypoints, setShowWaypoints] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return false; // Forzar desactivado para no admin
     }
     const stored = localStorage.getItem('collie_show_waypoints');
@@ -565,7 +675,7 @@ function App() {
       setIsBffLoading(true);
       const candidates = [
         getApiBaseUrl(),
-        'http://localhost:6005/v1'
+        import.meta.env.VITE_TRANSIT_API_URL
       ].filter((u): u is string => Boolean(u));
       const uniqueCandidates = Array.from(new Set(candidates));
 
@@ -791,11 +901,11 @@ function App() {
           headers: await getSignedHeaders('GET', '/catalog/public/timetables', token)
         });
         
-        let schedulesData = [];
+        let schedulesData: any[] = [];
         if (resTimetable.ok) {
           const jsonTimetable = await resTimetable.json();
           if (jsonTimetable.success && jsonTimetable.data) {
-            schedulesData = jsonTimetable.data;
+            schedulesData = buildSimulationSchedulesList(jsonTimetable.data);
           }
         }
 
@@ -879,7 +989,7 @@ function App() {
 
   const [focusedRouteBounds, setFocusedRouteBounds] = useState<{ bounds: [number, number][], t: number } | null>(null);
   const [showRouteArrows, setShowRouteArrows] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return true; // Forzar activo para no admin
     }
     const stored = localStorage.getItem('collie_show_route_arrows');
@@ -887,14 +997,14 @@ function App() {
   });
   const [mapStyle, setMapStyle] = useState<'argenmap' | 'cartodb' | 'osm'>('argenmap');
   const [showStartEndMarkers, setShowStartEndMarkers] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return true; // Forzar activo para no admin
     }
     const stored = localStorage.getItem('collie_show_start_end_markers');
     return stored !== null ? stored === 'true' : true;
   });
   const [showVehicleLabels, setShowVehicleLabels] = useState<boolean>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && localStorage.getItem('developer_bypass') !== 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('collie_admin_token') === null && sessionStorage.getItem('collie_admin_token') === null) {
       return true; // Forzar activo para no admin
     }
     const stored = localStorage.getItem('collie_show_vehicle_labels');
@@ -1198,11 +1308,11 @@ function App() {
               headers: await getSignedHeaders('GET', '/catalog/public/timetables', token)
             });
             
-            let schedulesData = [];
+            let schedulesData: any[] = [];
             if (resTimetable.ok) {
               const jsonTimetable = await resTimetable.json();
               if (jsonTimetable.success && jsonTimetable.data) {
-                schedulesData = jsonTimetable.data;
+                schedulesData = buildSimulationSchedulesList(jsonTimetable.data);
               }
             }
 
@@ -1910,7 +2020,7 @@ function App() {
           onClick={() => {
             if (devPassword === 'collie2026') {
               localStorage.setItem('dev_access', 'true');
-              setDevAccess(true);
+          setDevAccess(true);
             } else {
               alert('Contraseña incorrecta');
             }
@@ -1923,16 +2033,171 @@ function App() {
     );
   }
 
+  const isRowActiveNow = (row: string[]) => {
+    if (!Array.isArray(row)) return false;
+    const validTimes = row.filter((t: any) => typeof t === 'string' && t.trim() !== '' && t.includes(':'));
+    if (validTimes.length < 2) return false;
+    
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    
+    const parseToMinutes = (timeStr: string) => {
+      const parts = timeStr.trim().split(':').map(Number);
+      return (parts[0] || 0) * 60 + (parts[1] || 0);
+    };
+    
+    const startMinutes = parseToMinutes(validTimes[0]);
+    const endMinutes = parseToMinutes(validTimes[validTimes.length - 1]);
+    
+    if (endMinutes < startMinutes) {
+      return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+    }
+    
+    return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+  };
 
+  const matchDayType = (s: string, t: string) => {
+    if (!s || !t) return false;
+    s = s.toLowerCase();
+    t = t.toLowerCase();
+    if (s === t) return true;
+    if (s.includes('lunes') && t.includes('lunes')) return true;
+    if (s.includes('sab') && t.includes('sab')) return true;
+    if ((s.includes('domingo') || s.includes('feriado')) && (t.includes('domingo') || t.includes('feriado'))) return true;
+    return false;
+  };
+
+  const getScheduleActiveCount = (route: any, direction?: 'ida' | 'vuelta') => {
+    if (!route) return 0;
+    
+    const todayLabel = getTodayDayLabel(route, calendarExceptions);
+    let targetCode = 'lunes_a_viernes';
+    if (todayLabel === 'Lunes a Viernes') targetCode = 'lunes_a_viernes';
+    else if (todayLabel === 'Sábado' || todayLabel === 'Sábados') targetCode = 'sabados';
+    else if (todayLabel === 'Domingos y Feriados') targetCode = 'domingos_feriados';
+    else if (todayLabel.startsWith('Especial')) targetCode = 'especial';
+
+    const countForDir = (dir: 'ida' | 'vuelta') => {
+      let dirCount = 0;
+      if (route.schedules && typeof route.schedules === 'object') {
+        const keysToTry = [
+          `${targetCode}_${dir}`,
+          `weekday_${dir}`,
+          `saturday_${dir}`,
+          `sunday_holiday_${dir}`,
+          `sunday_${dir}`
+        ];
+        let sch = null;
+        for (const k of keysToTry) {
+          if (route.schedules[k]) {
+            sch = route.schedules[k];
+            break;
+          }
+        }
+        if (!sch) {
+          for (const [k, s] of Object.entries(route.schedules) as [string, any][]) {
+            if (!s) continue;
+            if (s.direction === dir || k.endsWith(`_${dir}`)) {
+              const formatted = formatSpecialLabel(s.dayTypeName || s.dayType || s.dayTypesId || k);
+              if (formatted === todayLabel) {
+                sch = s;
+                break;
+              }
+            }
+          }
+        }
+        if (sch) {
+          const rows: string[][] = sch.rows || sch.matrix || (sch.trips ? sch.trips.map((t: any) => t.times) : []);
+          if (Array.isArray(rows)) {
+            dirCount += rows.filter(isRowActiveNow).length;
+          }
+        }
+      }
+
+      if (dirCount === 0 && Array.isArray(route.schedulesList)) {
+        route.schedulesList.forEach((sch: any) => {
+          const schDir = sch.direction || (sch.direction_id === '0' || sch.direction_id === 0 ? 'ida' : 'vuelta');
+          if (schDir === dir) {
+            const schDay = sch.service_type || sch.day_types_code || sch.dayType || '';
+            if (matchDayType(schDay, todayLabel) || schDay === '' || route.schedulesList.length === 1) {
+              const trips = sch.trips || [];
+              trips.forEach((t: any) => {
+                if (t.times && Array.isArray(t.times)) {
+                  if (isRowActiveNow(t.times)) dirCount++;
+                }
+              });
+            }
+          }
+        });
+      }
+
+      return dirCount;
+    };
+
+    if (direction) {
+      return countForDir(direction);
+    }
+
+    return countForDir('ida') + countForDir('vuelta');
+  };
+
+  const isBusMatchingDirection = (bus: any, dir: 'ida' | 'vuelta') => {
+    if (!bus || !dir) return false;
+    const bDir = String(bus.dir || bus.direction || '').toLowerCase();
+    if (bDir === 'ida' || bDir === 'vuelta') return bDir === dir;
+    if (bus.direction_id !== undefined) {
+      return dir === 'ida' ? bus.direction_id === 0 : bus.direction_id === 1;
+    }
+    return true;
+  };
+
+  const isBusMatchingRoute = (bus: any, route: any) => {
+    if (!bus || !route) return false;
+    const busRouteId = String(bus.routeId || bus.route_id || bus.branch_id || bus.branchId || '').toLowerCase();
+    const routeId = String(route.id || '').toLowerCase();
+    if (routeId && busRouteId && (busRouteId === routeId || busRouteId === `route-${routeId}`)) return true;
+
+    const busCode = String(bus.code || bus.route_code || bus.route_short_name || bus.short_name || '').toUpperCase().trim();
+    const routeCode = String(route.code || route.short_name || '').toUpperCase().trim();
+    if (routeCode && busCode && (busCode === routeCode || busCode.startsWith(routeCode) || routeCode.startsWith(busCode))) return true;
+
+    return false;
+  };
+
+  const isBusMatchingLine = (bus: any, lineName: string, lineRoutes: any[]) => {
+    if (!bus) return false;
+    if (Array.isArray(lineRoutes) && lineRoutes.some((r: any) => isBusMatchingRoute(bus, r))) return true;
+
+    const busLine = String(bus.line || bus.line_id || bus.lineId || bus.line_code || bus.agency_id || bus.agencyId || '').toUpperCase().trim();
+    const lineClean = String(lineName || '').replace(/\s*\([Tt]ransporte\s+local\)/gi, '').toUpperCase().trim();
+    if (busLine && lineClean && (busLine.includes(lineClean) || lineClean.includes(busLine))) return true;
+
+    return false;
+  };
+
+  const getRouteActiveUnitsCount = (route: any, direction?: 'ida' | 'vuelta') => {
+    if (!route) return 0;
+    const serverVal = direction 
+      ? (direction === 'ida' ? route.active_units_ida : route.active_units_vuelta) 
+      : route.active_units_count;
+    if (direction) {
+      const gpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isBusMatchingDirection(bus, direction)).length;
+      const schCount = getScheduleActiveCount(route, direction);
+      return Math.max(gpsCount, schCount, serverVal || 0);
+    }
+    const gpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route)).length;
+    const schCount = getScheduleActiveCount(route);
+    return Math.max(gpsCount, schCount, serverVal || 0);
+  };
 
   const renderRouteCard = (route: any, idx: number) => {
     const isRouteSelected = selectedRouteIds.has(route.id);
     const isFavorite = favorites.has(route.id);
     const isVisible = visibleRouteIds.has(route.id);
-    const routeBusesCount = liveBuses.filter((bus: any) => bus.routeId === route.id || bus.code === route.code).length;
+    const routeBusesCount = getRouteActiveUnitsCount(route);
     const isRealGpsBus = (bus: any) => bus && (bus.isGps === true || bus.is_gps === true) && bus.isSimulated !== true && bus.is_simulated !== true && !bus.id?.startsWith('sim-') && !bus.originalId?.startsWith('sim-');
-    const routeMatchedGpsCount = liveBuses.filter((bus: any) => (bus.routeId === route.id || bus.code === route.code) && isRealGpsBus(bus)).length;
-    const routeTotalGpsCount = liveBuses.filter((bus: any) => (bus.routeId === route.id || bus.code === route.code) && isRealGpsBus(bus)).length;
+    const routeMatchedGpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isRealGpsBus(bus)).length;
+    const routeTotalGpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isRealGpsBus(bus)).length;
     const routeGpsText = isAdmin ? `${routeMatchedGpsCount}/${routeTotalGpsCount} GPS` : `${routeMatchedGpsCount > 0 ? routeMatchedGpsCount : routeTotalGpsCount} GPS`;
     const routeGpsStyle = routeTotalGpsCount === 0 
       ? { bg: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }
@@ -2029,7 +2294,7 @@ function App() {
 
               // REGLA 4: Si se informa "fuera de servicio" (INTERRUPTED) y hay colectivos con GPS transmitiendo en vivo para esta línea,
               // se acomoda la notificación a "NORMAL".
-              const activeGpsBusesCount = liveBuses.filter((bus: any) => (bus.routeId === route.id || bus.code === route.code) && (bus.isGps || bus.hasRealGpsMatch || bus.isCuandoSubo || bus.gps_source)).length;
+              const activeGpsBusesCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && (bus.isGps || bus.hasRealGpsMatch || bus.isCuandoSubo || bus.gps_source)).length;
               if (status === 'INTERRUPTED' && activeGpsBusesCount > 0) {
                 status = 'NORMAL';
               }
@@ -2143,7 +2408,7 @@ function App() {
                 const isStopsVisible = d.direction === 'ida' ? (routeStopsIda[route.id] ?? false) : (routeStopsVuelta[route.id] ?? false);
                 const isIda = d.direction === 'ida';
                 const dotColor = isIda ? '#3b82f6' : '#a855f7';
-                const routeDirectionBusesCount = liveBuses.filter((bus: any) => (bus.routeId === route.id || bus.code === route.code) && bus.dir === d.direction).length;
+                const routeDirectionBusesCount = getRouteActiveUnitsCount(route, d.direction as 'ida' | 'vuelta');
                 let targetDest = d.destination || d.headsign || (d.stops && d.stops.length > 0 ? d.stops[d.stops.length - 1]?.name : null);
                 const routeTitle = route.title || route.name || '';
                 if (routeTitle && (routeTitle.includes('-') || routeTitle.includes('–') || routeTitle.includes('—'))) {
@@ -2633,12 +2898,12 @@ function App() {
           const total = routes.length;
           const active = routes.filter((r: any) => selectedRouteIds.has(r.id)).length;
           
-          const lineRouteIds = routes.map((r: any) => r.id);
-          const lineRouteCodes = routes.map((r: any) => r.code);
-          const activeBusesCount = liveBuses.filter((bus: any) => lineRouteIds.includes(bus.routeId) || lineRouteCodes.includes(bus.code)).length;
+          const lineGpsCount = liveBuses.filter((bus: any) => isBusMatchingLine(bus, line, routes)).length;
+          const lineSchCount = routes.reduce((acc: number, r: any) => acc + getScheduleActiveCount(r), 0);
+          const activeBusesCount = Math.max(lineGpsCount, lineSchCount);
           const lineIsRealGpsBus = (bus: any) => bus && (bus.isGps === true || bus.is_gps === true) && bus.isSimulated !== true && bus.is_simulated !== true && !bus.id?.startsWith('sim-') && !bus.originalId?.startsWith('sim-');
-          const lineMatchedGpsCount = liveBuses.filter((bus: any) => (lineRouteIds.includes(bus.routeId) || lineRouteCodes.includes(bus.code)) && lineIsRealGpsBus(bus)).length;
-          const lineTotalGpsCount = liveBuses.filter((bus: any) => (lineRouteIds.includes(bus.routeId) || lineRouteCodes.includes(bus.code)) && lineIsRealGpsBus(bus)).length;
+          const lineMatchedGpsCount = liveBuses.filter((bus: any) => isBusMatchingLine(bus, line, routes) && lineIsRealGpsBus(bus)).length;
+          const lineTotalGpsCount = liveBuses.filter((bus: any) => isBusMatchingLine(bus, line, routes) && lineIsRealGpsBus(bus)).length;
           const lineGpsText = isAdmin ? `${lineMatchedGpsCount}/${lineTotalGpsCount} GPS` : `${lineMatchedGpsCount > 0 ? lineMatchedGpsCount : lineTotalGpsCount} GPS`;
           const lineGpsStyle = lineTotalGpsCount === 0 
             ? { bg: 'rgba(239, 68, 68, 0.12)', color: '#ef4444' }
@@ -5098,9 +5363,9 @@ function App() {
   );
 }
 
-// Caché en Memoria del Cliente (10 minutos / 600.000 ms)
+// Caché en Memoria del Cliente (30 segundos)
 const TIMETABLE_CLIENT_CACHE: Record<string, { data: any; timestamp: number }> = {};
-const CLIENT_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutos
+const CLIENT_CACHE_TTL_MS = 30 * 1000; // 30 segundos
 
 function getClientCachedTimetable(cacheKey: string) {
   const entry = TIMETABLE_CLIENT_CACHE[cacheKey];

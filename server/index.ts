@@ -4,6 +4,10 @@ import { cors } from 'hono/cors';
 type Bindings = {
   DB: D1Database;
   FLEET_KV: KVNamespace;
+  AI?: any;
+  AWS_ACCESS_KEY_ID?: string;
+  AWS_SECRET_ACCESS_KEY?: string;
+  AWS_REGION?: string;
   ASSETS?: { fetch: (req: Request) => Promise<Response> };
 };
 
@@ -26,6 +30,41 @@ app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 // Ads Endpoint
 app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
 
+// Helper para verificar si la petición proviene de un Admin logueado
+function isUserAdminRequest(c: any): boolean {
+  const authHeader = c.req.header('authorization') || c.req.header('Authorization') || '';
+  const adminHeader = c.req.header('x-admin-token') || c.req.header('x-admin-session') || '';
+  const adminQuery = c.req.query('admin');
+  
+  if (adminQuery === 'true' || adminQuery === '1') return true;
+  if (adminHeader && adminHeader.trim().length > 0) return true;
+  if (authHeader.startsWith('Bearer ') && authHeader.length > 15) return true;
+  
+  return false;
+}
+
+// Helper para asegurar la existencia de los 3 estados de publicación (Publicado, Borrador, No Publicado) en D1
+async function ensurePublicationStatuses(db: any) {
+  if (!db) return;
+  try {
+    await db.prepare(`
+      INSERT OR IGNORE INTO line_publication_statuses (id, code, name, description, color, display_order)
+      VALUES 
+        ('lpub_published', 'published', 'Publicado', 'Línea visible públicamente', '#10B981', 1),
+        ('lpub_draft', 'draft', 'Borrador', 'Línea visible únicamente para Admin logueado', '#F59E0B', 2),
+        ('lpub_unpublished', 'unpublished', 'No Publicado', 'Línea oculta para todos', '#EF4444', 3)
+    `).run();
+
+    await db.prepare(`
+      INSERT OR IGNORE INTO branch_publication_statuses (id, code, name, description, color, display_order)
+      VALUES 
+        ('bpub_published', 'published', 'Publicado', 'Ramal visible públicamente', '#10B981', 1),
+        ('bpub_draft', 'draft', 'Borrador', 'Ramal visible únicamente para Admin logueado', '#F59E0B', 2),
+        ('bpub_unpublished', 'unpublished', 'No Publicado', 'Ramal oculto para todos', '#EF4444', 3)
+    `).run();
+  } catch (_) {}
+}
+
 // Helper para obtener la versión actual de la caché (invalida instantáneamente todo al cambiar de versión)
 async function getCacheVersion(kv: any): Promise<string> {
   if (!kv) return 'v1';
@@ -35,6 +74,16 @@ async function getCacheVersion(kv: any): Promise<string> {
   } catch (_) {
     return 'v1';
   }
+}
+
+async function purgeKvCache(kv: any) {
+  if (!kv) return;
+  try {
+    const currentV = await getCacheVersion(kv);
+    const versionNum = parseInt(currentV.replace('v', ''), 10) || 1;
+    const newVersion = `v${versionNum + 1}`;
+    await kv.put('cache:global:version', newVersion);
+  } catch (_) {}
 }
 
 // Endpoint de Purga / Invalidation de Caché del Servidor
@@ -67,8 +116,10 @@ app.get('/v1/admin/cache/purge', handleCachePurge);
 // 1. Líneas / Empresas públicas (Retorna las empresas reales disponibles en D1) + Caché KV (15 min)
 app.get('/v1/catalog/public/lines', async (c) => {
   try {
+    await ensurePublicationStatuses(c.env.DB);
+    const isAdmin = isUserAdminRequest(c);
     const v = await getCacheVersion(c.env.FLEET_KV);
-    const cacheKey = `cache:${v}:lines`;
+    const cacheKey = `cache:${v}:lines:admin_${isAdmin}`;
 
     if (c.env.FLEET_KV) {
       try {
@@ -81,9 +132,24 @@ app.get('/v1/catalog/public/lines', async (c) => {
       } catch (_) {}
     }
 
-    const companiesRes = await c.env.DB.prepare("SELECT DISTINCT company FROM branches WHERE company IS NOT NULL AND company != '' ORDER BY company ASC").all();
-    const companies = companiesRes.results.map((r: any) => r.company);
-    const payload = { success: true, lines: companies.length > 0 ? companies : ['SIT'] };
+    const lineFilter = isAdmin
+      ? "(l.line_publication_statuses_id IS NULL OR l.line_publication_statuses_id != 'lpub_unpublished')"
+      : "(l.line_publication_statuses_id IS NULL OR (l.line_publication_statuses_id != 'lpub_unpublished' AND l.line_publication_statuses_id != 'lpub_draft'))";
+
+    const branchFilter = isAdmin
+      ? "(b.id IS NULL OR b.branch_publication_statuses_id IS NULL OR b.branch_publication_statuses_id != 'bpub_unpublished')"
+      : "(b.id IS NULL OR b.branch_publication_statuses_id IS NULL OR (b.branch_publication_statuses_id != 'bpub_unpublished' AND b.branch_publication_statuses_id != 'bpub_draft'))";
+
+    const companiesRes = await c.env.DB.prepare(`
+      SELECT DISTINCT COALESCE(NULLIF(l.code, ''), b.company) as line_code
+      FROM lines l
+      LEFT JOIN branches b ON b.line_id = l.id
+      WHERE ${lineFilter}
+        AND ${branchFilter}
+      ORDER BY line_code ASC
+    `).all();
+    const companies = companiesRes.results.map((r: any) => r.line_code).filter(Boolean);
+    const payload = { success: true, lines: companies };
 
     if (c.env.FLEET_KV) {
       try {
@@ -102,11 +168,13 @@ app.get('/v1/catalog/public/lines', async (c) => {
 // 2. Data completa del catálogo (Routes, Shapes, Stops) + Caché KV (15 min)
 app.get('/v1/catalog/public/data', async (c) => {
   try {
+    await ensurePublicationStatuses(c.env.DB);
+    const isAdmin = isUserAdminRequest(c);
     const idsParam = c.req.query('ids') || '';
     const companyParam = c.req.query('company') || '';
 
     const v = await getCacheVersion(c.env.FLEET_KV);
-    const cacheKey = `cache:${v}:data:${idsParam.trim()}:${companyParam.trim()}`;
+    const cacheKey = `cache:${v}:data_v3:admin_${isAdmin}:${idsParam.trim()}:${companyParam.trim()}`;
 
     if (c.env.FLEET_KV) {
       try {
@@ -119,32 +187,141 @@ app.get('/v1/catalog/public/data', async (c) => {
       } catch (_) {}
     }
 
+    const branchFilter = isAdmin
+      ? "(b.branch_publication_statuses_id IS NULL OR b.branch_publication_statuses_id != 'bpub_unpublished')"
+      : "(b.branch_publication_statuses_id IS NULL OR (b.branch_publication_statuses_id != 'bpub_unpublished' AND b.branch_publication_statuses_id != 'bpub_draft'))";
+
+    const lineFilter = isAdmin
+      ? "(l.line_publication_statuses_id IS NULL OR l.line_publication_statuses_id != 'lpub_unpublished')"
+      : "(l.line_publication_statuses_id IS NULL OR (l.line_publication_statuses_id != 'lpub_unpublished' AND l.line_publication_statuses_id != 'lpub_draft'))";
+
     let branchesQuery = `
       SELECT b.id as branch_id, b.code as branch_code, b.name as branch_name, b.company as branch_company, b.description,
-             l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color, l.jurisdiction,
-             bs.code as status_code, bs.name as status_name, bs.color as status_color
+             b.display_order as branch_display_order, b.branch_colors_id, b.branch_publication_statuses_id,
+             l.id as line_id, l.code as line_code, l.name as line_name, l.color as line_color, l.jurisdiction, l.line_publication_statuses_id,
+             bs.code as status_code, bs.name as status_name, bs.color as status_color,
+             bc.code_hexa as explicit_branch_color,
+             bc_by_order.code_hexa as order_branch_color
       FROM branches b
       JOIN lines l ON b.line_id = l.id
       LEFT JOIN branch_statuses bs ON b.branch_statuses_id = bs.id
+      LEFT JOIN branch_colors bc ON b.branch_colors_id = bc.id
+      LEFT JOIN branch_colors bc_by_order ON b.display_order = bc_by_order.display_order
+      WHERE ${branchFilter}
+        AND ${lineFilter}
     `;
     let params: any[] = [];
 
     if (idsParam) {
       const idsList = idsParam.split(',').map(s => s.trim()).filter(Boolean);
-      branchesQuery += ` WHERE b.id IN (${idsList.map(() => '?').join(',')}) OR b.code IN (${idsList.map(() => '?').join(',')}) OR l.id IN (${idsList.map(() => '?').join(',')})`;
+      branchesQuery += ` AND (b.id IN (${idsList.map(() => '?').join(',')}) OR b.code IN (${idsList.map(() => '?').join(',')}) OR l.id IN (${idsList.map(() => '?').join(',')}))`;
       params = [...idsList, ...idsList, ...idsList];
     } else if (companyParam && companyParam.toUpperCase() !== 'ALL') {
       const filter = `%${companyParam.trim()}%`;
-      branchesQuery += ` WHERE b.company LIKE ? OR l.company LIKE ?`;
+      branchesQuery += ` AND (b.company LIKE ? OR l.company LIKE ?)`;
       params = [filter, filter];
     }
 
-    branchesQuery += ' ORDER BY l.code ASC, b.code ASC';
+    branchesQuery += ' ORDER BY l.code ASC, b.display_order ASC, b.code ASC';
 
     const branchesRes = await c.env.DB.prepare(branchesQuery).bind(...params).all();
     const branches = branchesRes.results;
 
+    const activeUnitsSummary = await getOrComputeActiveUnitsSummary(c.env).catch(() => null);
+
+    // Cargar horarios (schedules & schedule_items) para todos los ramales del catálogo
+    const branchIds = branches.map((b: any) => b.branch_id);
+    const branchSchedulesMap: Record<string, Record<string, any>> = {};
+    const branchSchedulesListMap: Record<string, any[]> = {};
+
+    if (branchIds.length > 0) {
+      const placeholders = branchIds.map(() => '?').join(',');
+      const schRes = await c.env.DB.prepare(
+        `SELECT s.*, b.id as branch_id, dt.code as day_type_code, dt.name as day_type_name
+         FROM schedules s
+         JOIN branches b ON s.branch_id = b.id
+         JOIN day_types dt ON s.day_types_id = dt.id
+         WHERE s.branch_id IN (${placeholders})`
+      ).bind(...branchIds).all();
+
+      const schedulesList = schRes.results || [];
+
+      if (schedulesList.length > 0) {
+        const scheduleIds = schedulesList.map((s: any) => s.id);
+        const schPlaceholders = scheduleIds.map(() => '?').join(',');
+
+        const itemsRes = await c.env.DB.prepare(
+          `SELECT si.* FROM schedule_items si WHERE si.schedule_id IN (${schPlaceholders}) ORDER BY si.dispatch_order ASC`
+        ).bind(...scheduleIds).all();
+
+        const itemsList = itemsRes.results || [];
+        const itemsByScheduleId: Record<string, any[]> = {};
+        itemsList.forEach((item: any) => {
+          if (!itemsByScheduleId[item.schedule_id]) {
+            itemsByScheduleId[item.schedule_id] = [];
+          }
+          itemsByScheduleId[item.schedule_id].push(item);
+        });
+
+        schedulesList.forEach((row: any) => {
+          const branchId = row.branch_id;
+          if (!branchSchedulesMap[branchId]) {
+            branchSchedulesMap[branchId] = {};
+            branchSchedulesListMap[branchId] = [];
+          }
+
+          const dayTypeCode = row.day_type_code || row.day_types_id;
+          const dirType = row.direction || 'ida';
+          const key = `${dayTypeCode}_${dirType}`;
+
+          let defaultHeaders: string[] = ['Salida'];
+          if (row.headers_json) {
+            try { defaultHeaders = JSON.parse(row.headers_json); } catch (_) {}
+          }
+
+          const items = itemsByScheduleId[row.id] || [];
+          const matrix: string[][] = [];
+
+          items.forEach((item: any) => {
+            let tripTimes: string[] = [];
+            if (item.trip_times_json) {
+              try { tripTimes = JSON.parse(item.trip_times_json); } catch (_) {}
+            }
+            if (!tripTimes || tripTimes.length === 0) {
+              if (item.departure_time) tripTimes = [item.departure_time];
+            }
+            if (tripTimes.length > 0) {
+              matrix.push(tripTimes);
+            }
+          });
+
+          const schObj = {
+            id: row.id,
+            dayType: dayTypeCode,
+            dayTypesId: row.day_types_id,
+            dayTypeName: row.day_type_name,
+            direction: dirType,
+            headers: defaultHeaders,
+            matrix: matrix,
+            rows: matrix
+          };
+
+          branchSchedulesMap[branchId][key] = schObj;
+          branchSchedulesListMap[branchId].push({
+            id: row.id,
+            direction: dirType,
+            direction_id: dirType === 'ida' ? '0' : '1',
+            service_type: dayTypeCode,
+            dayType: dayTypeCode,
+            trips: matrix.map(rowTimes => ({ times: rowTimes }))
+          });
+        });
+      }
+    }
+
     const routes = await Promise.all(branches.map(async (b: any) => {
+      const branchColor = b.explicit_branch_color || b.order_branch_color || b.line_color || '#10B981';
+
       // Shapes / Trazados
       const shapesRes = await c.env.DB.prepare('SELECT * FROM route_shapes WHERE branch_id = ?').bind(b.branch_id).all();
       const directions = shapesRes.results.map((s: any) => ({
@@ -165,27 +342,43 @@ app.get('/v1/catalog/public/data', async (c) => {
         proj_lng: st.proj_lng,
         direction: st.direction,
         order: st.stop_order,
-        color: b.line_color,
+        color: branchColor,
         code: b.branch_code,
         stop_group_id: st.stop_group_id || null
       }));
+
+      const routeActiveInfo = activeUnitsSummary?.by_route?.[b.branch_id] || activeUnitsSummary?.by_route?.[b.branch_code] || { active_units: 0, ida: 0, vuelta: 0 };
+      const isPublished = (b.branch_publication_statuses_id === 'bpub_published' || !b.branch_publication_statuses_id) && 
+                          (b.line_publication_statuses_id === 'lpub_published' || !b.line_publication_statuses_id);
 
       return {
         id: b.branch_id,
         code: b.branch_code,
         name: b.branch_name,
-        color: b.line_color,
+        color: branchColor,
         company: b.branch_company || 'SIT',
         jurisdiction: b.jurisdiction,
         status_code: b.status_code || 'active',
         status_name: b.status_name || 'Activo / Normal',
         status_color: b.status_color || '#10B981',
+        branch_publication_statuses_id: b.branch_publication_statuses_id || 'bpub_published',
+        line_publication_statuses_id: b.line_publication_statuses_id || 'lpub_published',
+        is_published: isPublished,
+        active_units_count: routeActiveInfo.active_units,
+        active_units_ida: routeActiveInfo.ida,
+        active_units_vuelta: routeActiveInfo.vuelta,
         directions,
-        stops
+        stops,
+        schedules: branchSchedulesMap[b.branch_id] || {},
+        schedulesList: branchSchedulesListMap[b.branch_id] || []
       };
     }));
 
-    const payload = { success: true, routes };
+    const payload = { 
+      success: true, 
+      routes,
+      active_units_summary: activeUnitsSummary
+    };
 
     if (c.env.FLEET_KV) {
       try {
@@ -204,10 +397,12 @@ app.get('/v1/catalog/public/data', async (c) => {
 // 2b. Grupos de Paradas Unificadas / Estaciones (Stop Groups) + Caché KV (15 min)
 app.get('/v1/catalog/public/stop_groups', async (c) => {
   try {
+    await ensurePublicationStatuses(c.env.DB);
+    const isAdmin = isUserAdminRequest(c);
     const includeDisabled = c.req.query('include_disabled') === 'true';
 
     const v = await getCacheVersion(c.env.FLEET_KV);
-    const cacheKey = `cache:${v}:stop_groups:${includeDisabled}`;
+    const cacheKey = `cache:${v}:stop_groups:admin_${isAdmin}:${includeDisabled}`;
 
     if (c.env.FLEET_KV) {
       try {
@@ -229,6 +424,14 @@ app.get('/v1/catalog/public/stop_groups', async (c) => {
     const stopGroupsRes = await c.env.DB.prepare(query).all();
     const stop_groups = stopGroupsRes.results;
 
+    const branchFilter = isAdmin
+      ? "(b.branch_publication_statuses_id IS NULL OR b.branch_publication_statuses_id != 'bpub_unpublished')"
+      : "(b.branch_publication_statuses_id IS NULL OR (b.branch_publication_statuses_id != 'bpub_unpublished' AND b.branch_publication_statuses_id != 'bpub_draft'))";
+
+    const lineFilter = isAdmin
+      ? "(l.line_publication_statuses_id IS NULL OR l.line_publication_statuses_id != 'lpub_unpublished')"
+      : "(l.line_publication_statuses_id IS NULL OR (l.line_publication_statuses_id != 'lpub_unpublished' AND l.line_publication_statuses_id != 'lpub_draft'))";
+
     const enrichedStopGroups = await Promise.all(stop_groups.map(async (sg: any) => {
       const detailsRes = await c.env.DB.prepare('SELECT * FROM stop_group_details WHERE stop_group_id = ? ORDER BY display_order ASC').bind(sg.id).all();
 
@@ -240,6 +443,8 @@ app.get('/v1/catalog/public/stop_groups', async (c) => {
         JOIN branches b ON s.branch_id = b.id
         JOIN lines l ON b.line_id = l.id
         WHERE s.stop_group_id = ?
+          AND ${branchFilter}
+          AND ${lineFilter}
         ORDER BY l.code ASC, b.code ASC
       `).bind(sg.id).all();
 
@@ -294,16 +499,59 @@ function resolveCurrentDayType(nowDate = new Date()) {
   };
 }
 
+async function resolveCurrentDayTypeAsync(db?: any, company = 'SIT', nowDate = new Date()) {
+  const dateStr = nowDate.toISOString().split('T')[0];
+
+  if (db) {
+    try {
+      // 1. Revisar si hay una Excepción de Calendario configurada para esta fecha
+      const excRes = await db.prepare(`
+        SELECT override_day_type, description FROM calendar_exceptions
+        WHERE date = ? AND (company = ? OR company = 'all')
+        ORDER BY CASE WHEN company = ? THEN 1 ELSE 2 END
+        LIMIT 1
+      `).bind(dateStr, company, company).first();
+
+      if (excRes && excRes.override_day_type) {
+        const override = excRes.override_day_type;
+        if (override === 'saturday' || override === 'sabados') {
+          return { code: 'sabados', name: 'Sábado (Excepción)', id: '26453d08-1d87-57ea-910e-1e14de95a162' };
+        } else if (override === 'sunday' || override === 'domingos_feriados') {
+          return { code: 'domingos_feriados', name: 'Domingos y Feriados (Excepción)', id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e' };
+        } else if (override === 'weekday' || override === 'lunes_a_viernes') {
+          return { code: 'lunes_a_viernes', name: 'Lunes a Viernes (Excepción)', id: '88f18fc3-ba8e-521a-a093-07db0825cf3a' };
+        } else {
+          return { code: override, name: `Excepción (${override})`, id: override };
+        }
+      }
+
+      // 2. Revisar si la fecha es un Feriado Nacional en la tabla holidays
+      const holRes = await db.prepare('SELECT name, type FROM holidays WHERE date = ?').bind(dateStr).first();
+      if (holRes) {
+        return {
+          code: 'domingos_feriados',
+          name: `Feriado (${holRes.name})`,
+          id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e'
+        };
+      }
+    } catch (_) {}
+  }
+
+  return resolveCurrentDayType(nowDate);
+}
+
 // 3. Horarios (Schedules & Schedule Items) Multicolumna con Puntos Intermedios + Caché KV (15 min)
 app.get('/v1/catalog/public/timetables', async (c) => {
   try {
+    await ensurePublicationStatuses(c.env.DB);
+    const isAdmin = isUserAdminRequest(c);
     const routeId = c.req.query('route_id');
     if (!routeId) {
       return c.json({ success: false, error: 'route_id query parameter is required' }, 400);
     }
 
     const v = await getCacheVersion(c.env.FLEET_KV);
-    const cacheKey = `cache:${v}:timetable:${routeId.trim().toLowerCase()}`;
+    const cacheKey = `cache:${v}:timetable:admin_${isAdmin}:${routeId.trim().toLowerCase()}`;
 
     // 1. Intentar responder desde Cloudflare KV (Caché servidor global 15 min)
     if (c.env.FLEET_KV) {
@@ -317,9 +565,24 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       } catch (_) {}
     }
 
+    const branchFilter = isAdmin
+      ? "(b.branch_publication_statuses_id IS NULL OR b.branch_publication_statuses_id != 'bpub_unpublished')"
+      : "(b.branch_publication_statuses_id IS NULL OR (b.branch_publication_statuses_id != 'bpub_unpublished' AND b.branch_publication_statuses_id != 'bpub_draft'))";
+
+    const lineFilter = isAdmin
+      ? "(l.line_publication_statuses_id IS NULL OR l.line_publication_statuses_id != 'lpub_unpublished')"
+      : "(l.line_publication_statuses_id IS NULL OR (l.line_publication_statuses_id != 'lpub_unpublished' AND l.line_publication_statuses_id != 'lpub_draft'))";
+
     const upperRouteId = routeId.trim().toUpperCase();
     const schRes = await c.env.DB.prepare(
-      'SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name FROM schedules s JOIN branches b ON s.branch_id = b.id JOIN day_types dt ON s.day_types_id = dt.id WHERE b.id = ? OR b.line_id = ? OR b.code = ? OR b.code = ?'
+      `SELECT s.*, b.code as branch_code, dt.code as day_type_code, dt.name as day_type_name 
+       FROM schedules s 
+       JOIN branches b ON s.branch_id = b.id 
+       JOIN lines l ON b.line_id = l.id 
+       JOIN day_types dt ON s.day_types_id = dt.id 
+       WHERE (b.id = ? OR b.line_id = ? OR b.code = ? OR b.code = ?)
+         AND ${branchFilter}
+         AND ${lineFilter}`
     ).bind(routeId, routeId, routeId, upperRouteId).all();
 
     const schedulesList = schRes.results || [];
@@ -401,7 +664,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       });
     }
 
-    const currentDayTypeInfo = resolveCurrentDayType();
+    const currentDayTypeInfo = await resolveCurrentDayTypeAsync(c.env.DB);
     let dayTypesList: any[] = [];
     try {
       const dtRes = await c.env.DB.prepare('SELECT id, code, name, description, display_order, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC').all();
@@ -461,7 +724,7 @@ app.get('/v1/catalog/public/day_types', async (c) => {
       ? 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types ORDER BY display_order ASC'
       : 'SELECT id, code, name, description, display_order, aws_schedule_type_prefix, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC';
 
-    const currentDayTypeInfo = resolveCurrentDayType();
+    const currentDayTypeInfo = await resolveCurrentDayTypeAsync(c.env.DB);
     const res = await c.env.DB.prepare(sql).all();
     const results = res.results || [];
 
@@ -531,8 +794,561 @@ app.get('/v1/catalog/public/branch_statuses', async (c) => {
   }
 });
 
-// 4. Excepciones de Calendario
-app.get('/v1/calendar_exceptions', (c) => c.json([]));
+// AWS SigV4 Signer & Textract Helpers for Cloudflare Workers (Native Web Crypto)
+async function hmacSha256(key: ArrayBuffer | Uint8Array, message: string): Promise<ArrayBuffer> {
+  const keyBuffer = (key instanceof Uint8Array ? key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) : key) as ArrayBuffer;
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  return await crypto.subtle.sign('HMAC', cryptoKey, new TextEncoder().encode(message));
+}
+
+async function sha256Hex(message: string | Uint8Array): Promise<string> {
+  const data = typeof message === 'string' ? new TextEncoder().encode(message) : message;
+  const dataBuffer = (data instanceof Uint8Array ? data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) : data) as ArrayBuffer;
+  const hash = await crypto.subtle.digest('SHA-256', dataBuffer);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function getSignatureKey(key: string, dateStamp: string, regionName: string, serviceName: string): Promise<ArrayBuffer> {
+  const kDate = await hmacSha256(new TextEncoder().encode('AWS4' + key), dateStamp);
+  const kRegion = await hmacSha256(kDate, regionName);
+  const kService = await hmacSha256(kRegion, serviceName);
+  const kSigning = await hmacSha256(kService, 'aws4_request');
+  return kSigning;
+}
+
+async function callAwsTextractAnalyzeDocument(
+  base64Image: string,
+  accessKeyId: string,
+  secretAccessKey: string,
+  region: string = 'us-east-1'
+): Promise<any> {
+  let rawBase64 = base64Image;
+  if (rawBase64.includes('base64,')) {
+    rawBase64 = rawBase64.split('base64,')[1];
+  }
+
+  const endpoint = `https://textract.${region}.amazonaws.com/`;
+  const host = `textract.${region}.amazonaws.com`;
+  const service = 'textract';
+
+  const bodyObj = {
+    Document: {
+      Bytes: rawBase64
+    },
+    FeatureTypes: ['TABLES']
+  };
+  const payload = JSON.stringify(bodyObj);
+
+  const now = new Date();
+  const amzDate = now.toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+  const dateStamp = amzDate.substring(0, 8);
+
+  const contentType = 'application/x-amz-json-1.1';
+  const target = 'Textract.AnalyzeDocument';
+
+  const payloadHash = await sha256Hex(payload);
+  const canonicalHeaders = `content-type:${contentType}\nhost:${host}\nx-amz-date:${amzDate}\nx-amz-target:${target}\n`;
+  const signedHeaders = 'content-type;host;x-amz-date;x-amz-target';
+
+  const canonicalRequest = `POST\n/\n\n${canonicalHeaders}\n${signedHeaders}\n${payloadHash}`;
+
+  const algorithm = 'AWS4-HMAC-SHA256';
+  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+  const stringToSign = `${algorithm}\n${amzDate}\n${credentialScope}\n${await sha256Hex(canonicalRequest)}`;
+
+  const signingKey = await getSignatureKey(secretAccessKey, dateStamp, region, service);
+  const signatureBuffer = await hmacSha256(signingKey, stringToSign);
+  const signatureHex = Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const authorizationHeader = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signatureHex}`;
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': contentType,
+      'Host': host,
+      'X-Amz-Date': amzDate,
+      'X-Amz-Target': target,
+      'Authorization': authorizationHeader
+    },
+    body: payload
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`AWS Textract API error (${res.status}): ${errText}`);
+  }
+
+  return await res.json();
+}
+
+function parseTextractBlocksToTable(blocks: any[]): { headers: string[]; matrix: string[][] } {
+  const wordMap: Record<string, string> = {};
+  const cellMap: Record<string, any> = {};
+  const tableBlocks: any[] = [];
+
+  for (const block of blocks) {
+    if (block.BlockType === 'WORD' && block.Id && block.Text) {
+      wordMap[block.Id] = block.Text;
+    } else if (block.BlockType === 'CELL' && block.Id) {
+      cellMap[block.Id] = block;
+    } else if (block.BlockType === 'TABLE') {
+      tableBlocks.push(block);
+    }
+  }
+
+  if (tableBlocks.length === 0) {
+    throw new Error('No se detectaron tablas en la imagen');
+  }
+
+  const table = tableBlocks[0];
+  let cellIds: string[] = [];
+  if (Array.isArray(table.Relationships)) {
+    for (const rel of table.Relationships) {
+      if (rel.Type === 'CHILD') {
+        cellIds = rel.Ids || [];
+        break;
+      }
+    }
+  }
+
+  const tempMatrix: Record<number, Record<number, string>> = {};
+  let maxRow = 0;
+  let maxCol = 0;
+
+  for (const id of cellIds) {
+    const cell = cellMap[id];
+    if (!cell) continue;
+
+    const rIdx = (cell.RowIndex || 1) - 1;
+    const cIdx = (cell.ColumnIndex || 1) - 1;
+
+    if (rIdx > maxRow) maxRow = rIdx;
+    if (cIdx > maxCol) maxCol = cIdx;
+
+    const cellTextParts: string[] = [];
+    if (Array.isArray(cell.Relationships)) {
+      for (const rel of cell.Relationships) {
+        if (rel.Type === 'CHILD') {
+          for (const childId of (rel.Ids || [])) {
+            if (wordMap[childId]) {
+              cellTextParts.push(wordMap[childId]);
+            }
+          }
+        }
+      }
+    }
+
+    if (!tempMatrix[rIdx]) tempMatrix[rIdx] = {};
+    tempMatrix[rIdx][cIdx] = cellTextParts.join(' ').trim();
+  }
+
+  const rawMatrix: string[][] = [];
+  for (let r = 0; r <= maxRow; r++) {
+    const row: string[] = [];
+    let hasContent = false;
+    for (let c = 0; c <= maxCol; c++) {
+      const val = (tempMatrix[r]?.[c]) || '';
+      row.push(val);
+      if (val !== '') hasContent = true;
+    }
+    if (hasContent) {
+      rawMatrix.push(row);
+    }
+  }
+
+  if (rawMatrix.length === 0) {
+    throw new Error('La tabla detectada está vacía');
+  }
+
+  const headers = rawMatrix[0];
+  const matrix = rawMatrix.length > 1 ? rawMatrix.slice(1) : [];
+
+  return { headers, matrix };
+}
+
+// 3.5 OCR Processing con AWS Textract (con fallback a Cloudflare Workers AI Vision)
+app.post('/v1/admin/ocr', async (c) => {
+  try {
+    const body = await c.req.json();
+    const fileData = body.file || body.image;
+
+    if (!fileData) {
+      return c.json({ success: false, error: 'No se envió ninguna imagen' }, 400);
+    }
+
+    let headers: string[] = [];
+    let matrix: string[][] = [];
+    let engine = 'unknown';
+
+    // 1. Intentar primero con AWS Textract (si están configurados los secretos)
+    const accessKeyId = c.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = c.env.AWS_SECRET_ACCESS_KEY;
+    const region = c.env.AWS_REGION || 'us-east-1';
+
+    if (accessKeyId && secretAccessKey) {
+      try {
+        const textractOutput = await callAwsTextractAnalyzeDocument(fileData, accessKeyId, secretAccessKey, region);
+        const parsed = parseTextractBlocksToTable(textractOutput.Blocks || []);
+        headers = parsed.headers;
+        matrix = parsed.matrix;
+        engine = 'aws-textract';
+      } catch (awsErr: any) {
+        console.warn('AWS Textract OCR attempt failed, falling back to Workers AI:', awsErr.message);
+      }
+    }
+
+    // 2. Fallback a Cloudflare Workers AI si AWS Textract no devolvió resultados
+    if (matrix.length === 0 && c.env.AI) {
+      try {
+        let base64String = fileData;
+        if (base64String.includes('base64,')) {
+          base64String = base64String.split('base64,')[1];
+        }
+
+        const binaryString = atob(base64String);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        const prompt = `Analiza esta imagen de una tabla/grilla de horarios de colectivos/autobuses.
+Extrae todas las cabeceras/nombres de paradas y la matriz de horarios en formato JSON estricto con la siguiente estructura exacta:
+{
+  "headers": ["NOMBRE_PARADA_1", "NOMBRE_PARADA_2"],
+  "matrix": [
+    ["HH:MM", "HH:MM"],
+    ["HH:MM", "HH:MM"]
+  ]
+}
+Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.`;
+
+        const response: any = await c.env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
+          prompt: prompt,
+          image: [...bytes]
+        });
+
+        const rawText = typeof response === 'string' ? response : (response.response || JSON.stringify(response));
+
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed.headers)) headers = parsed.headers.map((h: any) => String(h).trim());
+          if (Array.isArray(parsed.matrix)) matrix = parsed.matrix.map((row: any) => Array.isArray(row) ? row.map((cell: any) => String(cell).trim()) : []);
+        }
+
+        if (headers.length === 0 && matrix.length === 0) {
+          const lines = rawText.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0);
+          for (const line of lines) {
+            const timeMatches = line.match(/\b\d{1,2}:\d{2}\b/g);
+            if (timeMatches && timeMatches.length >= 2) {
+              matrix.push(timeMatches);
+            } else if (!line.includes(':') && line.includes(';')) {
+              headers = line.split(';').map((s: string) => s.trim());
+            }
+          }
+        }
+
+        if (matrix.length > 0) {
+          engine = 'cloudflare-workers-ai';
+        }
+      } catch (aiErr: any) {
+        console.warn('Cloudflare Workers AI OCR error:', aiErr);
+      }
+    }
+
+    if (matrix.length > 0 && headers.length === 0) {
+      headers = matrix[0].map((_, idx) => `Parada ${idx + 1}`);
+    }
+
+    if (matrix.length === 0) {
+      return c.json({
+        success: false,
+        error: 'No se pudieron reconocer patrones de horarios (HH:MM) en la imagen proporcionada. Intenta con una imagen más clara o recortada.'
+      }, 422);
+    }
+
+    return c.json({
+      success: true,
+      headers: headers,
+      matrix: matrix,
+      engine: engine
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: 'Error al procesar la imagen', details: err.message }, 500);
+  }
+});
+
+// 4. Feriados Nacionales y Excepciones de Calendario
+app.get('/v1/holidays', async (c) => {
+  try {
+    const res = await c.env.DB.prepare('SELECT id, date, name, type, created_at FROM holidays ORDER BY date ASC').all();
+    return c.json(res.results || []);
+  } catch (err: any) {
+    return c.json([]);
+  }
+});
+
+app.post('/v1/holidays', async (c) => {
+  try {
+    const body = await c.req.json();
+    if (!body.date || !body.name) {
+      return c.json({ success: false, error: 'Fecha y nombre son requeridos' }, 400);
+    }
+    const id = body.id || `hol_${Date.now()}`;
+    const type = body.type || 'inamovible';
+    await c.env.DB.prepare(`
+      INSERT INTO holidays (id, date, name, type)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(date) DO UPDATE SET name = excluded.name, type = excluded.type
+    `).bind(id, body.date, body.name, type).run();
+
+    await purgeKvCache(c.env.FLEET_KV);
+
+    return c.json({ success: true, id, date: body.date, name: body.name, type });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+app.delete('/v1/holidays/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    await c.env.DB.prepare('DELETE FROM holidays WHERE id = ? OR date = ?').bind(id, id).run();
+    
+    await purgeKvCache(c.env.FLEET_KV);
+
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+app.get('/v1/calendar_exceptions', async (c) => {
+  try {
+    const res = await c.env.DB.prepare('SELECT id, date, company, override_day_type as overrideDayType, description, created_at FROM calendar_exceptions ORDER BY date ASC').all();
+    return c.json(res.results || []);
+  } catch (err: any) {
+    return c.json([]);
+  }
+});
+
+app.post('/v1/calendar_exceptions', async (c) => {
+  try {
+    const body = await c.req.json();
+    if (!body.date) {
+      return c.json({ success: false, error: 'La fecha es requerida' }, 400);
+    }
+    const id = body.id || `cexc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const company = body.company || 'SIT';
+    const overrideDayType = body.overrideDayType || body.override_day_type || 'saturday';
+    const description = body.description || '';
+
+    await c.env.DB.prepare(`
+      INSERT INTO calendar_exceptions (id, date, company, override_day_type, description)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(id, body.date, company, overrideDayType, description).run();
+
+    await purgeKvCache(c.env.FLEET_KV);
+
+    return c.json({ success: true, id, date: body.date, company, overrideDayType, description });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+app.delete('/v1/calendar_exceptions/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    await c.env.DB.prepare('DELETE FROM calendar_exceptions WHERE id = ?').bind(id).run();
+
+    await purgeKvCache(c.env.FLEET_KV);
+
+    return c.json({ success: true });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+
+// Helper: Evalúa si una fila de horario está activa en la hora actual de Argentina (UTC-3)
+const isRowActiveAtServerTime = (row: string[], currentMinutes: number) => {
+  if (!Array.isArray(row)) return false;
+  const validTimes = row.filter((t: any) => typeof t === 'string' && t.trim() !== '' && t.includes(':'));
+  if (validTimes.length < 2) return false;
+  
+  const parseToMinutes = (timeStr: string) => {
+    const parts = timeStr.trim().split(':').map(Number);
+    return (parts[0] || 0) * 60 + (parts[1] || 0);
+  };
+  
+  const startMinutes = parseToMinutes(validTimes[0]);
+  const endMinutes = parseToMinutes(validTimes[validTimes.length - 1]);
+  
+  if (endMinutes < startMinutes) {
+    return currentMinutes >= startMinutes || currentMinutes <= endMinutes;
+  }
+  
+  return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+};
+
+const getServerDayTypeCode = () => {
+  const now = new Date();
+  const argTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const argDate = new Date(argTimeStr);
+  const day = argDate.getDay();
+  if (day === 0) return 'domingos_feriados';
+  if (day === 6) return 'sabados';
+  return 'lunes_a_viernes';
+};
+
+const getServerCurrentMinutes = () => {
+  const now = new Date();
+  const argTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' });
+  const argDate = new Date(argTimeStr);
+  return argDate.getHours() * 60 + argDate.getMinutes();
+};
+
+async function getOrComputeActiveUnitsSummary(env: any) {
+  const cacheKey = 'cache:active_units_summary_v1';
+  
+  if (env.FLEET_KV) {
+    try {
+      const cached = await env.FLEET_KV.get(cacheKey, 'json');
+      if (cached) return cached;
+    } catch (_) {}
+  }
+
+  const dayTypeCode = getServerDayTypeCode();
+  const currentMinutes = getServerCurrentMinutes();
+
+  let liveBuses: any[] = [];
+  if (env.FLEET_KV) {
+    try {
+      const snap = await env.FLEET_KV.get('fleet_live_snapshot', 'json');
+      if (Array.isArray(snap)) liveBuses = snap;
+    } catch (_) {}
+  }
+
+  const schRes = await env.DB.prepare(`
+    SELECT s.id, s.branch_id, s.direction, dt.code as day_type_code
+    FROM schedules s
+    JOIN day_types dt ON s.day_types_id = dt.id
+    WHERE dt.code = ? OR dt.code LIKE ? OR s.day_types_id = ?
+  `).bind(dayTypeCode, `%${dayTypeCode}%`, dayTypeCode).all();
+
+  const schedules = schRes.results || [];
+  const activeTripsCountByBranchDir: Record<string, number> = {};
+
+  if (schedules.length > 0) {
+    const scheduleIds = schedules.map((s: any) => s.id);
+    const placeholders = scheduleIds.map(() => '?').join(',');
+    const itemsRes = await env.DB.prepare(`
+      SELECT schedule_id, trip_times_json, departure_time FROM schedule_items WHERE schedule_id IN (${placeholders})
+    `).bind(...scheduleIds).all();
+
+    const itemsByScheduleId: Record<string, any[]> = {};
+    (itemsRes.results || []).forEach((item: any) => {
+      if (!itemsByScheduleId[item.schedule_id]) itemsByScheduleId[item.schedule_id] = [];
+      itemsByScheduleId[item.schedule_id].push(item);
+    });
+
+    schedules.forEach((sch: any) => {
+      const items = itemsByScheduleId[sch.id] || [];
+      const dirKey = sch.direction || 'ida';
+      const mapKey = `${sch.branch_id}_${dirKey}`;
+      let count = 0;
+
+      items.forEach((item: any) => {
+        let times: string[] = [];
+        if (item.trip_times_json) {
+          try { times = JSON.parse(item.trip_times_json); } catch (_) {}
+        }
+        if (times.length > 0 && isRowActiveAtServerTime(times, currentMinutes)) {
+          count++;
+        }
+      });
+
+      activeTripsCountByBranchDir[mapKey] = (activeTripsCountByBranchDir[mapKey] || 0) + count;
+    });
+  }
+
+  const branchesRes = await env.DB.prepare(`
+    SELECT b.id as branch_id, b.code as branch_code, l.code as line_code
+    FROM branches b
+    JOIN lines l ON b.line_id = l.id
+  `).all();
+
+  const byRoute: Record<string, { active_units: number; ida: number; vuelta: number }> = {};
+  const byLine: Record<string, { active_units: number }> = {};
+  let totalActiveUnits = 0;
+
+  (branchesRes.results || []).forEach((b: any) => {
+    const branchId = b.branch_id;
+    const branchCode = b.branch_code;
+    const lineCode = b.line_code || 'SIT';
+
+    const gpsIda = liveBuses.filter((bus: any) => (bus.routeId === branchId || bus.code === branchCode) && (bus.dir === 'ida' || bus.direction === 'ida')).length;
+    const gpsVuelta = liveBuses.filter((bus: any) => (bus.routeId === branchId || bus.code === branchCode) && (bus.dir === 'vuelta' || bus.direction === 'vuelta')).length;
+
+    const schIda = activeTripsCountByBranchDir[`${branchId}_ida`] || 0;
+    const schVuelta = activeTripsCountByBranchDir[`${branchId}_vuelta`] || 0;
+
+    const idaActive = Math.max(gpsIda, schIda);
+    const vueltaActive = Math.max(gpsVuelta, schVuelta);
+    const routeTotal = idaActive + vueltaActive;
+
+    const routeEntry = { active_units: routeTotal, ida: idaActive, vuelta: vueltaActive };
+    byRoute[branchId] = routeEntry;
+    if (branchCode) {
+      byRoute[branchCode] = routeEntry;
+    }
+
+    if (!byLine[lineCode]) {
+      byLine[lineCode] = { active_units: 0 };
+    }
+    byLine[lineCode].active_units += routeTotal;
+    totalActiveUnits += routeTotal;
+  });
+
+  const activeLinesCount = Object.values(byLine).filter(l => l.active_units > 0).length;
+
+  const payload = {
+    success: true,
+    timestamp: new Date().toISOString(),
+    day_type_code: dayTypeCode,
+    server_minutes: currentMinutes,
+    total_active_lines: activeLinesCount,
+    total_active_units: totalActiveUnits,
+    by_line: byLine,
+    by_route: byRoute
+  };
+
+  if (env.FLEET_KV) {
+    try {
+      await env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 });
+    } catch (_) {}
+  }
+
+  return payload;
+}
+
+// 4b. Estado Servidor de Unidades Activas Cacheado (Server Pre-calculated Active Units)
+app.get('/v1/transit/active_units', async (c) => {
+  try {
+    const summary = await getOrComputeActiveUnitsSummary(c.env);
+    c.header('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=30');
+    return c.json(summary);
+  } catch (err: any) {
+    return c.json({ success: false, error: 'Failed to compute active units summary', details: err.message }, 500);
+  }
+});
 
 // 5. Colectivos en Vivo (Fleet State & Telemetría)
 app.get('/v1/transit/buses/live', async (c) => {
@@ -647,6 +1463,387 @@ const handleBranchStatusUpdate = async (c: any) => {
 app.post('/v1/admin/branches/status', handleBranchStatusUpdate);
 app.put('/v1/admin/branches/status', handleBranchStatusUpdate);
 app.get('/v1/admin/branches/status', handleBranchStatusUpdate);
+
+// Registros de Esquemas de Tablas para la Consola Admin
+const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; orderBy?: string; fields: string[] }> = {
+  companies: {
+    label: 'Empresas de Transporte (Companies)',
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'code', 'name', 'description']
+  },
+  line_publication_statuses: {
+    label: 'Publicación de Líneas (Line Publication Statuses)',
+    primaryKey: 'id',
+    orderBy: 'display_order ASC',
+    fields: ['id', 'code', 'name', 'description', 'color', 'display_order']
+  },
+  lines: {
+    label: 'Líneas (Lines)',
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'company_id', 'code', 'name', 'color', 'line_publication_statuses_id']
+  },
+  branches: {
+    label: 'Ramales (Branches)',
+    primaryKey: 'id',
+    orderBy: 'line_id ASC, display_order ASC, code ASC',
+    fields: ['id', 'line_id', 'code', 'name', 'direction_ida_label', 'direction_vuelta_label', 'display_order', 'branch_statuses_id', 'branch_colors_id', 'branch_publication_statuses_id']
+  },
+  branch_publication_statuses: {
+    label: 'Publicación de Ramales (Branch Publication Statuses)',
+    primaryKey: 'id',
+    orderBy: 'display_order ASC',
+    fields: ['id', 'code', 'name', 'description', 'color', 'display_order']
+  },
+  branch_colors: {
+    label: 'Colores de Ramales',
+    primaryKey: 'id',
+    orderBy: 'display_order ASC',
+    fields: ['id', 'code_hexa', 'description', 'display_order']
+  },
+  branch_companies: {
+    label: 'Relación Ramales - Empresas (Branch Companies)',
+    primaryKey: 'id',
+    orderBy: 'branch_id ASC, company_id ASC',
+    fields: ['id', 'branch_id', 'company_id']
+  },
+  schedules: {
+    label: 'Horarios',
+    primaryKey: 'id',
+    orderBy: 'name ASC',
+    fields: ['id', 'branch_id', 'direction', 'day_types_id', 'name', 'headers_json', 'header_aliases_json', 'stop_addresses_json']
+  },
+  schedule_items: {
+    label: 'Despachos / Salidas (Schedule Items)',
+    primaryKey: 'id',
+    orderBy: 'dispatch_order ASC, departure_time ASC',
+    fields: ['id', 'schedule_id', 'departure_time', 'dispatch_order', 'trip_times_json']
+  },
+  day_types: {
+    label: 'Tipos de Día (Day Types)',
+    primaryKey: 'id',
+    orderBy: 'display_order ASC',
+    fields: ['id', 'code', 'name', 'display_order']
+  },
+  calendar_exceptions: {
+    label: 'Excepciones de Calendario (Calendar Exceptions)',
+    primaryKey: 'id',
+    orderBy: 'date DESC',
+    fields: ['id', 'date', 'day_types_id', 'note', 'is_holiday']
+  },
+  branch_statuses: {
+    label: 'Estados Operativos (Branch Statuses)',
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'code', 'name', 'color']
+  },
+  stops: {
+    label: 'Paradas (Stops)',
+    primaryKey: 'id',
+    orderBy: 'branch_id ASC, direction ASC, stop_order ASC',
+    fields: ['id', 'branch_id', 'direction', 'stop_order', 'name', 'lat', 'lng', 'is_control_point']
+  },
+  route_shapes: {
+    label: 'Trazados / Shapes (Route Shapes)',
+    primaryKey: 'id',
+    orderBy: 'branch_id ASC, direction ASC',
+    fields: ['id', 'branch_id', 'direction', 'coordinates_json']
+  },
+  ads: {
+    label: 'Anuncios y Alertas (Ads)',
+    primaryKey: 'id',
+    orderBy: 'created_at DESC',
+    fields: ['id', 'title', 'content', 'badge', 'type', 'is_active', 'created_at']
+  }
+};
+
+// GET /v1/admin/tables -> Lista de esquemas de tablas editables
+app.get('/v1/admin/tables', (c) => {
+  return c.json({ success: true, tables: ALLOWED_ADMIN_TABLES });
+});
+
+// Helper de Autopurga de Caché KV
+const triggerKVAutoPurge = async (env: any): Promise<boolean> => {
+  if (!env.FLEET_KV) return false;
+  try {
+    const currentV = await getCacheVersion(env.FLEET_KV);
+    const versionNum = parseInt(currentV.replace('v', ''), 10) || 1;
+    const newVersion = `v${versionNum + 1}`;
+    await env.FLEET_KV.put('cache:global:version', newVersion);
+    return true;
+  } catch (_) {
+    return false;
+  }
+};
+
+// GET /v1/admin/table/:tableName -> Leer registros paginados
+app.get('/v1/admin/table/:tableName', async (c) => {
+  const tableName = c.req.param('tableName');
+  const tableConfig = ALLOWED_ADMIN_TABLES[tableName];
+  if (!tableConfig) {
+    return c.json({ success: false, error: `Tabla no autorizada o inexistente: '${tableName}'` }, 400);
+  }
+
+  const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 500);
+  const offset = parseInt(c.req.query('offset') || '0', 10);
+  const search = (c.req.query('q') || '').trim().toLowerCase();
+
+  try {
+    let countSql = `SELECT COUNT(*) as total FROM ${tableName}`;
+    let dataSql = `SELECT * FROM ${tableName}`;
+    const params: any[] = [];
+
+    if (search) {
+      const searchCols = tableConfig.fields.filter(f => f !== 'id' && !f.endsWith('_json'));
+      if (searchCols.length > 0) {
+        const whereClause = searchCols.map(col => `LOWER(CAST(${col} AS TEXT)) LIKE ?`).join(' OR ');
+        countSql += ` WHERE ${whereClause}`;
+        dataSql += ` WHERE ${whereClause}`;
+        searchCols.forEach(() => params.push(`%${search}%`));
+      }
+    }
+
+    const orderClause = tableConfig.orderBy || `${tableConfig.primaryKey} DESC`;
+    dataSql += ` ORDER BY ${orderClause} LIMIT ? OFFSET ?`;
+
+    const countRes = await c.env.DB.prepare(countSql).bind(...params).all();
+    const total = (countRes.results?.[0] as any)?.total || 0;
+
+    const dataRes = await c.env.DB.prepare(dataSql).bind(...params, limit, offset).all();
+
+    return c.json({
+      success: true,
+      table: tableName,
+      primaryKey: tableConfig.primaryKey,
+      fields: tableConfig.fields,
+      total,
+      limit,
+      offset,
+      rows: dataRes.results || []
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// POST /v1/admin/schedules/batch -> Guardado atómico ultrarrápido de grilla de horarios e ítems
+app.post('/v1/admin/schedules/batch', async (c) => {
+  try {
+    const { schedule, items } = await c.req.json();
+    if (!schedule || !schedule.branch_id) {
+      return c.json({ success: false, error: 'Metadatos de horario inválidos' }, 400);
+    }
+
+    let scheduleId = schedule.id;
+    const statements: any[] = [];
+
+    // 1. Guardar o actualizar schedule maestro
+    if (scheduleId) {
+      statements.push(
+        c.env.DB.prepare(`
+          UPDATE schedules 
+          SET branch_id = ?, direction = ?, day_types_id = ?, name = ?, headers_json = ?, header_aliases_json = ?, stop_addresses_json = ? 
+          WHERE id = ?
+        `).bind(
+          schedule.branch_id,
+          schedule.direction || 'ida',
+          schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+          schedule.name || 'Grilla',
+          schedule.headers_json || '[]',
+          schedule.header_aliases_json || '[]',
+          schedule.stop_addresses_json || '[]',
+          scheduleId
+        )
+      );
+    } else {
+      scheduleId = `sched-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      statements.push(
+        c.env.DB.prepare(`
+          INSERT INTO schedules (id, branch_id, direction, day_types_id, name, headers_json, header_aliases_json, stop_addresses_json) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          scheduleId,
+          schedule.branch_id,
+          schedule.direction || 'ida',
+          schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+          schedule.name || 'Grilla',
+          schedule.headers_json || '[]',
+          schedule.header_aliases_json || '[]',
+          schedule.stop_addresses_json || '[]'
+        )
+      );
+    }
+
+    // 2. Limpiar ítems anteriores de esta grilla
+    statements.push(
+      c.env.DB.prepare('DELETE FROM schedule_items WHERE schedule_id = ?').bind(scheduleId)
+    );
+
+    // 3. Preparar inserción masiva de ítems (schedule_items)
+    if (Array.isArray(items) && items.length > 0) {
+      items.forEach((item: any, idx: number) => {
+        const itemId = `sitem-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`;
+        statements.push(
+          c.env.DB.prepare(`
+            INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
+            VALUES (?, ?, ?, ?, ?)
+          `).bind(
+            itemId,
+            scheduleId,
+            item.departure_time || '00:00',
+            item.dispatch_order || (idx + 1),
+            typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || [])
+          )
+        );
+      });
+    }
+
+    // Ejecución masiva atómica en D1 (1 solo viaje de red)
+    await c.env.DB.batch(statements);
+
+    // Purgar caché KV una única vez al finalizar
+    await triggerKVAutoPurge(c.env);
+
+    return c.json({
+      success: true,
+      scheduleId,
+      itemsCount: items ? items.length : 0,
+      message: 'Grilla de horarios guardada exitosamente en una sola operación atómica'
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// POST /v1/admin/table/:tableName -> Insertar registro
+app.post('/v1/admin/table/:tableName', async (c) => {
+  const tableName = c.req.param('tableName');
+  const tableConfig = ALLOWED_ADMIN_TABLES[tableName];
+  if (!tableConfig) {
+    return c.json({ success: false, error: `Tabla no autorizada: '${tableName}'` }, 400);
+  }
+
+  try {
+    const body = await c.req.json();
+    const colsToInsert: string[] = [];
+    const valPlaceholders: string[] = [];
+    const values: any[] = [];
+
+    // Asignar ID si no viene provisto
+    if (!body[tableConfig.primaryKey]) {
+      body[tableConfig.primaryKey] = `${tableName}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    tableConfig.fields.forEach(field => {
+      if (body[field] !== undefined) {
+        colsToInsert.push(field);
+        valPlaceholders.push('?');
+        let val = body[field];
+        if (typeof val === 'object' && val !== null) {
+          val = JSON.stringify(val);
+        }
+        values.push(val);
+      }
+    });
+
+    if (colsToInsert.length === 0) {
+      return c.json({ success: false, error: 'No se enviaron datos para insertar' }, 400);
+    }
+
+    const insertSql = `INSERT INTO ${tableName} (${colsToInsert.join(', ')}) VALUES (${valPlaceholders.join(', ')})`;
+    await c.env.DB.prepare(insertSql).bind(...values).run();
+
+    const cachePurged = await triggerKVAutoPurge(c.env);
+
+    return c.json({
+      success: true,
+      message: `Registro creado exitosamente en '${tableName}'`,
+      id: body[tableConfig.primaryKey],
+      cache_purged: cachePurged
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// PUT /v1/admin/table/:tableName/:id -> Actualizar registro
+app.put('/v1/admin/table/:tableName/:id', async (c) => {
+  const tableName = c.req.param('tableName');
+  const recordId = c.req.param('id');
+  const tableConfig = ALLOWED_ADMIN_TABLES[tableName];
+  if (!tableConfig) {
+    return c.json({ success: false, error: `Tabla no autorizada: '${tableName}'` }, 400);
+  }
+
+  try {
+    const body = await c.req.json();
+    const setClauses: string[] = [];
+    const values: any[] = [];
+
+    tableConfig.fields.forEach(field => {
+      if (field !== tableConfig.primaryKey && body[field] !== undefined) {
+        setClauses.push(`${field} = ?`);
+        let val = body[field];
+        if (typeof val === 'object' && val !== null) {
+          val = JSON.stringify(val);
+        }
+        values.push(val);
+      }
+    });
+
+    if (setClauses.length === 0) {
+      return c.json({ success: false, error: 'No hay campos válidos para actualizar' }, 400);
+    }
+
+    values.push(recordId);
+    const updateSql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${tableConfig.primaryKey} = ?`;
+    const res = await c.env.DB.prepare(updateSql).bind(...values).run();
+
+    if (res.meta.changes === 0) {
+      return c.json({ success: false, error: `No se encontró registro con ID '${recordId}' en '${tableName}'` }, 404);
+    }
+
+    const cachePurged = await triggerKVAutoPurge(c.env);
+
+    return c.json({
+      success: true,
+      message: `Registro '${recordId}' actualizado en '${tableName}'`,
+      cache_purged: cachePurged
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// DELETE /v1/admin/table/:tableName/:id -> Eliminar registro
+app.delete('/v1/admin/table/:tableName/:id', async (c) => {
+  const tableName = c.req.param('tableName');
+  const recordId = c.req.param('id');
+  const tableConfig = ALLOWED_ADMIN_TABLES[tableName];
+  if (!tableConfig) {
+    return c.json({ success: false, error: `Tabla no autorizada: '${tableName}'` }, 400);
+  }
+
+  try {
+    const deleteSql = `DELETE FROM ${tableName} WHERE ${tableConfig.primaryKey} = ?`;
+    const res = await c.env.DB.prepare(deleteSql).bind(recordId).run();
+
+    if (res.meta.changes === 0) {
+      return c.json({ success: false, error: `No se encontró el registro '${recordId}' en '${tableName}'` }, 404);
+    }
+
+    const cachePurged = await triggerKVAutoPurge(c.env);
+
+    return c.json({
+      success: true,
+      message: `Registro '${recordId}' eliminado de '${tableName}'`,
+      cache_purged: cachePurged
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
 
 // SPA Fallback Route: Para cualquier ruta de cliente navegada directamente (ej: /login), servir index.html
 app.notFound(async (c) => {
