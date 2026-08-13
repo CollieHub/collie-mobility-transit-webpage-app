@@ -65,26 +65,25 @@ export const getTodayDayLabel = (routeObjToUse?: any, calendarExceptions: any[] 
   const d = String(now.getDate()).padStart(2, '0');
   const dateStr = `${y}-${m}-${d}`;
 
-  let companyName = 'Otras';
+  let companyName = 'SIT';
   if (routeObjToUse) {
     const code = routeObjToUse.code || '';
     const isSIT = code.toLowerCase().startsWith('rz') || routeObjToUse.id?.toLowerCase().includes('sit');
-    if (isSIT) {
-      companyName = 'SIT';
-    } else {
+    if (!isSIT) {
       companyName = routeObjToUse.company || 'Otras';
     }
   }
 
-  const matchedException = calendarExceptions.find(
-    (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all')
+  const matchedException = (calendarExceptions || []).find(
+    (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all' || exc.company === 'SIT' || !exc.company)
   );
 
   if (matchedException) {
-    if (matchedException.overrideDayType === 'weekday') return 'Lunes a Viernes';
-    if (matchedException.overrideDayType === 'saturday') return 'Sábado';
-    if (matchedException.overrideDayType === 'sunday') return 'Domingos y Feriados';
-    return formatSpecialLabel(matchedException.overrideDayType);
+    const override = matchedException.overrideDayType || matchedException.override_day_type;
+    if (override === 'weekday' || override === 'lunes_a_viernes') return 'Lunes a Viernes';
+    if (override === 'saturday' || override === 'sabados' || override === 'sabado') return 'Sábado';
+    if (override === 'sunday' || override === 'sunday_holiday' || override === 'domingos_feriados') return 'Domingos y Feriados';
+    return formatSpecialLabel(override);
   }
 
   if (isHoliday(now)) {
@@ -207,10 +206,39 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
 
   const [dayTypes, setDayTypes] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>(() => {
-    if (data?.currentDayTypeName) return data.currentDayTypeName;
-    if (data?.currentDayType) return formatSpecialLabel(data.currentDayType);
-    return getTodayDayLabel(routeObj || routeData?.route, calendarExceptions);
+    return getTodayDayLabel(routeObjToUse || routeObj || routeData?.route, calendarExceptions);
   });
+
+  useEffect(() => {
+    const computedToday = getTodayDayLabel(routeObjToUse || routeObj || routeData?.route, calendarExceptions);
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    let companyName = 'SIT';
+    if (routeObjToUse) {
+      const code = routeObjToUse.code || '';
+      const isSIT = code.toLowerCase().startsWith('rz') || routeObjToUse.id?.toLowerCase().includes('sit');
+      if (!isSIT) companyName = routeObjToUse.company || 'Otras';
+    }
+
+    const hasException = (calendarExceptions || []).some(
+      (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all' || exc.company === 'SIT' || !exc.company)
+    );
+
+    if (hasException) {
+      setSelectedDay(computedToday);
+    } else if (data?.currentDayTypeName) {
+      setSelectedDay(formatSpecialLabel(data.currentDayTypeName));
+    } else if (data?.currentDayType) {
+      setSelectedDay(formatSpecialLabel(data.currentDayType));
+    } else {
+      setSelectedDay(computedToday);
+    }
+  }, [calendarExceptions, data?.currentDayType, data?.currentDayTypeName, routeObjToUse]);
+
   const activeIdaRowRef = useRef<HTMLTableRowElement>(null);
   const activeVueltaRowRef = useRef<HTMLTableRowElement>(null);
 
@@ -221,16 +249,15 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     const d = String(now.getDate()).padStart(2, '0');
     const dateStr = `${y}-${m}-${d}`;
 
-    let companyName = 'Otras';
+    let companyName = 'SIT';
     if (routeObjToUse) {
       const code = routeObjToUse.code || '';
       const isSIT = code.toLowerCase().startsWith('rz') || routeObjToUse.id?.toLowerCase().includes('sit');
-      if (isSIT) companyName = 'SIT';
-      else companyName = routeObjToUse.company || 'Otras';
+      if (!isSIT) companyName = routeObjToUse.company || 'Otras';
     }
 
-    const matchedException = calendarExceptions.find(
-      (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all')
+    const matchedException = (calendarExceptions || []).find(
+      (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all' || exc.company === 'SIT' || !exc.company)
     );
 
     return matchedException?.description || null;

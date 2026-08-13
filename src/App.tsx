@@ -542,34 +542,43 @@ function App() {
     const fetchExceptions = async () => {
       try {
         const baseUrl = getApiBaseUrl();
-        const token = await getPublicToken(baseUrl);
-        const signedHeaders = await getSignedHeaders('GET', '/catalog/public/data', token);
-        console.log("📝 [fetchExceptions] Requesting /catalog/public/data");
-        const res = await fetch(`${baseUrl}/catalog/public/data?summary=true&t=${Date.now()}`, {
-          headers: signedHeaders
-        });
-        
-        let json;
-        if (res.ok) {
-          json = await res.json();
-        } else {
-          console.warn(`[fetchExceptions] /catalog/public/data failed with status ${res.status}. Falling back to /calendar_exceptions...`);
-          // Fallback para desarrollo local
-          const fallbackRes = await fetch(`${baseUrl}/calendar_exceptions?t=${Date.now()}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          if (fallbackRes.ok) {
-            const fallbackData = await fallbackRes.json();
-            json = { calendarExceptions: fallbackData };
-          } else {
-            console.error("[fetchExceptions] Fallback also failed:", fallbackRes.status);
+        let d1Exceptions: any[] = [];
+        try {
+          const d1Res = await fetch(`${baseUrl}/calendar_exceptions?t=${Date.now()}`);
+          if (d1Res.ok) {
+            const text = await d1Res.text();
+            if (text) {
+              const parsed = JSON.parse(text);
+              d1Exceptions = Array.isArray(parsed) ? parsed : (parsed.rows || []);
+            }
           }
-        }
+        } catch (_) {}
 
-        if (json && json.calendarExceptions) {
-          console.log("📥 [App] Excepciones de calendario cargadas:", json.calendarExceptions);
-          setCalendarExceptions(json.calendarExceptions);
-        }
+        let awsExceptions: any[] = [];
+        try {
+          const token = await getPublicToken(baseUrl);
+          const signedHeaders = await getSignedHeaders('GET', '/catalog/public/data', token);
+          const res = await fetch(`${baseUrl}/catalog/public/data?summary=true&t=${Date.now()}`, {
+            headers: signedHeaders
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json && Array.isArray(json.calendarExceptions)) {
+              awsExceptions = json.calendarExceptions;
+            }
+          }
+        } catch (_) {}
+
+        const mergedDict: Record<string, any> = {};
+        [...d1Exceptions, ...awsExceptions].forEach((exc: any) => {
+          if (exc && exc.date) {
+            const key = `${exc.date}_${exc.company || 'all'}`;
+            mergedDict[key] = exc;
+          }
+        });
+        const merged = Object.values(mergedDict);
+        console.log("📥 [App] Excepciones de calendario cargadas:", merged);
+        setCalendarExceptions(merged);
       } catch (err) {
         console.warn("Failed to fetch calendar exceptions:", err);
       }
