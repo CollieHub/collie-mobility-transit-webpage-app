@@ -461,6 +461,14 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   const activeRowRef = activeDirection === 'ida' ? activeIdaRowRef : activeVueltaRowRef;
   const isSelectedException = selectedDay === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg;
 
+  const getDayTypeOptionLabel = (dayLabel: string) => {
+    const todayLabel = getTodayDayLabel(routeObjToUse, calendarExceptions);
+    if (dayLabel === todayLabel && activeExceptionMsg) {
+      return `${dayLabel} (${activeExceptionMsg})`;
+    }
+    return dayLabel;
+  };
+
   if (isMobile) {
     const hasIda = currentIdaTimetables.length > 0;
     const hasVuelta = currentVueltaTimetables.length > 0;
@@ -518,7 +526,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
               >
                 {dayTypes.map(d => (
                     <option key={d} value={d}>
-                      {d === getTodayDayLabel(routeObjToUse, calendarExceptions) && activeExceptionMsg ? activeExceptionMsg : d}
+                      {getDayTypeOptionLabel(d)}
                     </option>
                 ))}
               </select>
@@ -695,7 +703,9 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
                   }}
                 >
                   {dayTypes.map(d => (
-                    <option key={d} value={d} style={{ color: '#0f172a', background: '#ffffff' }}>{d}</option>
+                    <option key={d} value={d} style={{ color: '#0f172a', background: '#ffffff' }}>
+                      {getDayTypeOptionLabel(d)}
+                    </option>
                   ))}
                 </select>
               </div>
