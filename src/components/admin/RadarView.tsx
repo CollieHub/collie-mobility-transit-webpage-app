@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -32,6 +32,41 @@ L.Icon.Default.mergeOptions({
 });
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
+
+function createWaypointIcon(isStart: boolean, isEnd: boolean) {
+  const bgColor = isStart ? '#10b981' : isEnd ? '#ef4444' : '#0284c7';
+  return L.divIcon({
+    className: 'custom-waypoint-icon',
+    html: `<div style="
+      width: 14px;
+      height: 14px;
+      background-color: ${bgColor};
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      cursor: grab;
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+  });
+}
+
+function createStopIcon() {
+  return L.divIcon({
+    className: 'custom-stop-icon',
+    html: `<div style="
+      width: 14px;
+      height: 14px;
+      background-color: #3b82f6;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      cursor: grab;
+    "></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7]
+  });
+}
 
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -259,7 +294,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     return Math.round(sum * 100) / 100;
   }, [waypoints]);
 
-  // Clic en el mapa: Ruteo ruteando por calles con OSRM
+  // 1. Clic en el mapa: Suma un punto al recorrido (Ruteo por calles con OSRM)
   const handleAddWaypoint = async (pt: [number, number]) => {
     if (waypoints.length === 0 || !useStreetRouting) {
       setWaypoints(prev => [...prev, pt]);
@@ -276,6 +311,119 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     } finally {
       setIsRouting(false);
     }
+  };
+
+  // 2. Clic directo sobre la línea del recorrido: Inserta un punto intermedio en ese segmento
+  const handleInsertPolylineWaypoint = async (clickPt: [number, number]) => {
+    if (waypoints.length < 2) return;
+
+    let minDistance = Infinity;
+    let insertIdx = 1;
+
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const a = waypoints[i];
+      const b = waypoints[i + 1];
+      const proj = projectPointOnPolyline(clickPt, [a, b]);
+      const dist = calculateDistanceKm(clickPt[0], clickPt[1], proj[0], proj[1]);
+      if (dist < minDistance) {
+        minDistance = dist;
+        insertIdx = i + 1;
+      }
+    }
+
+    if (useStreetRouting) {
+      setIsRouting(true);
+      try {
+        const prevPt = waypoints[insertIdx - 1];
+        const nextPt = waypoints[insertIdx];
+
+        const seg1 = await fetchOsrmStreetRoute(prevPt, clickPt);
+        const seg2 = await fetchOsrmStreetRoute(clickPt, nextPt);
+
+        const inserted = [...seg1, ...seg2];
+        setWaypoints(prev => {
+          const updated = [...prev];
+          updated.splice(insertIdx, 0, ...inserted);
+          return updated;
+        });
+        showNotification?.('success', `Punto intermedio ruteado e insertado en la traza`);
+      } catch (_) {
+        setWaypoints(prev => {
+          const updated = [...prev];
+          updated.splice(insertIdx, 0, clickPt);
+          return updated;
+        });
+      } finally {
+        setIsRouting(false);
+      }
+    } else {
+      setWaypoints(prev => {
+        const updated = [...prev];
+        updated.splice(insertIdx, 0, clickPt);
+        return updated;
+      });
+      showNotification?.('success', `Punto intermedio insertado`);
+    }
+  };
+
+  // 3. Clic y mantener presionado (Drag & Drop) de un Waypoint
+  const handleWaypointDragEnd = async (idx: number, newPt: [number, number]) => {
+    if (!useStreetRouting || waypoints.length <= 1) {
+      setWaypoints(prev => {
+        const updated = [...prev];
+        updated[idx] = newPt;
+        return updated;
+      });
+      showNotification?.('success', `Punto #${idx + 1} movido`);
+      return;
+    }
+
+    setIsRouting(true);
+    try {
+      let newSegmentBefore: [number, number][] = [];
+      let newSegmentAfter: [number, number][] = [];
+
+      if (idx > 0) {
+        newSegmentBefore = await fetchOsrmStreetRoute(waypoints[idx - 1], newPt);
+      }
+      if (idx < waypoints.length - 1) {
+        newSegmentAfter = await fetchOsrmStreetRoute(newPt, waypoints[idx + 1]);
+      }
+
+      setWaypoints(prev => {
+        const updated = [...prev];
+        if (idx === 0) {
+          updated.splice(0, 1, newPt, ...newSegmentAfter);
+        } else if (idx === prev.length - 1) {
+          updated.splice(idx, 1, ...newSegmentBefore);
+        } else {
+          updated.splice(idx, 1, ...newSegmentBefore, ...newSegmentAfter);
+        }
+        return updated;
+      });
+      showNotification?.('success', `Punto #${idx + 1} re-ruteado por calles`);
+    } catch (_) {
+      setWaypoints(prev => {
+        const updated = [...prev];
+        updated[idx] = newPt;
+        return updated;
+      });
+    } finally {
+      setIsRouting(false);
+    }
+  };
+
+  // 4. Clic y mantener presionado (Drag & Drop) de una Parada
+  const handleStopDragEnd = (stopId: string, newPt: [number, number]) => {
+    let projLat = newPt[0];
+    let projLng = newPt[1];
+    if (waypoints.length >= 2) {
+      const proj = projectPointOnPolyline(newPt, waypoints);
+      projLat = proj[0];
+      projLng = proj[1];
+    }
+    setStops(prev => prev.map(st => st.id === stopId ? { ...st, lat: newPt[0], lng: newPt[1], proj_lat: projLat, proj_lng: projLng } : st));
+    showNotification?.('success', 'Parada re-posicionada');
   };
 
   const handleUndoWaypoint = () => {
@@ -1032,67 +1180,78 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <MapFocusController focusCoords={focusCoords} />
             <MapClickHandler activeTool={activeTool} onAddWaypoint={handleAddWaypoint} onAddStop={handleAddStop} />
 
-            {/* Polyline path for Route Shape */}
+            {/* Interactive Polyline: Clic sobre la linea para insertar un punto intermedio */}
             {waypoints.length > 1 && (
               <Polyline
                 positions={waypoints}
+                eventHandlers={{
+                  click(e) {
+                    L.DomEvent.stopPropagation(e.originalEvent);
+                    handleInsertPolylineWaypoint([e.latlng.lat, e.latlng.lng]);
+                  }
+                }}
                 pathOptions={{
                   color: direction === 'ida' ? '#0284c7' : '#e11d48',
-                  weight: 5,
+                  weight: 8,
                   opacity: 0.85,
                   dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
                 }}
               />
             )}
 
-            {/* Start (A) & End (B) Route Markers */}
+            {/* Waypoints Draggable Markers: Clic y mantener presionado para mover el punto */}
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
 
-              // Ocultar totalmente los puntos intermedios
-              if (!isStart && !isEnd) return null;
-
               return (
-                <CircleMarker
-                  key={`pt_${idx}`}
-                  center={pt}
-                  radius={6}
-                  pathOptions={{
-                    color: '#ffffff',
-                    weight: 2,
-                    fillColor: isStart ? '#10b981' : '#ef4444',
-                    fillOpacity: 1
+                <Marker
+                  key={`wpt_marker_${idx}`}
+                  position={pt}
+                  draggable={true}
+                  icon={createWaypointIcon(isStart, isEnd)}
+                  eventHandlers={{
+                    dragend(e: any) {
+                      const newLat = e.target.getLatLng().lat;
+                      const newLng = e.target.getLatLng().lng;
+                      handleWaypointDragEnd(idx, [newLat, newLng]);
+                    }
                   }}
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {isStart ? '🚩 Inicio de Recorrido (Punto 1)' : '🏁 Fin de Recorrido'}
+                      {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto ${idx + 1}`}
+                      <br />
+                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Mantén presionado y arrastra para mover el punto</span>
                     </div>
                   </Popup>
-                </CircleMarker>
+                </Marker>
               );
             })}
 
-            {/* Stop Markers on Map */}
+            {/* Stop Draggable Markers: Clic y mantener presionado para re-posicionar parada */}
             {stops.map(st => (
-              <CircleMarker
-                key={st.id}
-                center={[st.lat, st.lng]}
-                radius={5}
-                pathOptions={{
-                  color: '#ffffff',
-                  weight: 2,
-                  fillColor: '#3b82f6',
-                  fillOpacity: 1
+              <Marker
+                key={`stop_marker_${st.id}`}
+                position={[st.lat, st.lng]}
+                draggable={true}
+                icon={createStopIcon()}
+                eventHandlers={{
+                  dragend(e: any) {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+                    handleStopDragEnd(st.id, [newLat, newLng]);
+                  }
                 }}
               >
                 <Popup>
                   <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
                     {st.stop_order}. {st.name}
+                    <br />
+                    <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Mantén presionado y arrastra para mover la parada</span>
                   </div>
                 </Popup>
-              </CircleMarker>
+              </Marker>
             ))}
           </MapContainer>
 
