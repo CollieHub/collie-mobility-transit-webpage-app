@@ -121,6 +121,12 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<string>>(new Set());
 
+  useEffect(() => {
+    if (activeTable === 'radar') {
+      setIsSidebarCollapsed(true);
+    }
+  }, [activeTable]);
+
   const [editRow, setEditRow] = useState<any | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
