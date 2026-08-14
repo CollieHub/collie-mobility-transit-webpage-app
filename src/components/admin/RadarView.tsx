@@ -108,6 +108,44 @@ function projectPointOnPolyline(pt: [number, number], path: [number, number][]):
   return bestPt;
 }
 
+function perpendicularDistanceKm(pt: [number, number], lineStart: [number, number], lineEnd: [number, number]): number {
+  const dx = lineEnd[1] - lineStart[1];
+  const dy = lineEnd[0] - lineStart[0];
+  const mag = Math.sqrt(dx * dx + dy * dy);
+  if (mag === 0) return calculateDistanceKm(pt[0], pt[1], lineStart[0], lineStart[1]);
+
+  const u = ((pt[1] - lineStart[1]) * dx + (pt[0] - lineStart[0]) * dy) / (mag * mag);
+  const clampedU = Math.max(0, Math.min(1, u));
+  const projLat = lineStart[0] + clampedU * dy;
+  const projLng = lineStart[1] + clampedU * dx;
+  return calculateDistanceKm(pt[0], pt[1], projLat, projLng);
+}
+
+// Ramer-Douglas-Peucker algorithm to extract significant control waypoints from dense shape nodes
+function simplifyPolylineRdp(points: [number, number][], epsilonKm: number = 0.2): [number, number][] {
+  if (points.length <= 2) return points;
+
+  let dmax = 0;
+  let index = 0;
+  const end = points.length - 1;
+
+  for (let i = 1; i < end; i++) {
+    const d = perpendicularDistanceKm(points[i], points[0], points[end]);
+    if (d > dmax) {
+      index = i;
+      dmax = d;
+    }
+  }
+
+  if (dmax > epsilonKm) {
+    const recResults1 = simplifyPolylineRdp(points.slice(0, index + 1), epsilonKm);
+    const recResults2 = simplifyPolylineRdp(points.slice(index), epsilonKm);
+    return [...recResults1.slice(0, recResults1.length - 1), ...recResults2];
+  } else {
+    return [points[0], points[end]];
+  }
+}
+
 async function fetchOsrmStreetRoute(from: [number, number], to: [number, number]): Promise<[number, number][]> {
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
@@ -115,7 +153,7 @@ async function fetchOsrmStreetRoute(from: [number, number], to: [number, number]
     if (!res.ok) return [to];
     const data = await res.json();
     if (data.routes && data.routes.length > 0 && data.routes[0].geometry?.coordinates) {
-      const coords = data.routes[0].geometry.coordinates; // Array de [lng, lat]
+      const coords = data.routes[0].geometry.coordinates;
       const points: [number, number][] = coords.slice(1).map((c: [number, number]) => [c[1], c[0]]);
       return points.length > 0 ? points : [to];
     }
@@ -139,7 +177,6 @@ function MapClickHandler({
       if (activeTool === 'add_stop') {
         onAddStop([e.latlng.lat, e.latlng.lng]);
       } else {
-        // En cualquier otro caso (o modo dibujo), la interacción sobre el mapa suma puntos del recorrido siguiendo las calles
         onAddWaypoint([e.latlng.lat, e.latlng.lng]);
       }
     }
@@ -187,7 +224,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [isRouting, setIsRouting] = useState<boolean>(false);
 
+  // Control waypoints: High-level control handles (5-15 points max)
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
+  // Full polyline path: Detailed OSRM curve geometry coordinates for clean street polyline rendering
+  const [fullPolylinePath, setFullPolylinePath] = useState<[number, number][]>([]);
+
   const [existingShapeId, setExistingShapeId] = useState<string | null>(null);
 
   const [stops, setStops] = useState<StopItem[]>([]);
@@ -233,6 +274,32 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     }
   }, [branchesList, selectedBranchId]);
 
+  const updateFullPolylinePathFromControls = useCallback(async (controls: [number, number][]) => {
+    if (controls.length < 2) {
+      setFullPolylinePath(controls);
+      return;
+    }
+
+    if (!useStreetRouting) {
+      setFullPolylinePath(controls);
+      return;
+    }
+
+    setIsRouting(true);
+    try {
+      let resultPath: [number, number][] = [controls[0]];
+      for (let i = 0; i < controls.length - 1; i++) {
+        const seg = await fetchOsrmStreetRoute(controls[i], controls[i + 1]);
+        resultPath = [...resultPath, ...seg];
+      }
+      setFullPolylinePath(resultPath);
+    } catch (_) {
+      setFullPolylinePath(controls);
+    } finally {
+      setIsRouting(false);
+    }
+  }, [useStreetRouting]);
+
   const loadBranchData = useCallback(async () => {
     if (!selectedBranchId) return;
 
@@ -250,19 +317,26 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
               return pt;
             });
-            setWaypoints(formatted);
+
+            setFullPolylinePath(formatted);
+            // Simplify dense 1,800+ coordinates into significant control waypoints for crisp map display
+            const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
+            setWaypoints(simplifiedControls);
             setExistingShapeId(match.id);
           } catch (_) {
             setWaypoints([]);
+            setFullPolylinePath([]);
             setExistingShapeId(null);
           }
         } else {
           setWaypoints([]);
+          setFullPolylinePath([]);
           setExistingShapeId(null);
         }
       }
     } catch (_) {
       setWaypoints([]);
+      setFullPolylinePath([]);
       setExistingShapeId(null);
     }
 
@@ -285,37 +359,32 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     loadBranchData();
   }, [loadBranchData]);
 
+  const displayPolylinePath = useMemo(() => {
+    return fullPolylinePath.length > 0 ? fullPolylinePath : waypoints;
+  }, [fullPolylinePath, waypoints]);
+
   const totalDistanceKm = useMemo(() => {
-    if (waypoints.length < 2) return 0;
+    if (displayPolylinePath.length < 2) return 0;
     let sum = 0;
-    for (let i = 0; i < waypoints.length - 1; i++) {
-      sum += calculateDistanceKm(waypoints[i][0], waypoints[i][1], waypoints[i + 1][0], waypoints[i + 1][1]);
+    for (let i = 0; i < displayPolylinePath.length - 1; i++) {
+      sum += calculateDistanceKm(displayPolylinePath[i][0], displayPolylinePath[i][1], displayPolylinePath[i + 1][0], displayPolylinePath[i + 1][1]);
     }
     return Math.round(sum * 100) / 100;
-  }, [waypoints]);
+  }, [displayPolylinePath]);
 
-  // 1. Clic en el mapa: Suma un punto al recorrido (Ruteo por calles con OSRM)
+  // 1. Clic en el mapa: Suma un punto de control al recorrido
   const handleAddWaypoint = async (pt: [number, number]) => {
-    if (waypoints.length === 0 || !useStreetRouting) {
-      setWaypoints(prev => [...prev, pt]);
-      return;
-    }
-
-    const lastPt = waypoints[waypoints.length - 1];
-    setIsRouting(true);
-    try {
-      const routedPoints = await fetchOsrmStreetRoute(lastPt, pt);
-      setWaypoints(prev => [...prev, ...routedPoints]);
-    } catch (_) {
-      setWaypoints(prev => [...prev, pt]);
-    } finally {
-      setIsRouting(false);
-    }
+    const updatedControls = [...waypoints, pt];
+    setWaypoints(updatedControls);
+    await updateFullPolylinePathFromControls(updatedControls);
   };
 
-  // 2. Clic directo sobre la línea del recorrido: Inserta un punto intermedio en ese segmento
+  // 2. Clic directo sobre la línea del recorrido: Inserta un punto de control intermedio
   const handleInsertPolylineWaypoint = async (clickPt: [number, number]) => {
-    if (waypoints.length < 2) return;
+    if (waypoints.length < 2) {
+      handleAddWaypoint(clickPt);
+      return;
+    }
 
     let minDistance = Infinity;
     let insertIdx = 1;
@@ -331,94 +400,28 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       }
     }
 
-    if (useStreetRouting) {
-      setIsRouting(true);
-      try {
-        const prevPt = waypoints[insertIdx - 1];
-        const nextPt = waypoints[insertIdx];
-
-        const seg1 = await fetchOsrmStreetRoute(prevPt, clickPt);
-        const seg2 = await fetchOsrmStreetRoute(clickPt, nextPt);
-
-        const inserted = [...seg1, ...seg2];
-        setWaypoints(prev => {
-          const updated = [...prev];
-          updated.splice(insertIdx, 0, ...inserted);
-          return updated;
-        });
-        showNotification?.('success', `Punto intermedio ruteado e insertado en la traza`);
-      } catch (_) {
-        setWaypoints(prev => {
-          const updated = [...prev];
-          updated.splice(insertIdx, 0, clickPt);
-          return updated;
-        });
-      } finally {
-        setIsRouting(false);
-      }
-    } else {
-      setWaypoints(prev => {
-        const updated = [...prev];
-        updated.splice(insertIdx, 0, clickPt);
-        return updated;
-      });
-      showNotification?.('success', `Punto intermedio insertado`);
-    }
+    const updatedControls = [...waypoints];
+    updatedControls.splice(insertIdx, 0, clickPt);
+    setWaypoints(updatedControls);
+    await updateFullPolylinePathFromControls(updatedControls);
+    showNotification?.('success', `Punto intermedio insertado`);
   };
 
-  // 3. Clic y mantener presionado (Drag & Drop) de un Waypoint
+  // 3. Clic y mantener presionado (Drag & Drop) de un Waypoint de control
   const handleWaypointDragEnd = async (idx: number, newPt: [number, number]) => {
-    if (!useStreetRouting || waypoints.length <= 1) {
-      setWaypoints(prev => {
-        const updated = [...prev];
-        updated[idx] = newPt;
-        return updated;
-      });
-      showNotification?.('success', `Punto #${idx + 1} movido`);
-      return;
-    }
-
-    setIsRouting(true);
-    try {
-      let newSegmentBefore: [number, number][] = [];
-      let newSegmentAfter: [number, number][] = [];
-
-      if (idx > 0) {
-        newSegmentBefore = await fetchOsrmStreetRoute(waypoints[idx - 1], newPt);
-      }
-      if (idx < waypoints.length - 1) {
-        newSegmentAfter = await fetchOsrmStreetRoute(newPt, waypoints[idx + 1]);
-      }
-
-      setWaypoints(prev => {
-        const updated = [...prev];
-        if (idx === 0) {
-          updated.splice(0, 1, newPt, ...newSegmentAfter);
-        } else if (idx === prev.length - 1) {
-          updated.splice(idx, 1, ...newSegmentBefore);
-        } else {
-          updated.splice(idx, 1, ...newSegmentBefore, ...newSegmentAfter);
-        }
-        return updated;
-      });
-      showNotification?.('success', `Punto #${idx + 1} re-ruteado por calles`);
-    } catch (_) {
-      setWaypoints(prev => {
-        const updated = [...prev];
-        updated[idx] = newPt;
-        return updated;
-      });
-    } finally {
-      setIsRouting(false);
-    }
+    const updatedControls = [...waypoints];
+    updatedControls[idx] = newPt;
+    setWaypoints(updatedControls);
+    await updateFullPolylinePathFromControls(updatedControls);
+    showNotification?.('success', `Punto #${idx + 1} movido`);
   };
 
   // 4. Clic y mantener presionado (Drag & Drop) de una Parada
   const handleStopDragEnd = (stopId: string, newPt: [number, number]) => {
     let projLat = newPt[0];
     let projLng = newPt[1];
-    if (waypoints.length >= 2) {
-      const proj = projectPointOnPolyline(newPt, waypoints);
+    if (displayPolylinePath.length >= 2) {
+      const proj = projectPointOnPolyline(newPt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
     }
@@ -426,24 +429,31 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     showNotification?.('success', 'Parada re-posicionada');
   };
 
-  const handleUndoWaypoint = () => {
-    setWaypoints(prev => prev.slice(0, -1));
+  const handleUndoWaypoint = async () => {
+    const updatedControls = waypoints.slice(0, -1);
+    setWaypoints(updatedControls);
+    await updateFullPolylinePathFromControls(updatedControls);
   };
 
   const handleClearWaypoints = () => {
     setWaypoints([]);
+    setFullPolylinePath([]);
   };
 
-  const handleDeleteWaypointIndex = (idx: number) => {
-    setWaypoints(prev => prev.filter((_, i) => i !== idx));
+  const handleDeleteWaypointIndex = async (idx: number) => {
+    const updatedControls = waypoints.filter((_, i) => i !== idx);
+    setWaypoints(updatedControls);
+    await updateFullPolylinePathFromControls(updatedControls);
   };
 
-  const handleReverseRouteShape = () => {
+  const handleReverseRouteShape = async () => {
     if (waypoints.length < 2) {
       showNotification?.('error', 'Se requieren al menos 2 puntos para invertir el trazado');
       return;
     }
-    setWaypoints(prev => [...prev].reverse());
+    const reversedControls = [...waypoints].reverse();
+    setWaypoints(reversedControls);
+    await updateFullPolylinePathFromControls(reversedControls);
     showNotification?.('success', 'Trazado invertido (ideal para configurar Vuelta)');
   };
 
@@ -452,8 +462,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
     let projLat = pt[0];
     let projLng = pt[1];
-    if (waypoints.length >= 2) {
-      const proj = projectPointOnPolyline(pt, waypoints);
+    if (displayPolylinePath.length >= 2) {
+      const proj = projectPointOnPolyline(pt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
     }
@@ -492,13 +502,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   };
 
   const handleProjectStopsOnRoute = () => {
-    if (waypoints.length < 2) {
+    if (displayPolylinePath.length < 2) {
       showNotification?.('error', 'Crea o carga un trazado primero para proyectar las paradas');
       return;
     }
     setStops(prev => {
       return prev.map(s => {
-        const proj = projectPointOnPolyline([s.lat, s.lng], waypoints);
+        const proj = projectPointOnPolyline([s.lat, s.lng], displayPolylinePath);
         return { ...s, proj_lat: proj[0], proj_lng: proj[1] };
       });
     });
@@ -552,7 +562,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   // 2. Tool Assistant: Auto-generador masivo de paradas cada X metros sobre el trazado
   const handleExecuteAutoStopsGenerator = () => {
-    if (waypoints.length < 2) {
+    if (displayPolylinePath.length < 2) {
       showNotification?.('error', 'Se requiere una traza dibujada para autogenerar paradas');
       return;
     }
@@ -567,18 +577,18 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       direction: direction,
       stop_order: 1,
       name: 'Origen / Cabecera',
-      lat: waypoints[0][0],
-      lng: waypoints[0][1],
-      proj_lat: waypoints[0][0],
-      proj_lng: waypoints[0][1]
+      lat: displayPolylinePath[0][0],
+      lng: displayPolylinePath[0][1],
+      proj_lat: displayPolylinePath[0][0],
+      proj_lng: displayPolylinePath[0][1]
     });
 
     let currentAccumulatedKm = 0;
     let nextTargetKm = intervalKm;
 
-    for (let i = 0; i < waypoints.length - 1; i++) {
-      const p1 = waypoints[i];
-      const p2 = waypoints[i + 1];
+    for (let i = 0; i < displayPolylinePath.length - 1; i++) {
+      const p1 = displayPolylinePath[i];
+      const p2 = displayPolylinePath[i + 1];
       const segDist = calculateDistanceKm(p1[0], p1[1], p2[0], p2[1]);
 
       while (currentAccumulatedKm + segDist >= nextTargetKm) {
@@ -607,7 +617,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     }
 
     // Destination Stop
-    const lastPt = waypoints[waypoints.length - 1];
+    const lastPt = displayPolylinePath[displayPolylinePath.length - 1];
     newStopsList.push({
       id: `stp_${selectedBranchId}_${direction}_${Date.now()}_dest`,
       branch_id: selectedBranchId,
@@ -633,13 +643,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
     setIsSaving(true);
     try {
-      if (waypoints.length >= 2) {
+      const pathToSave = displayPolylinePath.length > 0 ? displayPolylinePath : waypoints;
+      if (pathToSave.length >= 2) {
         const shapeId = existingShapeId || `shp_${selectedBranchId}_${direction}_${Date.now()}`;
         const shapePayload = {
           id: shapeId,
           branch_id: selectedBranchId,
           direction: direction,
-          coordinates_json: JSON.stringify(waypoints),
+          coordinates_json: JSON.stringify(pathToSave),
           total_distance_km: totalDistanceKm
         };
 
@@ -1166,7 +1177,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         {/* Leaflet Map Canvas */}
         <div style={{ flex: 1, borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)', position: 'relative' }}>
           <MapContainer
-            center={waypoints.length > 0 ? waypoints[0] : ZARATE_CENTER}
+            center={displayPolylinePath.length > 0 ? displayPolylinePath[0] : ZARATE_CENTER}
             zoom={13}
             style={{ height: '100%', width: '100%' }}
             zoomControl={false}
@@ -1180,10 +1191,10 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <MapFocusController focusCoords={focusCoords} />
             <MapClickHandler activeTool={activeTool} onAddWaypoint={handleAddWaypoint} onAddStop={handleAddStop} />
 
-            {/* Interactive Polyline: Clic sobre la linea para insertar un punto intermedio */}
-            {waypoints.length > 1 && (
+            {/* Interactive Polyline: Continuous OSRM street route shape */}
+            {displayPolylinePath.length > 1 && (
               <Polyline
-                positions={waypoints}
+                positions={displayPolylinePath}
                 eventHandlers={{
                   click(e) {
                     L.DomEvent.stopPropagation(e.originalEvent);
@@ -1192,21 +1203,21 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 }}
                 pathOptions={{
                   color: direction === 'ida' ? '#0284c7' : '#e11d48',
-                  weight: 8,
+                  weight: 7,
                   opacity: 0.85,
                   dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
                 }}
               />
             )}
 
-            {/* Waypoints Draggable Markers: Clic y mantener presionado para mover el punto */}
+            {/* Control Waypoint Markers: ONLY render the key control handles (5-15 max, zero clutter!) */}
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
 
               return (
                 <Marker
-                  key={`wpt_marker_${idx}`}
+                  key={`wpt_control_marker_${idx}`}
                   position={pt}
                   draggable={true}
                   icon={createWaypointIcon(isStart, isEnd)}
@@ -1220,16 +1231,16 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto ${idx + 1}`}
+                      {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto de Control ${idx + 1}`}
                       <br />
-                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Mantén presionado y arrastra para mover el punto</span>
+                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-rutar las calles</span>
                     </div>
                   </Popup>
                 </Marker>
               );
             })}
 
-            {/* Stop Draggable Markers: Clic y mantener presionado para re-posicionar parada */}
+            {/* Stop Draggable Markers: Paradas en mapa */}
             {stops.map(st => (
               <Marker
                 key={`stop_marker_${st.id}`}
@@ -1248,7 +1259,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
                     {st.stop_order}. {st.name}
                     <br />
-                    <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Mantén presionado y arrastra para mover la parada</span>
+                    <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
                   </div>
                 </Popup>
               </Marker>
@@ -1419,7 +1430,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </button>
               </div>
 
-              {/* TAB CONTENT: PARADAS LIST vs RECORRIDO WAYPOINTS LIST */}
+              {/* TAB CONTENT: PARADAS LIST vs RECORRIDO CONTROL WAYPOINTS LIST */}
               {rightDockTab === 'paradas' ? (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {stops.length === 0 ? (
