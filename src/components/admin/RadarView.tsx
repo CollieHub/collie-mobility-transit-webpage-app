@@ -285,7 +285,7 @@ interface RadarViewProps {
 export default function RadarView({ linesList = [], branchesList = [], showNotification }: RadarViewProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
-  const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(true);
+  const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(false);
   const isPolylineClickRef = useRef<boolean>(false);
 
   const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
