@@ -441,8 +441,12 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
-              const radius = isStart || isEnd ? 6 : 3.5;
-              const fillColor = isStart ? '#10b981' : isEnd ? '#ef4444' : '#38bdf8';
+
+              // Ocultar totalmente los puntos intermedios
+              if (!isStart && !isEnd) return null;
+
+              const radius = 6;
+              const fillColor = isStart ? '#10b981' : '#ef4444';
 
               return (
                 <CircleMarker
@@ -451,14 +455,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   radius={radius}
                   pathOptions={{
                     color: '#ffffff',
-                    weight: isStart || isEnd ? 2 : 1,
+                    weight: 2,
                     fillColor: fillColor,
                     fillOpacity: 1
                   }}
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {isStart ? '🚩 Inicio de Recorrido (Punto 1)' : isEnd ? '🏁 Fin de Recorrido' : `Punto ${idx + 1}`}
+                      {isStart ? '🚩 Inicio de Recorrido (Punto 1)' : '🏁 Fin de Recorrido'}
                       <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
                         Lat: {pt[0].toFixed(5)}, Lng: {pt[1].toFixed(5)}
                       </div>
