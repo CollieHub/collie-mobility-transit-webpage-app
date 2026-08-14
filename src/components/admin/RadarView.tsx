@@ -16,7 +16,10 @@ import {
   Settings,
   Maximize2,
   Edit3,
-  Layers
+  Layers,
+  Copy,
+  Wand2,
+  GitCompare
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -140,6 +143,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
 
+  // Assistant Modals State
+  const [showReplicateModal, setShowReplicateModal] = useState<boolean>(false);
+  const [replicateTargetBranchId, setReplicateTargetBranchId] = useState<string>('');
+  const [replicateTargetDirection, setReplicateTargetDirection] = useState<'ida' | 'vuelta'>('ida');
+
+  const [showAutoStopsModal, setShowAutoStopsModal] = useState<boolean>(false);
+  const [autoStopsIntervalMeters, setAutoStopsIntervalMeters] = useState<number>(250);
+
   const nestedBranchesForCombo = useMemo(() => {
     if (selectedLineFilterId === 'all') return branchesList;
     return branchesList.filter(b => b.line_id === selectedLineFilterId);
@@ -243,6 +254,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     setWaypoints(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const handleReverseRouteShape = () => {
+    if (waypoints.length < 2) {
+      showNotification?.('error', 'Se requieren al menos 2 puntos para invertir el trazado');
+      return;
+    }
+    setWaypoints(prev => [...prev].reverse());
+    showNotification?.('success', 'Trazado invertido (ideal para configurar Vuelta)');
+  };
+
   const handleAddStop = (pt: [number, number]) => {
     if (!selectedBranchId) return;
 
@@ -304,6 +324,121 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const handleClearAllStops = () => {
     setStops([]);
     showNotification?.('success', 'Todas las paradas eliminadas');
+  };
+
+  // 1. Tool Assistant: Replicar Paradas hacia otro Ramal
+  const handleExecuteReplicateStops = async () => {
+    if (!replicateTargetBranchId) {
+      showNotification?.('error', 'Selecciona el ramal destino');
+      return;
+    }
+    if (stops.length === 0) {
+      showNotification?.('error', 'No hay paradas en el ramal origen para replicar');
+      return;
+    }
+
+    try {
+      for (const st of stops) {
+        const payload = {
+          id: `stp_${replicateTargetBranchId}_${replicateTargetDirection}_${Date.now()}_${st.stop_order}`,
+          branch_id: replicateTargetBranchId,
+          direction: replicateTargetDirection,
+          stop_order: st.stop_order,
+          name: st.name,
+          lat: st.lat,
+          lng: st.lng,
+          proj_lat: st.proj_lat || st.lat,
+          proj_lng: st.proj_lng || st.lng
+        };
+
+        await fetch('/v1/admin/table/stops', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      await fetch('/v1/admin/cache/purge');
+      showNotification?.('success', `¡${stops.length} paradas replicadas exitosamente!`);
+      setShowReplicateModal(false);
+    } catch (err: any) {
+      showNotification?.('error', `Error al replicar paradas: ${err.message}`);
+    }
+  };
+
+  // 2. Tool Assistant: Auto-generador masivo de paradas cada X metros sobre el trazado
+  const handleExecuteAutoStopsGenerator = () => {
+    if (waypoints.length < 2) {
+      showNotification?.('error', 'Se requiere una traza dibujada para autogenerar paradas');
+      return;
+    }
+
+    const intervalKm = autoStopsIntervalMeters / 1000;
+    const newStopsList: StopItem[] = [];
+
+    // Origin Stop
+    newStopsList.push({
+      id: `stp_${selectedBranchId}_${direction}_${Date.now()}_orig`,
+      branch_id: selectedBranchId,
+      direction: direction,
+      stop_order: 1,
+      name: 'Origen / Cabecera',
+      lat: waypoints[0][0],
+      lng: waypoints[0][1],
+      proj_lat: waypoints[0][0],
+      proj_lng: waypoints[0][1]
+    });
+
+    let currentAccumulatedKm = 0;
+    let nextTargetKm = intervalKm;
+
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      const p1 = waypoints[i];
+      const p2 = waypoints[i + 1];
+      const segDist = calculateDistanceKm(p1[0], p1[1], p2[0], p2[1]);
+
+      while (currentAccumulatedKm + segDist >= nextTargetKm) {
+        const remainingForNext = nextTargetKm - currentAccumulatedKm;
+        const ratio = segDist > 0 ? remainingForNext / segDist : 0;
+
+        const stopLat = p1[0] + ratio * (p2[0] - p1[0]);
+        const stopLng = p1[1] + ratio * (p2[1] - p1[1]);
+
+        const orderNum = newStopsList.length + 1;
+        newStopsList.push({
+          id: `stp_${selectedBranchId}_${direction}_${Date.now()}_${orderNum}`,
+          branch_id: selectedBranchId,
+          direction: direction,
+          stop_order: orderNum,
+          name: `Parada Altura ${Math.round(nextTargetKm * 1000)}m`,
+          lat: stopLat,
+          lng: stopLng,
+          proj_lat: stopLat,
+          proj_lng: stopLng
+        });
+
+        nextTargetKm += intervalKm;
+      }
+      currentAccumulatedKm += segDist;
+    }
+
+    // Destination Stop
+    const lastPt = waypoints[waypoints.length - 1];
+    newStopsList.push({
+      id: `stp_${selectedBranchId}_${direction}_${Date.now()}_dest`,
+      branch_id: selectedBranchId,
+      direction: direction,
+      stop_order: newStopsList.length + 1,
+      name: 'Destino / Terminal',
+      lat: lastPt[0],
+      lng: lastPt[1],
+      proj_lat: lastPt[0],
+      proj_lng: lastPt[1]
+    });
+
+    setStops(newStopsList);
+    showNotification?.('success', `¡Se autogeneraron ${newStopsList.length} paradas a lo largo del trazado!`);
+    setShowAutoStopsModal(false);
   };
 
   const handleSaveAll = async () => {
@@ -685,7 +820,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             </span>
           </div>
 
-          {/* Map Editing Tools */}
+          {/* Map Editing Tools & Assistants */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <button
               onClick={() => setActiveTool(activeTool === 'draw_route' ? 'none' : 'draw_route')}
@@ -725,6 +860,66 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             >
               <MapPin size={14} />
               <span>{activeTool === 'add_stop' ? '🚏 Modo Agregar Parada ACTIVO' : '🚏 Agregar Parada'}</span>
+            </button>
+
+            {/* Assistant 1: Auto-generate Stops Wizard */}
+            <button
+              onClick={() => setShowAutoStopsModal(true)}
+              title="Autogenerar paradas cada X metros"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
+                backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                color: '#a78bfa',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Wand2 size={14} />
+              <span>Auto-Paradas</span>
+            </button>
+
+            {/* Assistant 2: Replicate Stops to another Branch */}
+            <button
+              onClick={() => setShowReplicateModal(true)}
+              title="Replicar paradas a otro ramal"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+                backgroundColor: 'rgba(14, 165, 233, 0.15)',
+                color: '#38bdf8',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Copy size={14} />
+              <span>Replicar</span>
+            </button>
+
+            {/* Assistant 3: Invert & Create Vuelta Shape */}
+            <button
+              onClick={handleReverseRouteShape}
+              title="Invertir trazado para crear la Vuelta"
+              style={{
+                padding: '0.45rem 0.65rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: '#1f2937',
+                color: '#f3f4f6',
+                cursor: 'pointer'
+              }}
+            >
+              <GitCompare size={14} />
             </button>
 
             <button
@@ -1159,7 +1354,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </div>
               )}
 
-              {/* BOTTOM TOOLBAR GRID (DEPENDING ON ACTIVE RIGHT DOCK TAB) */}
+              {/* BOTTOM TOOLBAR GRID */}
               {rightDockTab === 'paradas' ? (
                 <div style={{
                   padding: '0.6rem 0.75rem',
@@ -1205,18 +1400,18 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Search size={14} />
                   </button>
                   <button
-                    onClick={() => showNotification?.('success', 'Paradas duplicadas')}
-                    title="Duplicar paradas"
+                    onClick={() => setShowReplicateModal(true)}
+                    title="Replicar paradas a otro ramal"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Layers size={14} />
+                    <Copy size={14} />
                   </button>
                   <button
-                    onClick={() => showNotification?.('success', 'Modo edición masiva')}
-                    title="Edición masiva de paradas"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={() => setShowAutoStopsModal(true)}
+                    title="Autogenerar paradas por distancia"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Edit3 size={14} />
+                    <Wand2 size={14} />
                   </button>
                   <button
                     onClick={handleClearAllStops}
@@ -1259,13 +1454,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Trash2 size={14} />
                   </button>
                   <button
-                    onClick={() => {
-                      if (waypoints.length > 0) setFocusCoords(waypoints[0]);
-                    }}
-                    title="Centrar en inicio del trazado"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={handleReverseRouteShape}
+                    title="Invertir sentido del trazado"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Search size={14} />
+                    <GitCompare size={14} />
                   </button>
                   <div
                     title={`Distancia acumulada: ${totalDistanceKm} km`}
@@ -1287,6 +1480,155 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           )}
         </div>
       </div>
+
+      {/* MODAL 1: REPLICAR PARADAS HACIA OTRO RAMAL */}
+      {showReplicateModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Copy size={16} /> Replicar Paradas hacia otro Ramal
+              </h3>
+              <button onClick={() => setShowReplicateModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#9ca3af', lineHeight: '1.4' }}>
+              Se copiarán las <strong>{stops.length} paradas</strong> del ramal actual hacia el ramal y sentido destino seleccionados.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 700 }}>RAMAL DESTINO:</label>
+                <select
+                  value={replicateTargetBranchId}
+                  onChange={e => setReplicateTargetBranchId(e.target.value)}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#1f2937', color: '#ffffff', fontSize: '0.8rem' }}
+                >
+                  <option value="">Seleccionar ramal destino...</option>
+                  {branchesList.map(b => (
+                    <option key={`rep_${b.id}`} value={b.id}>
+                      {b.code ? `${b.code} - ${b.name}` : b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 700 }}>SENTIDO DESTINO:</label>
+                <select
+                  value={replicateTargetDirection}
+                  onChange={e => setReplicateTargetDirection(e.target.value as any)}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#1f2937', color: '#ffffff', fontSize: '0.8rem' }}
+                >
+                  <option value="ida">IDA</option>
+                  <option value="vuelta">VUELTA</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowReplicateModal(false)}
+                style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExecuteReplicateStops}
+                style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', backgroundColor: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Replicar Paradas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: AUTOGENERADOR MASIVO DE PARADAS CADA X METROS */}
+      {showAutoStopsModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#a78bfa', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Wand2 size={16} /> Autogenerar Paradas por Distancia
+              </h3>
+              <button onClick={() => setShowAutoStopsModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#9ca3af', lineHeight: '1.4' }}>
+              Calcula y posiciona automáticamente paradas a lo largo de la traza vectorial dibujada cada <strong>{autoStopsIntervalMeters} metros</strong>.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 700 }}>DISTANCIA ENTRE PARADAS (METROS):</label>
+              <input
+                type="number"
+                value={autoStopsIntervalMeters}
+                onChange={e => setAutoStopsIntervalMeters(Math.max(50, parseInt(e.target.value, 10) || 100))}
+                step={50}
+                style={{ width: '100%', padding: '0.55rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: '#1f2937', color: '#ffffff', fontSize: '0.85rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowAutoStopsModal(false)}
+                style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', backgroundColor: 'transparent', color: '#cbd5e1', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExecuteAutoStopsGenerator}
+                style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', backgroundColor: '#8b5cf6', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Generar Paradas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
