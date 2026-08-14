@@ -794,6 +794,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={handleSaveAll}
               disabled={isSaving}
+              className="btn-animated btn-animated-success"
               style={{
                 flex: 1,
                 padding: '0.5rem',
@@ -814,6 +815,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             </button>
             <button
               onClick={loadBranchData}
+              className="btn-animated btn-animated-danger"
               style={{
                 padding: '0.5rem 0.75rem',
                 backgroundColor: 'rgba(239, 68, 68, 0.15)',
@@ -1006,6 +1008,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                         <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
                           <button
                             onClick={e => { e.stopPropagation(); setDirection('ida'); }}
+                            className="btn-animated btn-animated-primary"
                             style={{
                               flex: 1,
                               padding: '0.25rem 0.4rem',
@@ -1022,6 +1025,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); setDirection('vuelta'); }}
+                            className="btn-animated btn-animated-primary"
                             style={{
                               flex: 1,
                               padding: '0.25rem 0.4rem',
@@ -1091,6 +1095,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={() => setUseStreetRouting(!useStreetRouting)}
               title="Alternar entre Ruteo por calles (OSRM) o Línea recta directa"
+              className="btn-animated btn-animated-success"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1111,6 +1116,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
             <button
               onClick={() => setActiveTool(activeTool === 'add_stop' ? 'none' : 'add_stop')}
+              className="btn-animated btn-animated-primary"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1133,6 +1139,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={() => setShowAutoStopsModal(true)}
               title="Autogenerar paradas cada X metros"
+              className="btn-animated btn-animated-purple"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1155,6 +1162,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={() => setShowReplicateModal(true)}
               title="Replicar paradas a otro ramal"
+              className="btn-animated btn-animated-primary"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1177,6 +1185,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={handleReverseRouteShape}
               title="Invertir trazado para crear la Vuelta"
+              className="btn-animated btn-animated-dark"
               style={{
                 padding: '0.45rem 0.65rem',
                 borderRadius: '8px',
@@ -1193,6 +1202,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               onClick={handleUndoWaypoint}
               disabled={waypoints.length === 0}
               title="Deshacer último punto del trazado"
+              className="btn-animated btn-animated-dark"
               style={{
                 padding: '0.45rem 0.65rem',
                 borderRadius: '8px',
@@ -1209,6 +1219,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               onClick={handleClearWaypoints}
               disabled={waypoints.length === 0}
               title="Limpiar trazado"
+              className="btn-animated btn-animated-danger"
               style={{
                 padding: '0.45rem 0.65rem',
                 borderRadius: '8px',
@@ -1224,6 +1235,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             <button
               onClick={() => setShowRightDock(!showRightDock)}
               title="Alternar dock flotante"
+              className="btn-animated btn-animated-primary"
               style={{
                 padding: '0.45rem 0.65rem',
                 borderRadius: '8px',
@@ -1662,6 +1674,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={() => setActiveTool('add_stop')}
                     title="Agregar Parada"
+                    className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Plus size={14} />
@@ -1669,6 +1682,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={() => showNotification?.('success', 'Modo posicionamiento de paradas activado')}
                     title="Posicionar Paradas"
+                    className="btn-animated btn-animated-success"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <MapPin size={14} />
@@ -1676,6 +1690,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={handleReverseStops}
                     title="Invertir secuencia de paradas"
+                    className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <ArrowUpDown size={14} />
@@ -1683,6 +1698,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={handleProjectStopsOnRoute}
                     title="Ordenar por distancia"
+                    className="btn-animated btn-animated-dark"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#b45309', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Compass size={14} />
@@ -1690,6 +1706,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={handleProjectStopsOnRoute}
                     title="Auto-proyectar paradas sobre el trazado"
+                    className="btn-animated btn-animated-dark"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Search size={14} />
@@ -1697,6 +1714,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={() => setShowReplicateModal(true)}
                     title="Replicar paradas a otro ramal"
+                    className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Copy size={14} />
@@ -1704,6 +1722,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={() => setShowAutoStopsModal(true)}
                     title="Autogenerar paradas por distancia"
+                    className="btn-animated btn-animated-purple"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Wand2 size={14} />
@@ -1711,6 +1730,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={handleClearAllStops}
                     title="Eliminar todas las paradas"
+                    className="btn-animated btn-animated-danger"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#dc2626', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
@@ -1728,6 +1748,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={() => setUseStreetRouting(!useStreetRouting)}
                     title={useStreetRouting ? 'Desactivar ruteo OSRM por calles' : 'Activar ruteo OSRM por calles'}
+                    className="btn-animated btn-animated-success"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: useStreetRouting ? '#10b981' : '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Navigation size={14} />
@@ -1736,6 +1757,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     onClick={handleUndoWaypoint}
                     disabled={waypoints.length === 0}
                     title="Deshacer último punto"
+                    className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#0284c7', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Undo size={14} />
@@ -1744,6 +1766,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     onClick={handleClearWaypoints}
                     disabled={waypoints.length === 0}
                     title="Limpiar todo el trazado"
+                    className="btn-animated btn-animated-danger"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#dc2626', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
@@ -1752,6 +1775,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     onClick={handleSaveAll}
                     disabled={isSaving}
                     title="Guardar trazado a D1"
+                    className="btn-animated btn-animated-success"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Save size={14} />
@@ -1759,6 +1783,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <button
                     onClick={handleReverseRouteShape}
                     title="Invertir sentido del trazado"
+                    className="btn-animated btn-animated-purple"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <GitCompare size={14} />
