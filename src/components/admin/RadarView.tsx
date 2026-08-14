@@ -22,7 +22,8 @@ import {
   GitCompare,
   Navigation,
   Lock,
-  Unlock
+  Unlock,
+  Hash
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -68,6 +69,22 @@ function createStopIcon(color: string = '#ea580c') {
     </svg>`;
   return L.divIcon({
     className: 'custom-stop-icon',
+    html: svgCode,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2]
+  });
+}
+
+function createStopIconWithNumber(orderNum: number, color: string = '#ea580c') {
+  const size = 26;
+  const svgCode = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
+      <rect width="32" height="32" rx="8" fill="${color}"/>
+      <rect x="1.5" y="1.5" width="29" height="29" rx="6.5" fill="none" stroke="#ffffff" stroke-width="2" />
+      <text x="16" y="21" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#ffffff" text-anchor="middle">${orderNum}</text>
+    </svg>`;
+  return L.divIcon({
+    className: 'custom-stop-number-icon',
     html: svgCode,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2]
@@ -357,6 +374,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
+  const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
   const [isRouting, setIsRouting] = useState<boolean>(false);
 
   // Control waypoints: High-level control handles (5-15 points max)
@@ -1421,6 +1439,29 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <span>{useStreetRouting ? '🛣️ Ruteo Calles: SÍ' : '📏 Ruteo Recto: SÍ'}</span>
             </button>
 
+            {/* Toggle Stop Icon Display Mode: Bus Icon vs Sequential Numbers */}
+            <button
+              onClick={() => setStopIconMode(prev => prev === 'icon' ? 'number' : 'icon')}
+              title={stopIconMode === 'number' ? 'Cambiar íconos de paradas a símbolo de colectivo' : 'Cambiar íconos de paradas a números secuenciales (1..N)'}
+              className="btn-animated btn-animated-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: stopIconMode === 'number' ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: stopIconMode === 'number' ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
+                color: stopIconMode === 'number' ? '#38bdf8' : '#9ca3af',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Hash size={14} />
+              <span>{stopIconMode === 'number' ? '🔢 Números: SÍ' : '🚌 Íconos: SÍ'}</span>
+            </button>
+
 
 
             {/* Assistant 1: Auto-generate Stops Wizard */}
@@ -1619,13 +1660,17 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               );
             })}
 
-            {/* Stop Draggable Markers: Paradas en mapa con el icono oficial de la app publica */}
+            {/* Stop Draggable Markers: Paradas en mapa con el icono oficial o numero secuencial */}
             {stops.map(st => (
               <Marker
                 key={`stop_marker_${st.id}`}
                 position={[st.lat, st.lng]}
                 draggable={isEditingEnabled}
-                icon={createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')}
+                icon={
+                  stopIconMode === 'number'
+                    ? createStopIconWithNumber(st.stop_order, direction === 'ida' ? '#0284c7' : '#ea580c')
+                    : createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')
+                }
                 eventHandlers={{
                   dragend(e: any) {
                     const newLat = e.target.getLatLng().lat;
