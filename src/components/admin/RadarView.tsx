@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -441,10 +441,21 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
-              const icon = isStart ? startIcon : isEnd ? endIcon : waypointIcon;
+              const radius = isStart || isEnd ? 6 : 3.5;
+              const fillColor = isStart ? '#10b981' : isEnd ? '#ef4444' : '#38bdf8';
 
               return (
-                <Marker key={idx} position={pt} icon={icon}>
+                <CircleMarker
+                  key={idx}
+                  center={pt}
+                  radius={radius}
+                  pathOptions={{
+                    color: '#ffffff',
+                    weight: isStart || isEnd ? 2 : 1,
+                    fillColor: fillColor,
+                    fillOpacity: 1
+                  }}
+                >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
                       {isStart ? '🚩 Inicio de Recorrido (Punto 1)' : isEnd ? '🏁 Fin de Recorrido' : `Punto ${idx + 1}`}
@@ -453,7 +464,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                       </div>
                     </div>
                   </Popup>
-                </Marker>
+                </CircleMarker>
               );
             })}
           </MapContainer>
