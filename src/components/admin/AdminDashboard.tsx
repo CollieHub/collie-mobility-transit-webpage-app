@@ -77,7 +77,7 @@ const NAVIGATION_GROUPS = [
 
 export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboardProps) {
   const [tables, setTables] = useState<Record<string, TableMeta>>({});
-  const [activeTable, setActiveTable] = useState<string>('schedules');
+  const [activeTable, setActiveTable] = useState<string>('radar');
   const [rows, setRows] = useState<any[]>([]);
   const [linesList, setLinesList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
@@ -115,9 +115,9 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
   const [total, setTotal] = useState<number>(0);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPurgingCache, setIsPurgingCache] = useState<boolean>(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(true);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<string>>(new Set());
 
