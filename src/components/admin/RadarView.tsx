@@ -19,7 +19,8 @@ import {
   Layers,
   Copy,
   Wand2,
-  GitCompare
+  GitCompare,
+  Navigation
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -72,6 +73,23 @@ function projectPointOnPolyline(pt: [number, number], path: [number, number][]):
   return bestPt;
 }
 
+async function fetchOsrmStreetRoute(from: [number, number], to: [number, number]): Promise<[number, number][]> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if (!res.ok) return [to];
+    const data = await res.json();
+    if (data.routes && data.routes.length > 0 && data.routes[0].geometry?.coordinates) {
+      const coords = data.routes[0].geometry.coordinates; // Array de [lng, lat]
+      const points: [number, number][] = coords.slice(1).map((c: [number, number]) => [c[1], c[0]]);
+      return points.length > 0 ? points : [to];
+    }
+  } catch (err) {
+    console.warn('Error al consultar ruteo OSRM:', err);
+  }
+  return [to];
+}
+
 function MapClickHandler({
   activeTool,
   onAddWaypoint,
@@ -83,10 +101,11 @@ function MapClickHandler({
 }) {
   useMapEvents({
     click(e) {
-      if (activeTool === 'draw_route') {
-        onAddWaypoint([e.latlng.lat, e.latlng.lng]);
-      } else if (activeTool === 'add_stop') {
+      if (activeTool === 'add_stop') {
         onAddStop([e.latlng.lat, e.latlng.lng]);
+      } else {
+        // En cualquier otro caso (o modo dibujo), la interacción sobre el mapa suma puntos del recorrido siguiendo las calles
+        onAddWaypoint([e.latlng.lat, e.latlng.lng]);
       }
     }
   });
@@ -130,6 +149,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
+  const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
+  const [isRouting, setIsRouting] = useState<boolean>(false);
 
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
   const [existingShapeId, setExistingShapeId] = useState<string | null>(null);
@@ -238,8 +259,23 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     return Math.round(sum * 100) / 100;
   }, [waypoints]);
 
-  const handleAddWaypoint = (pt: [number, number]) => {
-    setWaypoints(prev => [...prev, pt]);
+  // Clic en el mapa: Ruteo ruteando por calles con OSRM
+  const handleAddWaypoint = async (pt: [number, number]) => {
+    if (waypoints.length === 0 || !useStreetRouting) {
+      setWaypoints(prev => [...prev, pt]);
+      return;
+    }
+
+    const lastPt = waypoints[waypoints.length - 1];
+    setIsRouting(true);
+    try {
+      const routedPoints = await fetchOsrmStreetRoute(lastPt, pt);
+      setWaypoints(prev => [...prev, ...routedPoints]);
+    } catch (_) {
+      setWaypoints(prev => [...prev, pt]);
+    } finally {
+      setIsRouting(false);
+    }
   };
 
   const handleUndoWaypoint = () => {
@@ -803,7 +839,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           flexWrap: 'wrap',
           gap: '0.75rem'
         }}>
-          {/* Active Branch Info */}
+          {/* Active Branch Info & Routing Indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
               {selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Selecciona un Ramal'}
@@ -818,28 +854,36 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             }}>
               {direction.toUpperCase()} ({direction === 'ida' ? (selectedBranchObj?.direction_ida_label || 'Ida') : (selectedBranchObj?.direction_vuelta_label || 'Vuelta')})
             </span>
+
+            {isRouting && (
+              <span style={{ fontSize: '0.7rem', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                🛣️ Ruteando por calles...
+              </span>
+            )}
           </div>
 
           {/* Map Editing Tools & Assistants */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Street Routing OSRM Toggle */}
             <button
-              onClick={() => setActiveTool(activeTool === 'draw_route' ? 'none' : 'draw_route')}
+              onClick={() => setUseStreetRouting(!useStreetRouting)}
+              title="Alternar entre Ruteo por calles (OSRM) o Línea recta directa"
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.4rem',
                 padding: '0.45rem 0.85rem',
                 borderRadius: '8px',
-                border: activeTool === 'draw_route' ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: activeTool === 'draw_route' ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
-                color: activeTool === 'draw_route' ? '#38bdf8' : '#9ca3af',
+                border: useStreetRouting ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: useStreetRouting ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
+                color: useStreetRouting ? '#10b981' : '#9ca3af',
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
-              <Compass size={14} />
-              <span>{activeTool === 'draw_route' ? '✏️ Modo Dibujar Recorrido ACTIVO' : '✏️ Dibujar Recorrido'}</span>
+              <Navigation size={14} />
+              <span>{useStreetRouting ? '🛣️ Ruteo Calles: SÍ' : '📏 Ruteo Recto: SÍ'}</span>
             </button>
 
             <button
@@ -850,16 +894,16 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 gap: '0.4rem',
                 padding: '0.45rem 0.85rem',
                 borderRadius: '8px',
-                border: activeTool === 'add_stop' ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: activeTool === 'add_stop' ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
-                color: activeTool === 'add_stop' ? '#10b981' : '#9ca3af',
+                border: activeTool === 'add_stop' ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTool === 'add_stop' ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
+                color: activeTool === 'add_stop' ? '#38bdf8' : '#9ca3af',
                 fontSize: '0.8rem',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
               <MapPin size={14} />
-              <span>{activeTool === 'add_stop' ? '🚏 Modo Agregar Parada ACTIVO' : '🚏 Agregar Parada'}</span>
+              <span>{activeTool === 'add_stop' ? '🚏 Agregar Paradas ACTIVO' : '🚏 Agregar Parada'}</span>
             </button>
 
             {/* Assistant 1: Auto-generate Stops Wizard */}
@@ -1223,7 +1267,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
                       <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
                       No hay paradas en {direction.toUpperCase()}.<br />
-                      Usa el botón <strong>+</strong> inferior para sumar paradas sobre el mapa.
+                      Activa <strong>🚏 Agregar Parada</strong> e ir tocando el mapa.
                     </div>
                   ) : (
                     stops.map((st) => (
@@ -1303,7 +1347,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
                       <Compass size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
                       No hay trazado dibujado para {direction.toUpperCase()}.<br />
-                      Activa <strong>✏️ Dibujar Recorrido</strong> para ir clickeando el mapa.
+                      Haz clic sobre el mapa para trazar el recorrido por las calles.
                     </div>
                   ) : (
                     waypoints.map((pt, idx) => {
@@ -1431,11 +1475,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   gap: '0.35rem'
                 }}>
                   <button
-                    onClick={() => setActiveTool(activeTool === 'draw_route' ? 'none' : 'draw_route')}
-                    title={activeTool === 'draw_route' ? 'Desactivar Dibujo' : 'Activar Modo Dibujar Recorrido'}
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: activeTool === 'draw_route' ? '#10b981' : '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={() => setUseStreetRouting(!useStreetRouting)}
+                    title={useStreetRouting ? 'Desactivar ruteo OSRM por calles' : 'Activar ruteo OSRM por calles'}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: useStreetRouting ? '#10b981' : '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Compass size={14} />
+                    <Navigation size={14} />
                   </button>
                   <button
                     onClick={handleUndoWaypoint}
