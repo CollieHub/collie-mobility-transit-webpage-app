@@ -338,6 +338,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [showAutoStopsModal, setShowAutoStopsModal] = useState<boolean>(false);
   const [autoStopsIntervalMeters, setAutoStopsIntervalMeters] = useState<number>(250);
+  const [showReverseStopsModal, setShowReverseStopsModal] = useState<boolean>(false);
 
   const nestedBranchesForCombo = useMemo(() => {
     if (selectedLineFilterId === 'all') return branchesList;
@@ -1739,7 +1740,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <MapPin size={14} />
                   </button>
                   <button
-                    onClick={handleReverseStops}
+                    onClick={() => setShowReverseStopsModal(true)}
                     title="Invertir secuencia de paradas"
                     className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -1989,6 +1990,68 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: 'none', backgroundColor: '#8b5cf6', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
               >
                 Generar Paradas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL 3: INVERTIR SECUENCIA DE PARADAS CONFIRMACION */}
+      {showReverseStopsModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <ArrowUpDown size={16} /> Invertir Secuencia de Paradas
+              </h3>
+              <button onClick={() => setShowReverseStopsModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Estás seguro de que deseas invertir el orden de la secuencia de las <strong>{stops.length} paradas</strong> en el sentido <strong>{direction.toUpperCase()}</strong>?
+              <br />
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block' }}>
+                La primera parada se convertirá en la última y toda la secuencia se reordenará inversamente.
+              </span>
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowReverseStopsModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleReverseStops();
+                  setShowReverseStopsModal(false);
+                }}
+                className="btn-animated btn-animated-primary"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Invertir Secuencia
               </button>
             </div>
           </div>
