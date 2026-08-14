@@ -734,8 +734,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             zoomControl={false}
           >
             <TileLayer
-              attribution='&copy; OpenStreetMap contributors &copy; CARTO'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               maxZoom={19}
             />
 
@@ -789,7 +789,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <CircleMarker
                 key={st.id}
                 center={[st.lat, st.lng]}
-                radius={7}
+                radius={5}
                 pathOptions={{
                   color: '#ffffff',
                   weight: 2,
@@ -797,11 +797,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   fillOpacity: 1
                 }}
               >
-                <Tooltip permanent direction="top" offset={[0, -8]} opacity={0.9}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0f172a' }}>
+                <Popup>
+                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
                     {st.stop_order}. {st.name}
-                  </span>
-                </Tooltip>
+                  </div>
+                </Popup>
               </CircleMarker>
             ))}
           </MapContainer>
