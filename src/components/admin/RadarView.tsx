@@ -769,6 +769,63 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     showNotification?.('success', 'Orden de paradas invertido');
   };
 
+  const handleSortStopsByPathDistance = () => {
+    if (displayPolylinePath.length < 2 || stops.length < 2) {
+      showNotification?.('error', 'Se requiere un trazado y al menos 2 paradas para reordenar');
+      return;
+    }
+
+    const findPolylineDistanceKm = (pt: [number, number], path: [number, number][]) => {
+      let minDistSq = Infinity;
+      let nearestSegIdx = 0;
+      let nearestProj: [number, number] = pt;
+
+      for (let i = 0; i < path.length - 1; i++) {
+        const a = path[i];
+        const b = path[i + 1];
+        const dy = b[0] - a[0];
+        const dx = b[1] - a[1];
+        const lenSq = dy * dy + dx * dx;
+
+        let t = 0;
+        if (lenSq > 0) {
+          t = Math.max(0, Math.min(1, ((pt[0] - a[0]) * dy + (pt[1] - a[1]) * dx) / lenSq));
+        }
+        const proj: [number, number] = [a[0] + t * dy, a[1] + t * dx];
+        const distSq = Math.pow(pt[0] - proj[0], 2) + Math.pow(pt[1] - proj[1], 2);
+        if (distSq < minDistSq) {
+          minDistSq = distSq;
+          nearestSegIdx = i;
+          nearestProj = proj;
+        }
+      }
+
+      let accDist = 0;
+      for (let i = 0; i < nearestSegIdx; i++) {
+        accDist += calculateDistanceKm(path[i][0], path[i][1], path[i + 1][0], path[i + 1][1]);
+      }
+      accDist += calculateDistanceKm(path[nearestSegIdx][0], path[nearestSegIdx][1], nearestProj[0], nearestProj[1]);
+
+      return accDist;
+    };
+
+    setStops(prev => {
+      const withDistance = prev.map(s => ({
+        stop: s,
+        distKm: findPolylineDistanceKm([s.proj_lat || s.lat, s.proj_lng || s.lng], displayPolylinePath)
+      }));
+
+      withDistance.sort((a, b) => a.distKm - b.distKm);
+
+      return withDistance.map((item, idx) => ({
+        ...item.stop,
+        stop_order: idx + 1
+      }));
+    });
+
+    showNotification?.('success', 'Paradas reordenadas secuencialmente de inicio a fin del recorrido');
+  };
+
   const handleProjectStopsOnRoute = () => {
     if (displayPolylinePath.length < 2) {
       showNotification?.('error', 'Crea o carga un trazado primero para proyectar las paradas');
@@ -1890,14 +1947,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </div>
               )}
 
-              {/* BOTTOM TOOLBAR GRID */}
+              {/* BOTTOM TOOLBAR GRID (6 BOTONES ÚNICOS) */}
               {rightDockTab === 'paradas' ? (
                 <div style={{
                   padding: '0.6rem 0.75rem',
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
+                  gridTemplateColumns: 'repeat(6, 1fr)',
                   gap: '0.35rem'
                 }}>
                   <button
@@ -1910,27 +1967,19 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   </button>
                   <button
                     onClick={() => setShowReverseStopsModal(true)}
-                    title="Invertir secuencia de paradas"
+                    title="Invertir secuencia de paradas (1->N a N->1)"
                     className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <ArrowUpDown size={14} />
                   </button>
                   <button
-                    onClick={handleProjectStopsOnRoute}
-                    title="Ordenar por distancia"
-                    className="btn-animated btn-animated-dark"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#b45309', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    onClick={handleSortStopsByPathDistance}
+                    title="Reordenar paradas de inicio a fin según el recorrido"
+                    className="btn-animated btn-animated-primary"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#d97706', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Compass size={14} />
-                  </button>
-                  <button
-                    onClick={handleProjectStopsOnRoute}
-                    title="Auto-proyectar paradas sobre el trazado"
-                    className="btn-animated btn-animated-dark"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Search size={14} />
                   </button>
                   <button
                     onClick={() => setShowReplicateModal(true)}
@@ -1942,7 +1991,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   </button>
                   <button
                     onClick={() => setShowAutoStopsModal(true)}
-                    title="Autogenerar paradas por distancia"
+                    title="Autogenerar paradas por distancia cada X metros"
                     className="btn-animated btn-animated-purple"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
@@ -1950,9 +1999,9 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   </button>
                   <button
                     onClick={handleClearAllStops}
-                    title="Eliminar todas las paradas"
+                    title="Eliminar todas las paradas de esta solapa"
                     className="btn-animated btn-animated-danger"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#dc2626', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
                   </button>
