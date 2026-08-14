@@ -123,8 +123,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
 
   const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
-  const [lineSearch, setLineSearch] = useState<string>('');
-  const [branchSearch, setBranchSearch] = useState<string>('');
+  const [selectedLineFilterId, setSelectedLineFilterId] = useState<string>('all');
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
@@ -141,37 +140,25 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
 
+  const nestedBranchesForCombo = useMemo(() => {
+    if (selectedLineFilterId === 'all') return branchesList;
+    return branchesList.filter(b => b.line_id === selectedLineFilterId);
+  }, [branchesList, selectedLineFilterId]);
+
   const groupedBranches = useMemo(() => {
     const groups: Record<string, any[]> = {};
-    branchesList.forEach(b => {
+    nestedBranchesForCombo.forEach(b => {
       let key = 'SIT';
       if (b.line_id && b.line_id.includes('campana')) key = 'Campana';
       else if (b.line_id && b.line_id.includes('san_nicolas')) key = 'San Nicolás';
       else if (b.code && b.code.startsWith('228')) key = 'Metropolitana';
       else if (b.company_id) key = b.company_id;
 
-      if (lineSearch) {
-        const qL = lineSearch.toLowerCase();
-        const lineObj = linesList.find(l => l.id === b.line_id);
-        const lineText = `${lineObj?.code || ''} ${lineObj?.name || ''} ${key}`.toLowerCase();
-        if (!lineText.includes(qL)) {
-          return;
-        }
-      }
-
-      if (branchSearch) {
-        const qB = branchSearch.toLowerCase();
-        const branchText = `${b.code || ''} ${b.name || ''}`.toLowerCase();
-        if (!branchText.includes(qB)) {
-          return;
-        }
-      }
-
       if (!groups[key]) groups[key] = [];
       groups[key].push(b);
     });
     return groups;
-  }, [branchesList, linesList, lineSearch, branchSearch]);
+  }, [nestedBranchesForCombo]);
 
   useEffect(() => {
     if (branchesList.length > 0 && !selectedBranchId) {
@@ -484,43 +471,73 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           </button>
         </div>
 
-        {/* Filter Inputs: Line & Ramal */}
-        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.04)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-            <input
-              type="text"
-              placeholder="Filtrar por línea..."
-              value={lineSearch}
-              onChange={e => setLineSearch(e.target.value)}
+        {/* Nested Combos: Línea y Ramal */}
+        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          {/* Combo 1: Línea */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              LÍNEA / EMPRESA
+            </label>
+            <select
+              value={selectedLineFilterId}
+              onChange={e => {
+                const val = e.target.value;
+                setSelectedLineFilterId(val);
+                if (val !== 'all') {
+                  const firstBranch = branchesList.find(b => b.line_id === val);
+                  if (firstBranch) setSelectedBranchId(firstBranch.id);
+                }
+              }}
               style={{
                 width: '100%',
-                padding: '0.45rem 0.5rem 0.45rem 2rem',
+                padding: '0.5rem 0.65rem',
                 borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 backgroundColor: '#1f2937',
                 color: '#ffffff',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                outline: 'none',
+                cursor: 'pointer'
               }}
-            />
+            >
+              <option value="all">Todas las Líneas ({linesList.length})</option>
+              {linesList.map(line => (
+                <option key={line.id} value={line.id}>
+                  Línea {line.code} - {line.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <div style={{ position: 'relative' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-            <input
-              type="text"
-              placeholder="Filtrar por ramal..."
-              value={branchSearch}
-              onChange={e => setBranchSearch(e.target.value)}
+
+          {/* Combo 2: Ramal (Anidado) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              RAMAL
+            </label>
+            <select
+              value={selectedBranchId}
+              onChange={e => setSelectedBranchId(e.target.value)}
               style={{
                 width: '100%',
-                padding: '0.45rem 0.5rem 0.45rem 2rem',
+                padding: '0.5rem 0.65rem',
                 borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 backgroundColor: '#1f2937',
                 color: '#ffffff',
-                fontSize: '0.8rem'
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                outline: 'none',
+                cursor: 'pointer'
               }}
-            />
+            >
+              <option value="">Seleccionar Ramal...</option>
+              {nestedBranchesForCombo.map(b => (
+                <option key={b.id} value={b.id}>
+                  {b.code ? `${b.code} - ${b.name}` : b.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
