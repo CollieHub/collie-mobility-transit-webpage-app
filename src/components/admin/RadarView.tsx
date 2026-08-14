@@ -114,6 +114,69 @@ function projectPointOnPolyline(pt: [number, number], path: [number, number][]):
   return bestPt;
 }
 
+// Offset a coordinate point 14 meters to the RIGHT-HAND SIDE of the route travel direction
+function offsetPointToRightOfPolyline(
+  pt: [number, number],
+  polyline: [number, number][],
+  offsetMeters: number = 14
+): [number, number] {
+  if (!polyline || polyline.length < 2) return pt;
+
+  let minSqDist = Infinity;
+  let segIdx = 0;
+  let projPt: [number, number] = pt;
+
+  for (let i = 0; i < polyline.length - 1; i++) {
+    const a = polyline[i];
+    const b = polyline[i + 1];
+    const dy = b[0] - a[0];
+    const dx = b[1] - a[1];
+    const lenSq = dy * dy + dx * dx;
+
+    let t = 0;
+    if (lenSq > 0) {
+      t = Math.max(0, Math.min(1, ((pt[0] - a[0]) * dy + (pt[1] - a[1]) * dx) / lenSq));
+    }
+    const proj: [number, number] = [a[0] + t * dy, a[1] + t * dx];
+    const distSq = Math.pow(pt[0] - proj[0], 2) + Math.pow(pt[1] - proj[1], 2);
+    if (distSq < minSqDist) {
+      minSqDist = distSq;
+      segIdx = i;
+      projPt = proj;
+    }
+  }
+
+  const a = polyline[segIdx];
+  const b = polyline[segIdx + 1];
+
+  const midLat = (a[0] + b[0]) / 2;
+  const radLat = (midLat * Math.PI) / 180;
+  const cosLat = Math.cos(radLat);
+
+  // Scaled direction vector components in meters-equivalent space
+  const dx = (b[1] - a[1]) * cosLat;
+  const dy = b[0] - a[0];
+  const len = Math.sqrt(dx * dx + dy * dy);
+
+  if (len === 0) return projPt;
+
+  // Unit vector of forward travel direction (ux, uy)
+  const ux = dx / len;
+  const uy = dy / len;
+
+  // Clockwise 90-degree right-hand perpendicular unit vector (nx, ny)
+  // For forward vector (ux, uy), right vector is (uy, -ux)
+  const nx = uy;
+  const ny = -ux;
+
+  // Convert offsetMeters to degrees latitude and longitude
+  const deltaDeg = offsetMeters / 111320;
+  const rightLat = projPt[0] + ny * deltaDeg;
+  const rightLng = projPt[1] + (nx * deltaDeg) / cosLat;
+
+  return [rightLat, rightLng];
+}
+
 function perpendicularDistanceKm(pt: [number, number], lineStart: [number, number], lineEnd: [number, number]): number {
   const dx = lineEnd[1] - lineStart[1];
   const dy = lineEnd[0] - lineStart[0];
@@ -618,13 +681,16 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const handleStopDragEnd = (stopId: string, newPt: [number, number]) => {
     let projLat = newPt[0];
     let projLng = newPt[1];
+    let markerPt: [number, number] = newPt;
+
     if (displayPolylinePath.length >= 2) {
       const proj = projectPointOnPolyline(newPt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
+      markerPt = offsetPointToRightOfPolyline(newPt, displayPolylinePath, 14);
     }
-    setStops(prev => prev.map(st => st.id === stopId ? { ...st, lat: newPt[0], lng: newPt[1], proj_lat: projLat, proj_lng: projLng } : st));
-    showNotification?.('success', 'Parada re-posicionada');
+    setStops(prev => prev.map(st => st.id === stopId ? { ...st, lat: markerPt[0], lng: markerPt[1], proj_lat: projLat, proj_lng: projLng } : st));
+    showNotification?.('success', 'Parada posicionada a la derecha del sentido de circulación');
   };
 
   const handleUndoWaypoint = async () => {
@@ -661,10 +727,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
     let projLat = pt[0];
     let projLng = pt[1];
+    let markerPt: [number, number] = pt;
+
     if (displayPolylinePath.length >= 2) {
       const proj = projectPointOnPolyline(pt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
+      markerPt = offsetPointToRightOfPolyline(pt, displayPolylinePath, 14);
     }
 
     const newOrder = stops.length + 1;
@@ -674,14 +743,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       direction: direction,
       stop_order: newOrder,
       name: `Parada ${newOrder}`,
-      lat: pt[0],
-      lng: pt[1],
+      lat: markerPt[0],
+      lng: markerPt[1],
       proj_lat: projLat,
       proj_lng: projLng
     };
 
     setStops(prev => [...prev, newStop]);
-    showNotification?.('success', `Parada #${newOrder} añadida al mapa`);
+    showNotification?.('success', `Parada #${newOrder} añadida a la derecha del sentido de circulación`);
   };
 
   const handleDeleteStop = (stopId: string) => {
@@ -829,8 +898,17 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       proj_lng: lastPt[1]
     });
 
-    setStops(newStopsList);
-    showNotification?.('success', `¡Se autogeneraron ${newStopsList.length} paradas a lo largo del trazado!`);
+    const finalOffsetStops = newStopsList.map(st => {
+      const rightPt = offsetPointToRightOfPolyline([st.lat, st.lng], displayPolylinePath, 14);
+      return {
+        ...st,
+        lat: rightPt[0],
+        lng: rightPt[1]
+      };
+    });
+
+    setStops(finalOffsetStops);
+    showNotification?.('success', `¡${finalOffsetStops.length} paradas autogeneradas a la derecha del sentido de circulación!`);
     setShowAutoStopsModal(false);
   };
 
