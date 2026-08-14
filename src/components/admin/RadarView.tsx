@@ -1384,7 +1384,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 justifyContent: 'space-between',
                 padding: '0.75rem 1rem',
                 backgroundColor: '#0c1527',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+                borderBottom: rightDockTab === 'recorrido' ? 'none' : '1px solid rgba(255, 255, 255, 0.06)'
               }}>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {rightDockTab === 'paradas' ? 'Paradas' : 'Recorrido'}: {selectedBranchObj ? (selectedBranchObj.name || selectedBranchObj.code) : 'Ramal'}
@@ -1393,6 +1393,23 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   {rightDockTab === 'paradas' ? stops.length : waypoints.length}
                 </span>
               </div>
+
+              {/* DISTANCE BADGE UNDER HEADER */}
+              {rightDockTab === 'recorrido' && (
+                <div style={{
+                  padding: '0.2rem 1rem 0.6rem',
+                  backgroundColor: '#0c1527',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>Distancia total:</span>
+                  <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 800, backgroundColor: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.25)', padding: '0.2rem 0.6rem', borderRadius: '6px' }}>
+                    📏 {totalDistanceKm} km
+                  </span>
+                </div>
+              )}
 
               {/* DIRECTION TABS BAR (IDA / VUELTA) */}
               <div style={{ display: 'flex', backgroundColor: '#070d19', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
@@ -1641,7 +1658,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(6, 1fr)',
+                  gridTemplateColumns: 'repeat(5, 1fr)',
                   gap: '0.35rem'
                 }}>
                   <button
@@ -1668,25 +1685,19 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Trash2 size={14} />
                   </button>
                   <button
-                    onClick={handleReverseRouteShape}
-                    title="Invertir sentido del trazado"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <GitCompare size={14} />
-                  </button>
-                  <div
-                    title={`Distancia acumulada: ${totalDistanceKm} km`}
-                    style={{ padding: '0.45rem 0.2rem', borderRadius: '6px', backgroundColor: '#1e293b', color: '#38bdf8', fontSize: '0.65rem', fontWeight: 800, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-                  >
-                    {totalDistanceKm}km
-                  </div>
-                  <button
                     onClick={handleSaveAll}
                     disabled={isSaving}
                     title="Guardar trazado a D1"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Save size={14} />
+                  </button>
+                  <button
+                    onClick={handleReverseRouteShape}
+                    title="Invertir sentido del trazado"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <GitCompare size={14} />
                   </button>
                 </div>
               )}
