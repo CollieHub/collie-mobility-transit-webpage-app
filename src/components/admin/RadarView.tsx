@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -123,7 +123,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
 
   const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
-  const [sidebarSearch, setSidebarSearch] = useState<string>('');
+  const [lineSearch, setLineSearch] = useState<string>('');
+  const [branchSearch, setBranchSearch] = useState<string>('');
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
@@ -138,6 +139,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
+  const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
 
   const groupedBranches = useMemo(() => {
     const groups: Record<string, any[]> = {};
@@ -148,9 +150,19 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       else if (b.code && b.code.startsWith('228')) key = 'Metropolitana';
       else if (b.company_id) key = b.company_id;
 
-      if (sidebarSearch) {
-        const q = sidebarSearch.toLowerCase();
-        if (!(b.code || '').toLowerCase().includes(q) && !(b.name || '').toLowerCase().includes(q)) {
+      if (lineSearch) {
+        const qL = lineSearch.toLowerCase();
+        const lineObj = linesList.find(l => l.id === b.line_id);
+        const lineText = `${lineObj?.code || ''} ${lineObj?.name || ''} ${key}`.toLowerCase();
+        if (!lineText.includes(qL)) {
+          return;
+        }
+      }
+
+      if (branchSearch) {
+        const qB = branchSearch.toLowerCase();
+        const branchText = `${b.code || ''} ${b.name || ''}`.toLowerCase();
+        if (!branchText.includes(qB)) {
           return;
         }
       }
@@ -159,7 +171,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       groups[key].push(b);
     });
     return groups;
-  }, [branchesList, sidebarSearch]);
+  }, [branchesList, linesList, lineSearch, branchSearch]);
 
   useEffect(() => {
     if (branchesList.length > 0 && !selectedBranchId) {
@@ -238,6 +250,10 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const handleClearWaypoints = () => {
     setWaypoints([]);
+  };
+
+  const handleDeleteWaypointIndex = (idx: number) => {
+    setWaypoints(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleAddStop = (pt: [number, number]) => {
@@ -468,15 +484,33 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           </button>
         </div>
 
-        {/* Filter Input */}
-        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+        {/* Filter Inputs: Line & Ramal */}
+        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.04)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ position: 'relative' }}>
             <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
             <input
               type="text"
-              placeholder="Filtrar líneas y ramales..."
-              value={sidebarSearch}
-              onChange={e => setSidebarSearch(e.target.value)}
+              placeholder="Filtrar por línea..."
+              value={lineSearch}
+              onChange={e => setLineSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.45rem 0.5rem 0.45rem 2rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backgroundColor: '#1f2937',
+                color: '#ffffff',
+                fontSize: '0.8rem'
+              }}
+            />
+          </div>
+          <div style={{ position: 'relative' }}>
+            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+            <input
+              type="text"
+              placeholder="Filtrar por ramal..."
+              value={branchSearch}
+              onChange={e => setBranchSearch(e.target.value)}
               style={{
                 width: '100%',
                 padding: '0.45rem 0.5rem 0.45rem 2rem',
@@ -710,7 +744,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
             <button
               onClick={() => setShowRightDock(!showRightDock)}
-              title="Alternar dock flotante de paradas"
+              title="Alternar dock flotante"
               style={{
                 padding: '0.45rem 0.65rem',
                 borderRadius: '8px',
@@ -806,7 +840,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             ))}
           </MapContainer>
 
-          {/* 3. RIGHT FLOATING WIDGET DOCK (EXACT REPLICA FROM SCREENSHOT) */}
+          {/* 3. RIGHT FLOATING WIDGET DOCK (CONMUTADOR DE PESTAÑAS: PARADAS vs RECORRIDO) */}
           {showRightDock && (
             <div style={{
               position: 'absolute',
@@ -833,8 +867,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
               }}>
                 <button
-                  onClick={handleClearAllStops}
-                  title="Eliminar todas las paradas"
+                  onClick={() => {
+                    if (rightDockTab === 'paradas') handleClearAllStops();
+                    else handleClearWaypoints();
+                  }}
+                  title={rightDockTab === 'paradas' ? 'Eliminar todas las paradas' : 'Limpiar todo el trazado'}
                   style={{
                     backgroundColor: 'transparent',
                     border: 'none',
@@ -848,14 +885,17 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <Trash2 size={16} />
                 </button>
 
+                {/* Top Bar Switcher: Paradas (MapPin) | Recorrido (RouteIcon) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#0f172a', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
                   <button
+                    onClick={() => setRightDockTab('paradas')}
+                    title="Editar Paradas"
                     style={{
-                      backgroundColor: '#1e293b',
+                      backgroundColor: rightDockTab === 'paradas' ? '#1e293b' : 'transparent',
                       border: 'none',
                       borderRadius: '6px',
                       padding: '0.35rem 0.5rem',
-                      color: '#38bdf8',
+                      color: rightDockTab === 'paradas' ? '#38bdf8' : '#94a3b8',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center'
@@ -864,11 +904,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <MapPin size={15} />
                   </button>
                   <button
+                    onClick={() => setRightDockTab('recorrido')}
+                    title="Editar Recorrido / Trazado"
                     style={{
-                      backgroundColor: 'transparent',
+                      backgroundColor: rightDockTab === 'recorrido' ? '#1e293b' : 'transparent',
                       border: 'none',
-                      padding: '0.35rem',
-                      color: '#94a3b8',
+                      borderRadius: '6px',
+                      padding: '0.35rem 0.5rem',
+                      color: rightDockTab === 'recorrido' ? '#38bdf8' : '#94a3b8',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center'
@@ -918,10 +961,10 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
               }}>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  Paradas: {selectedBranchObj ? (selectedBranchObj.name || selectedBranchObj.code) : 'Ramal'}
+                  {rightDockTab === 'paradas' ? 'Paradas' : 'Recorrido'}: {selectedBranchObj ? (selectedBranchObj.name || selectedBranchObj.code) : 'Ramal'}
                 </span>
                 <span style={{ fontSize: '0.75rem', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.15rem 0.55rem', borderRadius: '6px', fontWeight: 800 }}>
-                  {stops.length}
+                  {rightDockTab === 'paradas' ? stops.length : waypoints.length}
                 </span>
               </div>
 
@@ -941,7 +984,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     borderBottom: direction === 'ida' ? '2px solid #0284c7' : 'none'
                   }}
                 >
-                  IDA ({stops.filter(s => s.direction === 'ida').length})
+                  IDA ({direction === 'ida' ? (rightDockTab === 'paradas' ? stops.length : waypoints.length) : 0})
                 </button>
                 <button
                   onClick={() => setDirection('vuelta')}
@@ -957,158 +1000,272 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     borderBottom: direction === 'vuelta' ? '2px solid #0284c7' : 'none'
                   }}
                 >
-                  VUELTA ({stops.filter(s => s.direction === 'vuelta').length})
+                  VUELTA ({direction === 'vuelta' ? (rightDockTab === 'paradas' ? stops.length : waypoints.length) : 0})
                 </button>
               </div>
 
-              {/* STOPS LIST */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {stops.length === 0 ? (
-                  <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
-                    <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
-                    No hay paradas en {direction.toUpperCase()}.<br />
-                    Usa el botón <strong>+</strong> inferior para sumar paradas sobre el mapa.
-                  </div>
-                ) : (
-                  stops.map((st) => (
-                    <div
-                      key={st.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.55rem 0.75rem',
-                        borderRadius: '8px',
-                        backgroundColor: '#131b2e',
-                        border: '1px solid rgba(255, 255, 255, 0.04)'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
-                        {/* Drag Handle Icon */}
-                        <div style={{ color: '#475569', fontSize: '0.75rem', cursor: 'grab', userSelect: 'none' }}>::</div>
-
-                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#38bdf8', minWidth: '22px' }}>
-                          {st.stop_order}.
-                        </span>
-
-                        {editingStopId === st.id ? (
-                          <input
-                            type="text"
-                            value={editingStopName}
-                            onChange={e => setEditingStopName(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter') {
-                                setStops(prev => prev.map(s => s.id === st.id ? { ...s, name: editingStopName } : s));
-                                setEditingStopId(null);
-                              }
-                            }}
-                            style={{
-                              backgroundColor: '#070d19',
-                              color: '#ffffff',
-                              border: '1px solid #38bdf8',
-                              borderRadius: '4px',
-                              padding: '0.2rem 0.4rem',
-                              fontSize: '0.78rem',
-                              flex: 1
-                            }}
-                          />
-                        ) : (
-                          <span
-                            onClick={() => { setEditingStopId(st.id); setEditingStopName(st.name); }}
-                            style={{ fontSize: '0.8rem', color: '#f1f5f9', fontWeight: 500, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                          >
-                            {st.name}
-                          </span>
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <button
-                          onClick={() => setFocusCoords([st.lat, st.lng])}
-                          title="Centrar en mapa"
-                          style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
-                        >
-                          <Search size={13} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteStop(st.id)}
-                          title="Eliminar parada"
-                          style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
+              {/* TAB CONTENT: PARADAS LIST vs RECORRIDO WAYPOINTS LIST */}
+              {rightDockTab === 'paradas' ? (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {stops.length === 0 ? (
+                    <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
+                      <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
+                      No hay paradas en {direction.toUpperCase()}.<br />
+                      Usa el botón <strong>+</strong> inferior para sumar paradas sobre el mapa.
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    stops.map((st) => (
+                      <div
+                        key={st.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.55rem 0.75rem',
+                          borderRadius: '8px',
+                          backgroundColor: '#131b2e',
+                          border: '1px solid rgba(255, 255, 255, 0.04)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
+                          <div style={{ color: '#475569', fontSize: '0.75rem', cursor: 'grab', userSelect: 'none' }}>::</div>
 
-              {/* BOTTOM TOOLBAR GRID (8 exact icons from screenshot) */}
-              <div style={{
-                padding: '0.6rem 0.75rem',
-                backgroundColor: '#070d19',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(8, 1fr)',
-                gap: '0.35rem'
-              }}>
-                <button
-                  onClick={() => setActiveTool('add_stop')}
-                  title="Agregar Parada"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Plus size={14} />
-                </button>
-                <button
-                  onClick={() => showNotification?.('success', 'Modo posicionamiento de paradas activado')}
-                  title="Posicionar Paradas"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <MapPin size={14} />
-                </button>
-                <button
-                  onClick={handleReverseStops}
-                  title="Invertir secuencia de paradas"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <ArrowUpDown size={14} />
-                </button>
-                <button
-                  onClick={handleProjectStopsOnRoute}
-                  title="Ordenar por distancia"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#b45309', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Compass size={14} />
-                </button>
-                <button
-                  onClick={handleProjectStopsOnRoute}
-                  title="Auto-proyectar paradas sobre el trazado"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Search size={14} />
-                </button>
-                <button
-                  onClick={() => showNotification?.('success', 'Paradas duplicadas')}
-                  title="Duplicar paradas"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Layers size={14} />
-                </button>
-                <button
-                  onClick={() => showNotification?.('success', 'Modo edición masiva')}
-                  title="Edición masiva de paradas"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Edit3 size={14} />
-                </button>
-                <button
-                  onClick={handleClearAllStops}
-                  title="Eliminar todas las paradas"
-                  style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#dc2626', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#38bdf8', minWidth: '22px' }}>
+                            {st.stop_order}.
+                          </span>
+
+                          {editingStopId === st.id ? (
+                            <input
+                              type="text"
+                              value={editingStopName}
+                              onChange={e => setEditingStopName(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') {
+                                  setStops(prev => prev.map(s => s.id === st.id ? { ...s, name: editingStopName } : s));
+                                  setEditingStopId(null);
+                                }
+                              }}
+                              style={{
+                                backgroundColor: '#070d19',
+                                color: '#ffffff',
+                                border: '1px solid #38bdf8',
+                                borderRadius: '4px',
+                                padding: '0.2rem 0.4rem',
+                                fontSize: '0.78rem',
+                                flex: 1
+                              }}
+                            />
+                          ) : (
+                            <span
+                              onClick={() => { setEditingStopId(st.id); setEditingStopName(st.name); }}
+                              style={{ fontSize: '0.8rem', color: '#f1f5f9', fontWeight: 500, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                            >
+                              {st.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <button
+                            onClick={() => setFocusCoords([st.lat, st.lng])}
+                            title="Centrar en mapa"
+                            style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                          >
+                            <Search size={13} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStop(st.id)}
+                            title="Eliminar parada"
+                            style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  {waypoints.length === 0 ? (
+                    <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
+                      <Compass size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
+                      No hay trazado dibujado para {direction.toUpperCase()}.<br />
+                      Activa <strong>✏️ Dibujar Recorrido</strong> para ir clickeando el mapa.
+                    </div>
+                  ) : (
+                    waypoints.map((pt, idx) => {
+                      const isStart = idx === 0;
+                      const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
+                      return (
+                        <div
+                          key={`wpt_${idx}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.55rem 0.75rem',
+                            borderRadius: '8px',
+                            backgroundColor: '#131b2e',
+                            border: '1px solid rgba(255, 255, 255, 0.04)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isStart ? '#10b981' : isEnd ? '#ef4444' : '#38bdf8', minWidth: '22px' }}>
+                              {idx + 1}.
+                            </span>
+                            <span style={{ fontSize: '0.78rem', color: '#f1f5f9', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto ${idx + 1}`} ({pt[0].toFixed(4)}, {pt[1].toFixed(4)})
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <button
+                              onClick={() => setFocusCoords(pt)}
+                              title="Centrar punto en mapa"
+                              style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                            >
+                              <Search size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteWaypointIndex(idx)}
+                              title="Eliminar punto"
+                              style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* BOTTOM TOOLBAR GRID (DEPENDING ON ACTIVE RIGHT DOCK TAB) */}
+              {rightDockTab === 'paradas' ? (
+                <div style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: '#070d19',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(8, 1fr)',
+                  gap: '0.35rem'
+                }}>
+                  <button
+                    onClick={() => setActiveTool('add_stop')}
+                    title="Agregar Parada"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                  <button
+                    onClick={() => showNotification?.('success', 'Modo posicionamiento de paradas activado')}
+                    title="Posicionar Paradas"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <MapPin size={14} />
+                  </button>
+                  <button
+                    onClick={handleReverseStops}
+                    title="Invertir secuencia de paradas"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <ArrowUpDown size={14} />
+                  </button>
+                  <button
+                    onClick={handleProjectStopsOnRoute}
+                    title="Ordenar por distancia"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#b45309', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Compass size={14} />
+                  </button>
+                  <button
+                    onClick={handleProjectStopsOnRoute}
+                    title="Auto-proyectar paradas sobre el trazado"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Search size={14} />
+                  </button>
+                  <button
+                    onClick={() => showNotification?.('success', 'Paradas duplicadas')}
+                    title="Duplicar paradas"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Layers size={14} />
+                  </button>
+                  <button
+                    onClick={() => showNotification?.('success', 'Modo edición masiva')}
+                    title="Edición masiva de paradas"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Edit3 size={14} />
+                  </button>
+                  <button
+                    onClick={handleClearAllStops}
+                    title="Eliminar todas las paradas"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#dc2626', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{
+                  padding: '0.6rem 0.75rem',
+                  backgroundColor: '#070d19',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(6, 1fr)',
+                  gap: '0.35rem'
+                }}>
+                  <button
+                    onClick={() => setActiveTool(activeTool === 'draw_route' ? 'none' : 'draw_route')}
+                    title={activeTool === 'draw_route' ? 'Desactivar Dibujo' : 'Activar Modo Dibujar Recorrido'}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: activeTool === 'draw_route' ? '#10b981' : '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Compass size={14} />
+                  </button>
+                  <button
+                    onClick={handleUndoWaypoint}
+                    disabled={waypoints.length === 0}
+                    title="Deshacer último punto"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#0284c7', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Undo size={14} />
+                  </button>
+                  <button
+                    onClick={handleClearWaypoints}
+                    disabled={waypoints.length === 0}
+                    title="Limpiar todo el trazado"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#dc2626', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (waypoints.length > 0) setFocusCoords(waypoints[0]);
+                    }}
+                    title="Centrar en inicio del trazado"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0d9488', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Search size={14} />
+                  </button>
+                  <div
+                    title={`Distancia acumulada: ${totalDistanceKm} km`}
+                    style={{ padding: '0.45rem 0.2rem', borderRadius: '6px', backgroundColor: '#1e293b', color: '#38bdf8', fontSize: '0.65rem', fontWeight: 800, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+                  >
+                    {totalDistanceKm}km
+                  </div>
+                  <button
+                    onClick={handleSaveAll}
+                    disabled={isSaving}
+                    title="Guardar trazado a D1"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Save size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
