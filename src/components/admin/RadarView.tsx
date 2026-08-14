@@ -1159,26 +1159,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <span>{useStreetRouting ? '🛣️ Ruteo Calles: SÍ' : '📏 Ruteo Recto: SÍ'}</span>
             </button>
 
-            <button
-              onClick={() => setActiveTool(activeTool === 'add_stop' ? 'none' : 'add_stop')}
-              className="btn-animated btn-animated-primary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.45rem 0.85rem',
-                borderRadius: '8px',
-                border: activeTool === 'add_stop' ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: activeTool === 'add_stop' ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
-                color: activeTool === 'add_stop' ? '#38bdf8' : '#9ca3af',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <MapPin size={14} />
-              <span>{activeTool === 'add_stop' ? '🚏 Agregar Paradas ACTIVO' : '🚏 Agregar Parada'}</span>
-            </button>
+
 
             {/* Assistant 1: Auto-generate Stops Wizard */}
             <button
@@ -1590,7 +1571,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
                       <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
                       No hay paradas en {direction.toUpperCase()}.<br />
-                      Activa <strong>🚏 Agregar Parada</strong> e ir tocando el mapa.
+                      Simplemente toca cualquier punto del mapa para agregar una parada.
                     </div>
                   ) : (
                     stops.map((st) => (
@@ -1706,17 +1687,9 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(8, 1fr)',
+                  gridTemplateColumns: 'repeat(7, 1fr)',
                   gap: '0.35rem'
                 }}>
-                  <button
-                    onClick={() => setActiveTool('add_stop')}
-                    title="Agregar Parada"
-                    className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Plus size={14} />
-                  </button>
                   <button
                     onClick={() => showNotification?.('success', 'Modo posicionamiento de paradas activado')}
                     title="Posicionar Paradas"
