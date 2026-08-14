@@ -1464,51 +1464,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
 
 
-            {/* Assistant 1: Auto-generate Stops Wizard */}
-            <button
-              onClick={() => setShowAutoStopsModal(true)}
-              title="Autogenerar paradas cada X metros"
-              className="btn-animated btn-animated-purple"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                backgroundColor: 'rgba(139, 92, 246, 0.15)',
-                color: '#a78bfa',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <Wand2 size={14} />
-              <span>Auto-Paradas</span>
-            </button>
 
-            {/* Assistant 2: Replicate Stops to another Branch */}
-            <button
-              onClick={() => setShowReplicateModal(true)}
-              title="Replicar paradas a otro ramal"
-              className="btn-animated btn-animated-primary"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.45rem 0.75rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(14, 165, 233, 0.3)',
-                backgroundColor: 'rgba(14, 165, 233, 0.15)',
-                color: '#38bdf8',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <Copy size={14} />
-              <span>Replicar</span>
-            </button>
 
             {/* Assistant 3: Invert & Create Vuelta Shape */}
             <button
@@ -1527,22 +1483,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <GitCompare size={14} />
             </button>
 
-            <button
-              onClick={handleUndoWaypoint}
-              disabled={waypoints.length === 0}
-              title="Deshacer último punto del trazado"
-              className="btn-animated btn-animated-dark"
-              style={{
-                padding: '0.45rem 0.65rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1f2937',
-                color: waypoints.length === 0 ? '#4b5563' : '#f3f4f6',
-                cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
-              }}
-            >
-              <Undo size={14} />
-            </button>
 
             <button
               onClick={handleClearWaypoints}
