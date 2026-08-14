@@ -1901,8 +1901,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   gap: '0.35rem'
                 }}>
                   <button
-                    onClick={() => showNotification?.('success', 'Modo posicionamiento de paradas activado')}
-                    title="Posicionar Paradas"
+                    onClick={handleProjectStopsOnRoute}
+                    title="Posicionar y proyectar paradas a la derecha del trazado"
                     className="btn-animated btn-animated-success"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
