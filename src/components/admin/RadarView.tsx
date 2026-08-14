@@ -1613,35 +1613,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                             {st.stop_order}.
                           </span>
 
-                          {editingStopId === st.id ? (
-                            <input
-                              type="text"
-                              value={editingStopName}
-                              onChange={e => setEditingStopName(e.target.value)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') {
-                                  setStops(prev => prev.map(s => s.id === st.id ? { ...s, name: editingStopName } : s));
-                                  setEditingStopId(null);
-                                }
-                              }}
-                              style={{
-                                backgroundColor: '#070d19',
-                                color: '#ffffff',
-                                border: '1px solid #38bdf8',
-                                borderRadius: '4px',
-                                padding: '0.2rem 0.4rem',
-                                fontSize: '0.78rem',
-                                flex: 1
-                              }}
-                            />
-                          ) : (
-                            <span
-                              onClick={() => { setEditingStopId(st.id); setEditingStopName(st.name); }}
-                              style={{ fontSize: '0.8rem', color: '#f1f5f9', fontWeight: 500, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                            >
-                              {st.name}
-                            </span>
-                          )}
+                          <span
+                            onClick={() => setFocusCoords([st.lat, st.lng])}
+                            title="Centrar parada en el mapa"
+                            style={{ fontSize: '0.8rem', color: '#f1f5f9', fontWeight: 600, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}
+                          >
+                            {st.name}
+                          </span>
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
