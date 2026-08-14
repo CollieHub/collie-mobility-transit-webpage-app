@@ -409,6 +409,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [showAutoStopsModal, setShowAutoStopsModal] = useState<boolean>(false);
   const [autoStopsIntervalMeters, setAutoStopsIntervalMeters] = useState<number>(250);
   const [showReverseStopsModal, setShowReverseStopsModal] = useState<boolean>(false);
+  const [showProjectStopsModal, setShowProjectStopsModal] = useState<boolean>(false);
+  const [showSortStopsModal, setShowSortStopsModal] = useState<boolean>(false);
+  const [showClearStopsModal, setShowClearStopsModal] = useState<boolean>(false);
+  const [showClearRouteModal, setShowClearRouteModal] = useState<boolean>(false);
+  const [showReverseRouteModal, setShowReverseRouteModal] = useState<boolean>(false);
 
   const nestedBranchesForCombo = useMemo(() => {
     if (selectedLineFilterId === 'all') return branchesList;
@@ -1466,7 +1471,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
             {/* Assistant 3: Invert & Create Vuelta Shape */}
             <button
-              onClick={handleReverseRouteShape}
+              onClick={() => setShowReverseRouteModal(true)}
               title="Invertir trazado para crear la Vuelta"
               className="btn-animated btn-animated-dark"
               style={{
@@ -1958,7 +1963,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   gap: '0.35rem'
                 }}>
                   <button
-                    onClick={handleProjectStopsOnRoute}
+                    onClick={() => setShowProjectStopsModal(true)}
                     title="Posicionar y proyectar paradas a la derecha del trazado"
                     className="btn-animated btn-animated-success"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -1974,7 +1979,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <ArrowUpDown size={14} />
                   </button>
                   <button
-                    onClick={handleSortStopsByPathDistance}
+                    onClick={() => setShowSortStopsModal(true)}
                     title="Reordenar paradas de inicio a fin según el recorrido"
                     className="btn-animated btn-animated-primary"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#d97706', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -1998,7 +2003,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Wand2 size={14} />
                   </button>
                   <button
-                    onClick={handleClearAllStops}
+                    onClick={() => setShowClearStopsModal(true)}
                     title="Eliminar todas las paradas de esta solapa"
                     className="btn-animated btn-animated-danger"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -2033,7 +2038,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Undo size={14} />
                   </button>
                   <button
-                    onClick={handleClearWaypoints}
+                    onClick={() => setShowClearRouteModal(true)}
                     disabled={waypoints.length === 0}
                     title="Limpiar todo el trazado"
                     className="btn-animated btn-animated-danger"
@@ -2051,7 +2056,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Save size={14} />
                   </button>
                   <button
-                    onClick={handleReverseRouteShape}
+                    onClick={() => setShowReverseRouteModal(true)}
                     title="Invertir sentido del trazado"
                     className="btn-animated btn-animated-purple"
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -2270,6 +2275,308 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
               >
                 Sí, Invertir Secuencia
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL 4: POSICIONAR Y PROYECTAR PARADAS CONFIRMACION */}
+      {showProjectStopsModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#10b981', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <MapPin size={16} /> Posicionar Paradas en Acera Derecha
+              </h3>
+              <button onClick={() => setShowProjectStopsModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Deseas proyectar las <strong>{stops.length} paradas</strong> en el sentido <strong>{direction.toUpperCase()}</strong> sobre el trazado?
+              <br />
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block' }}>
+                Se encajarán automáticamente sobre la calle desplazadas 14m a la derecha según el avance del colectivo.
+              </span>
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowProjectStopsModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleProjectStopsOnRoute();
+                  setShowProjectStopsModal(false);
+                }}
+                className="btn-animated btn-animated-success"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#10b981', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Posicionar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: REORDENAR PARADAS POR DISTANCIA CONFIRMACION */}
+      {showSortStopsModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#f59e0b', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Compass size={16} /> Reordenar por Avance del Recorrido
+              </h3>
+              <button onClick={() => setShowSortStopsModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Deseas reordenar secuencialmente (1..N) las <strong>{stops.length} paradas</strong> en el sentido <strong>{direction.toUpperCase()}</strong> según su posición a lo largo de las calles de inicio a fin?
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowSortStopsModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleSortStopsByPathDistance();
+                  setShowSortStopsModal(false);
+                }}
+                className="btn-animated btn-animated-primary"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#d97706', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Reordenar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: ELIMINAR PARADAS CONFIRMACION */}
+      {showClearStopsModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#ef4444', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={16} /> Eliminar Todas las Paradas
+              </h3>
+              <button onClick={() => setShowClearStopsModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Estás seguro de que deseas eliminar todas las <strong>{stops.length} paradas</strong> del sentido <strong>{direction.toUpperCase()}</strong>?
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowClearStopsModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleClearAllStops();
+                  setShowClearStopsModal(false);
+                }}
+                className="btn-animated btn-animated-danger"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Eliminar Paradas
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 7: LIMPIAR TRAZADO CONFIRMACION */}
+      {showClearRouteModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#ef4444', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trash2 size={16} /> Limpiar Trazado del Recorrido
+              </h3>
+              <button onClick={() => setShowClearRouteModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Estás seguro de que deseas borrar todo el trazado y los puntos de control del sentido <strong>{direction.toUpperCase()}</strong>?
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowClearRouteModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleClearWaypoints();
+                  setShowClearRouteModal(false);
+                }}
+                className="btn-animated btn-animated-danger"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Limpiar Trazado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 8: INVERTIR TRAZADO CONFIRMACION */}
+      {showReverseRouteModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '420px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#a78bfa', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <GitCompare size={16} /> Invertir Sentido del Trazado
+              </h3>
+              <button onClick={() => setShowReverseRouteModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              ¿Estás seguro de que deseas invertir el sentido del trazado en <strong>{direction.toUpperCase()}</strong>?
+              <br />
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block' }}>
+                Esta acción invierte los puntos de inicio a fin (ideal para crear el sentido de Vuelta).
+              </span>
+            </p>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowReverseRouteModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  handleReverseRouteShape();
+                  setShowReverseRouteModal(false);
+                }}
+                className="btn-animated btn-animated-purple"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#8b5cf6', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Sí, Invertir Trazado
               </button>
             </div>
           </div>
