@@ -494,8 +494,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     await updateFullPolylinePathFromControls(updatedControls);
   };
 
-  // 2. Clic directo sobre la línea del recorrido: Inserta un punto de control intermedio
-  const handleInsertPolylineWaypoint = async (clickPt: [number, number]) => {
+  // 2. Clic directo sobre la línea del recorrido: Inserta un punto de control intermedio (SIN RECALCULAR RECORRIDO COMPLETO)
+  const handleInsertPolylineWaypoint = (clickPt: [number, number]) => {
     if (waypoints.length < 2) {
       handleAddWaypoint(clickPt);
       return;
@@ -518,17 +518,76 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     const updatedControls = [...waypoints];
     updatedControls.splice(insertIdx, 0, clickPt);
     setWaypoints(updatedControls);
-    await updateFullPolylinePathFromControls(updatedControls);
+    // No se recalcula la polyline al insertar un punto intermedio sobre el trazado existente
     showNotification?.('success', `Punto intermedio insertado`);
   };
 
-  // 3. Clic y mantener presionado (Drag & Drop) de un Waypoint de control
+  // 3. Clic y mantener presionado (Drag & Drop): Recalcula ÚNICAMENTE el tramo entre los puntos contiguos
   const handleWaypointDragEnd = async (idx: number, newPt: [number, number]) => {
     const updatedControls = [...waypoints];
     updatedControls[idx] = newPt;
     setWaypoints(updatedControls);
-    await updateFullPolylinePathFromControls(updatedControls);
-    showNotification?.('success', `Punto #${idx + 1} movido`);
+
+    if (!useStreetRouting || updatedControls.length < 2) {
+      await updateFullPolylinePathFromControls(updatedControls);
+      showNotification?.('success', `Punto #${idx + 1} movido`);
+      return;
+    }
+
+    setIsRouting(true);
+    try {
+      const startIdx = Math.max(0, idx - 1);
+      const endIdx = Math.min(updatedControls.length - 1, idx + 1);
+      const segmentControls = updatedControls.slice(startIdx, endIdx + 1);
+
+      // Recalcular con OSRM únicamente la porción contigua que cambió
+      const segmentRes = await fetchOsrmFullRoute(segmentControls);
+
+      const pStart = updatedControls[startIdx];
+      const pEnd = updatedControls[endIdx];
+
+      const findNearestIdx = (target: [number, number], path: [number, number][]) => {
+        let minDist = Infinity;
+        let bestIdx = 0;
+        for (let i = 0; i < path.length; i++) {
+          const d = calculateDistanceKm(target[0], target[1], path[i][0], path[i][1]);
+          if (d < minDist) {
+            minDist = d;
+            bestIdx = i;
+          }
+        }
+        return bestIdx;
+      };
+
+      if (fullPolylinePath.length > 0) {
+        const startPathIdx = findNearestIdx(pStart, fullPolylinePath);
+        const endPathIdx = findNearestIdx(pEnd, fullPolylinePath);
+
+        if (startPathIdx <= endPathIdx) {
+          const newPath = [
+            ...fullPolylinePath.slice(0, startPathIdx),
+            ...segmentRes.points,
+            ...fullPolylinePath.slice(endPathIdx + 1)
+          ];
+          setFullPolylinePath(newPath);
+
+          let sum = 0;
+          for (let i = 0; i < newPath.length - 1; i++) {
+            sum += calculateDistanceKm(newPath[i][0], newPath[i][1], newPath[i + 1][0], newPath[i + 1][1]);
+          }
+          setRouteDistanceKm(Math.round(sum * 100) / 100);
+        } else {
+          await updateFullPolylinePathFromControls(updatedControls);
+        }
+      } else {
+        await updateFullPolylinePathFromControls(updatedControls);
+      }
+    } catch (_) {
+      await updateFullPolylinePathFromControls(updatedControls);
+    } finally {
+      setIsRouting(false);
+      showNotification?.('success', `Punto #${idx + 1} movido`);
+    }
   };
 
   // 4. Clic y mantener presionado (Drag & Drop) de una Parada
