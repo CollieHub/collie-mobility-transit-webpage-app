@@ -86,6 +86,8 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
 
   // Exceptions State
   const [exceptions, setExceptions] = useState<CalendarException[]>([]);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [lines, setLines] = useState<any[]>([]);
   const [branches, setBranches] = useState<any[]>([]);
   const [isLoadingExceptions, setIsLoadingExceptions] = useState<boolean>(false);
   const [showAddException, setShowAddException] = useState<boolean>(false);
@@ -150,12 +152,24 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
     setIsLoadingExceptions(false);
   };
 
-  const fetchBranches = async () => {
+  const fetchMetadata = async () => {
     try {
-      const res = await fetch('/v1/admin/table/branches?limit=500');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.rows) setBranches(data.rows);
+      const [cRes, lRes, bRes] = await Promise.all([
+        fetch('/v1/admin/table/companies'),
+        fetch('/v1/admin/table/lines'),
+        fetch('/v1/admin/table/branches?limit=500')
+      ]);
+      if (cRes.ok) {
+        const cData = await cRes.json();
+        if (cData.rows) setCompanies(cData.rows);
+      }
+      if (lRes.ok) {
+        const lData = await lRes.json();
+        if (lData.rows) setLines(lData.rows);
+      }
+      if (bRes.ok) {
+        const bData = await bRes.json();
+        if (bData.rows) setBranches(bData.rows);
       }
     } catch (_) {}
   };
@@ -163,8 +177,54 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
   useEffect(() => {
     fetchHolidays();
     fetchExceptions();
-    fetchBranches();
+    fetchMetadata();
   }, []);
+
+  const companyOptions = useMemo(() => {
+    const options: { value: string; label: string }[] = [];
+    if (companies.length > 0) {
+      companies.forEach(c => {
+        options.push({
+          value: c.code || c.id,
+          label: c.name ? `${c.code ? c.code + ' - ' : ''}${c.name}` : c.code || c.id
+        });
+      });
+    }
+    if (!options.some(o => o.value === 'SIT')) {
+      options.unshift({ value: 'SIT', label: 'SIT (Zárate)' });
+    }
+    if (!options.some(o => o.value === 'all')) {
+      options.push({ value: 'all', label: 'Todas las Líneas (Global)' });
+    }
+    return options;
+  }, [companies]);
+
+  const filteredBranches = useMemo(() => {
+    if (!newExceptionForm.company || newExceptionForm.company === 'all') {
+      return [];
+    }
+
+    const selectedCode = newExceptionForm.company.toLowerCase();
+    const selectedComp = companies.find(c => (c.code || '').toLowerCase() === selectedCode || (c.id || '').toLowerCase() === selectedCode);
+    const selectedLine = lines.find(l => (l.code || '').toLowerCase() === selectedCode || (l.id || '').toLowerCase() === selectedCode || (selectedComp && l.company_id === selectedComp.id));
+
+    return branches.filter(b => {
+      if (selectedLine && b.line_id === selectedLine.id) return true;
+      if (selectedComp && b.company_id === selectedComp.id) return true;
+      if (selectedCode === 'sit' && (b.code?.toLowerCase().startsWith('rz') || (b.line_id && b.line_id.toLowerCase().includes('sit')))) return true;
+      if ((b.code || '').toLowerCase().startsWith(selectedCode)) return true;
+      return false;
+    });
+  }, [branches, companies, lines, newExceptionForm.company]);
+
+  useEffect(() => {
+    if (newExceptionForm.branchId) {
+      const isValid = filteredBranches.some(b => b.id === newExceptionForm.branchId);
+      if (!isValid) {
+        setNewExceptionForm(prev => ({ ...prev, branchId: '' }));
+      }
+    }
+  }, [newExceptionForm.company, filteredBranches]);
 
   const sortedHolidays = useMemo(() => {
     return [...holidays].sort((a, b) => a.date.localeCompare(b.date));
@@ -793,7 +853,7 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
                 />
               </div>
 
-              <div style={{ flex: '1 1 140px' }}>
+              <div style={{ flex: '1 1 160px' }}>
                 <label style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase' }}>Empresa / Línea</label>
                 <select
                   value={newExceptionForm.company}
@@ -808,28 +868,37 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
                     fontSize: '0.85rem'
                   }}
                 >
-                  <option value="SIT">SIT (Zárate)</option>
-                  <option value="all">Todas las Líneas (Global)</option>
+                  {companyOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
               </div>
 
-              <div style={{ flex: '1 1 180px' }}>
+              <div style={{ flex: '1 1 200px' }}>
                 <label style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase' }}>Ramal (Opcional)</label>
                 <select
                   value={newExceptionForm.branchId}
+                  disabled={newExceptionForm.company === 'all' || filteredBranches.length === 0}
                   onChange={e => setNewExceptionForm({ ...newExceptionForm, branchId: e.target.value })}
                   style={{
                     width: '100%',
                     padding: '0.55rem',
                     borderRadius: '8px',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    backgroundColor: '#1f2937',
-                    color: '#ffffff',
-                    fontSize: '0.85rem'
+                    backgroundColor: (newExceptionForm.company === 'all' || filteredBranches.length === 0) ? '#111827' : '#1f2937',
+                    color: (newExceptionForm.company === 'all' || filteredBranches.length === 0) ? '#6b7280' : '#ffffff',
+                    fontSize: '0.85rem',
+                    cursor: (newExceptionForm.company === 'all' || filteredBranches.length === 0) ? 'not-allowed' : 'pointer'
                   }}
                 >
-                  <option value="">Todos los Ramales (Toda la Línea)</option>
-                  {branches.map(b => (
+                  <option value="">
+                    {newExceptionForm.company === 'all'
+                      ? 'No aplica para Global'
+                      : filteredBranches.length === 0
+                        ? 'Sin ramales disponibles'
+                        : `Todos los Ramales (Toda la Línea ${newExceptionForm.company})`}
+                  </option>
+                  {filteredBranches.map(b => (
                     <option key={b.id} value={b.id}>
                       {b.code ? `${b.code} - ${b.name}` : b.name}
                     </option>
