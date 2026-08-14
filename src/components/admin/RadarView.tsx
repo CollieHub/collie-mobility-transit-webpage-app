@@ -222,16 +222,18 @@ async function fetchOsrmFullRoute(controls: [number, number][]): Promise<OsrmRou
 
 function MapClickHandler({
   activeTool,
+  rightDockTab,
   onAddWaypoint,
   onAddStop
 }: {
   activeTool: 'none' | 'draw_route' | 'add_stop';
+  rightDockTab: 'paradas' | 'recorrido';
   onAddWaypoint: (point: [number, number]) => void;
   onAddStop: (point: [number, number]) => void;
 }) {
   useMapEvents({
     click(e) {
-      if (activeTool === 'add_stop') {
+      if (rightDockTab === 'paradas' || activeTool === 'add_stop') {
         onAddStop([e.latlng.lat, e.latlng.lng]);
       } else {
         onAddWaypoint([e.latlng.lat, e.latlng.lng]);
@@ -290,7 +292,31 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [existingShapeId, setExistingShapeId] = useState<string | null>(null);
 
-  const [stops, setStops] = useState<StopItem[]>([]);
+  const [allBranchStops, setAllBranchStops] = useState<StopItem[]>([]);
+  const [idaWaypointsCount, setIdaWaypointsCount] = useState<number>(0);
+  const [vueltaWaypointsCount, setVueltaWaypointsCount] = useState<number>(0);
+
+  const idaStopsCount = useMemo(() => {
+    return allBranchStops.filter(s => s.direction === 'ida').length;
+  }, [allBranchStops]);
+
+  const vueltaStopsCount = useMemo(() => {
+    return allBranchStops.filter(s => s.direction === 'vuelta').length;
+  }, [allBranchStops]);
+
+  const stops = useMemo(() => {
+    return allBranchStops.filter(s => s.direction === direction).sort((a, b) => (a.stop_order ?? 0) - (b.stop_order ?? 0));
+  }, [allBranchStops, direction]);
+
+  const setStops = useCallback((updater: StopItem[] | ((prev: StopItem[]) => StopItem[])) => {
+    setAllBranchStops(prev => {
+      const currentDirectionStops = prev.filter(s => s.direction === direction).sort((a, b) => (a.stop_order ?? 0) - (b.stop_order ?? 0));
+      const nextDirectionStops = typeof updater === 'function' ? updater(currentDirectionStops) : updater;
+      const otherDirectionStops = prev.filter(s => s.direction !== direction);
+      return [...otherDirectionStops, ...nextDirectionStops];
+    });
+  }, [direction]);
+
   const [editingStopId, setEditingStopId] = useState<string | null>(null);
   const [editingStopName, setEditingStopName] = useState<string>('');
 
@@ -370,6 +396,23 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
+        const idaMatch = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === 'ida');
+        const vueltaMatch = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === 'vuelta');
+
+        if (idaMatch && idaMatch.coordinates_json) {
+          try {
+            const parsed = JSON.parse(idaMatch.coordinates_json);
+            setIdaWaypointsCount(simplifyPolylineRdp(parsed, 0.2).length);
+          } catch (_) { setIdaWaypointsCount(0); }
+        } else { setIdaWaypointsCount(0); }
+
+        if (vueltaMatch && vueltaMatch.coordinates_json) {
+          try {
+            const parsed = JSON.parse(vueltaMatch.coordinates_json);
+            setVueltaWaypointsCount(simplifyPolylineRdp(parsed, 0.2).length);
+          } catch (_) { setVueltaWaypointsCount(0); }
+        } else { setVueltaWaypointsCount(0); }
+
         const match = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === direction);
         if (match && match.coordinates_json) {
           try {
@@ -417,13 +460,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
-        const filtered = rows
-          .filter((s: any) => s.branch_id === selectedBranchId && s.direction === direction)
-          .sort((a: any, b: any) => (a.stop_order ?? 0) - (b.stop_order ?? 0));
-        setStops(filtered);
+        const filtered = rows.filter((s: any) => s.branch_id === selectedBranchId);
+        setAllBranchStops(filtered);
       }
     } catch (_) {
-      setStops([]);
+      setAllBranchStops([]);
     }
   }, [selectedBranchId, direction]);
 
@@ -867,7 +908,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               cursor: 'pointer'
             }}
           >
-            🚏 Paradas ({stops.length})
+            🚏 Paradas ({allBranchStops.length})
           </button>
         </div>
 
@@ -1269,7 +1310,12 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             />
 
             <MapFocusController focusCoords={focusCoords} />
-            <MapClickHandler activeTool={activeTool} onAddWaypoint={handleAddWaypoint} onAddStop={handleAddStop} />
+            <MapClickHandler
+              activeTool={activeTool}
+              rightDockTab={rightDockTab}
+              onAddWaypoint={handleAddWaypoint}
+              onAddStop={handleAddStop}
+            />
 
             {/* Interactive Polyline: Continuous OSRM street route shape */}
             {displayPolylinePath.length > 1 && (
@@ -1391,11 +1437,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   <Trash2 size={16} />
                 </button>
 
-                {/* Top Bar Switcher: Paradas (MapPin) | Recorrido (RouteIcon) */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', backgroundColor: '#0f172a', padding: '0.2rem 0.5rem', borderRadius: '8px' }}>
+                {/* Top Action Switchers */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <button
-                    onClick={() => setRightDockTab('paradas')}
+                    onClick={() => {
+                      setRightDockTab('paradas');
+                      setActiveTool('add_stop');
+                    }}
                     title="Editar Paradas"
+                    className="btn-animated btn-animated-dark"
                     style={{
                       backgroundColor: rightDockTab === 'paradas' ? '#1e293b' : 'transparent',
                       border: 'none',
@@ -1410,8 +1460,12 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <MapPin size={15} />
                   </button>
                   <button
-                    onClick={() => setRightDockTab('recorrido')}
+                    onClick={() => {
+                      setRightDockTab('recorrido');
+                      setActiveTool('none');
+                    }}
                     title="Editar Recorrido / Trazado"
+                    className="btn-animated btn-animated-dark"
                     style={{
                       backgroundColor: rightDockTab === 'recorrido' ? '#1e293b' : 'transparent',
                       border: 'none',
@@ -1495,6 +1549,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <div style={{ display: 'flex', backgroundColor: '#070d19', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
                 <button
                   onClick={() => setDirection('ida')}
+                  className="btn-animated btn-animated-primary"
                   style={{
                     flex: 1,
                     padding: '0.65rem',
@@ -1507,10 +1562,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     borderBottom: direction === 'ida' ? '2px solid #0284c7' : 'none'
                   }}
                 >
-                  IDA ({direction === 'ida' ? (rightDockTab === 'paradas' ? stops.length : waypoints.length) : 0})
+                  IDA ({rightDockTab === 'paradas' ? idaStopsCount : (direction === 'ida' ? waypoints.length : idaWaypointsCount)})
                 </button>
                 <button
                   onClick={() => setDirection('vuelta')}
+                  className="btn-animated btn-animated-primary"
                   style={{
                     flex: 1,
                     padding: '0.65rem',
@@ -1523,7 +1579,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     borderBottom: direction === 'vuelta' ? '2px solid #0284c7' : 'none'
                   }}
                 >
-                  VUELTA ({direction === 'vuelta' ? (rightDockTab === 'paradas' ? stops.length : waypoints.length) : 0})
+                  VUELTA ({rightDockTab === 'paradas' ? vueltaStopsCount : (direction === 'vuelta' ? waypoints.length : vueltaWaypointsCount)})
                 </button>
               </div>
 
