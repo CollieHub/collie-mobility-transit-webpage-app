@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   Route as RouteIcon,
+  MapPin,
+  Plus,
   Trash2,
   Undo,
   Save,
   Compass,
-  CheckCircle2,
-  AlertTriangle,
-  Info
+  Search,
+  ArrowUpDown,
+  X
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -19,27 +21,6 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-const startIcon = L.divIcon({
-  className: 'custom-start-marker',
-  html: `<div style="background-color: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">A</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
-
-const endIcon = L.divIcon({
-  className: 'custom-end-marker',
-  html: `<div style="background-color: #ef4444; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">B</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
-
-const waypointIcon = L.divIcon({
-  className: 'custom-waypoint-marker',
-  html: `<div style="background-color: #38bdf8; color: #111827; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">•</div>`,
-  iconSize: [18, 18],
-  iconAnchor: [9, 9]
 });
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
@@ -56,15 +37,75 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   return R * c;
 }
 
-function MapClickHandler({ isDrawing, onMapClick }: { isDrawing: boolean; onMapClick: (latlng: [number, number]) => void }) {
+function projectPointOnPolyline(pt: [number, number], path: [number, number][]): [number, number] {
+  if (!path || path.length === 0) return pt;
+  if (path.length === 1) return path[0];
+
+  let minSqDist = Infinity;
+  let bestPt = path[0];
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i];
+    const b = path[i + 1];
+    const dy = b[0] - a[0];
+    const dx = b[1] - a[1];
+    const lenSq = dy * dy + dx * dx;
+
+    let t = 0;
+    if (lenSq > 0) {
+      t = Math.max(0, Math.min(1, ((pt[0] - a[0]) * dy + (pt[1] - a[1]) * dx) / lenSq));
+    }
+    const proj: [number, number] = [a[0] + t * dy, a[1] + t * dx];
+    const distSq = Math.pow(pt[0] - proj[0], 2) + Math.pow(pt[1] - proj[1], 2);
+    if (distSq < minSqDist) {
+      minSqDist = distSq;
+      bestPt = proj;
+    }
+  }
+  return bestPt;
+}
+
+function MapClickHandler({
+  activeTool,
+  onAddWaypoint,
+  onAddStop
+}: {
+  activeTool: 'none' | 'draw_route' | 'add_stop';
+  onAddWaypoint: (point: [number, number]) => void;
+  onAddStop: (point: [number, number]) => void;
+}) {
   useMapEvents({
     click(e) {
-      if (isDrawing) {
-        onMapClick([e.latlng.lat, e.latlng.lng]);
+      if (activeTool === 'draw_route') {
+        onAddWaypoint([e.latlng.lat, e.latlng.lng]);
+      } else if (activeTool === 'add_stop') {
+        onAddStop([e.latlng.lat, e.latlng.lng]);
       }
     }
   });
   return null;
+}
+
+function MapFocusController({ focusCoords }: { focusCoords: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (focusCoords) {
+      map.flyTo(focusCoords, 16, { duration: 1 });
+    }
+  }, [focusCoords, map]);
+  return null;
+}
+
+interface StopItem {
+  id: string;
+  branch_id: string;
+  direction: 'ida' | 'vuelta';
+  stop_order: number;
+  name: string;
+  lat: number;
+  lng: number;
+  proj_lat?: number;
+  proj_lng?: number;
 }
 
 interface RadarViewProps {
@@ -74,44 +115,63 @@ interface RadarViewProps {
 }
 
 export default function RadarView({ linesList = [], branchesList = [], showNotification }: RadarViewProps) {
-  const [selectedLineId, setSelectedLineId] = useState<string>('');
+  const [selectedCompanyId] = useState<string>('all');
+  const [selectedLineId] = useState<string>('');
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
-  
+
+  const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
+  const [sidebarSearch, setSidebarSearch] = useState<string>('');
+  const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
+
+  const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
+
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
-  const [isDrawing, setIsDrawing] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [existingShapeId, setExistingShapeId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (linesList.length > 0 && !selectedLineId) {
-      setSelectedLineId(linesList[0].id);
-    }
-  }, [linesList, selectedLineId]);
+  const [stops, setStops] = useState<StopItem[]>([]);
+  const [editingStopId, setEditingStopId] = useState<string | null>(null);
+  const [editingStopName, setEditingStopName] = useState<string>('');
 
-  const filteredBranches = useMemo(() => {
-    if (!selectedLineId) return branchesList;
-    return branchesList.filter(b => b.line_id === selectedLineId || b.company_id === selectedLineId);
-  }, [branchesList, selectedLineId]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null);
+  const [showRightPanel] = useState<boolean>(true);
 
-  useEffect(() => {
-    if (filteredBranches.length > 0) {
-      if (!filteredBranches.some(b => b.id === selectedBranchId)) {
-        setSelectedBranchId(filteredBranches[0].id);
+  const [companies] = useState<any[]>([]);
+
+  const groupedBranches = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    branchesList.forEach(b => {
+      let key = 'SIT';
+      if (b.line_id && b.line_id.includes('campana')) key = 'Campana';
+      else if (b.line_id && b.line_id.includes('san_nicolas')) key = 'San Nicolás';
+      else if (b.code && b.code.startsWith('228')) key = 'Metropolitana';
+      else if (b.company_id) key = b.company_id;
+
+      if (sidebarSearch) {
+        const q = sidebarSearch.toLowerCase();
+        if (!(b.code || '').toLowerCase().includes(q) && !(b.name || '').toLowerCase().includes(q)) {
+          return;
+        }
       }
-    } else {
-      setSelectedBranchId('');
-    }
-  }, [filteredBranches, selectedBranchId]);
 
-  const fetchExistingShape = useCallback(async () => {
-    if (!selectedBranchId) {
-      setWaypoints([]);
-      setExistingShapeId(null);
-      return;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(b);
+    });
+    return groups;
+  }, [branchesList, sidebarSearch]);
+
+  useEffect(() => {
+    if (branchesList.length > 0 && !selectedBranchId) {
+      setSelectedBranchId(branchesList[0].id);
     }
+  }, [branchesList, selectedBranchId]);
+
+  const loadBranchData = useCallback(async () => {
+    if (!selectedBranchId) return;
+
     try {
-      const res = await fetch(`/v1/admin/table/route_shapes?limit=500`);
+      const res = await fetch('/v1/admin/table/route_shapes?limit=500');
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
@@ -119,27 +179,45 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         if (match && match.coordinates_json) {
           try {
             const parsed = JSON.parse(match.coordinates_json);
-            if (Array.isArray(parsed)) {
-              const formatted: [number, number][] = parsed.map((pt: any) => {
-                if (Array.isArray(pt)) return [pt[0], pt[1]];
-                if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
-                return pt;
-              });
-              setWaypoints(formatted);
-              setExistingShapeId(match.id);
-              return;
-            }
-          } catch (_) {}
+            const formatted: [number, number][] = parsed.map((pt: any) => {
+              if (Array.isArray(pt)) return [pt[0], pt[1]];
+              if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
+              return pt;
+            });
+            setWaypoints(formatted);
+            setExistingShapeId(match.id);
+          } catch (_) {
+            setWaypoints([]);
+            setExistingShapeId(null);
+          }
+        } else {
+          setWaypoints([]);
+          setExistingShapeId(null);
         }
       }
-    } catch (_) {}
-    setWaypoints([]);
-    setExistingShapeId(null);
+    } catch (_) {
+      setWaypoints([]);
+      setExistingShapeId(null);
+    }
+
+    try {
+      const res = await fetch('/v1/admin/table/stops?limit=500');
+      if (res.ok) {
+        const data = await res.json();
+        const rows = data.rows || [];
+        const filtered = rows
+          .filter((s: any) => s.branch_id === selectedBranchId && s.direction === direction)
+          .sort((a: any, b: any) => (a.stop_order ?? 0) - (b.stop_order ?? 0));
+        setStops(filtered);
+      }
+    } catch (_) {
+      setStops([]);
+    }
   }, [selectedBranchId, direction]);
 
   useEffect(() => {
-    fetchExistingShape();
-  }, [fetchExistingShape]);
+    loadBranchData();
+  }, [loadBranchData]);
 
   const totalDistanceKm = useMemo(() => {
     if (waypoints.length < 2) return 0;
@@ -150,59 +228,136 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     return Math.round(sum * 100) / 100;
   }, [waypoints]);
 
-  const handleMapClick = (point: [number, number]) => {
-    setWaypoints(prev => [...prev, point]);
+  const handleAddWaypoint = (pt: [number, number]) => {
+    setWaypoints(prev => [...prev, pt]);
   };
 
-  const handleUndo = () => {
+  const handleUndoWaypoint = () => {
     setWaypoints(prev => prev.slice(0, -1));
   };
 
-  const handleClear = () => {
+  const handleClearWaypoints = () => {
     setWaypoints([]);
   };
 
-  const handleSaveShape = async () => {
-    if (!selectedBranchId) {
-      showNotification?.('error', 'Selecciona un ramal para guardar el trazado');
+  const handleAddStop = (pt: [number, number]) => {
+    if (!selectedBranchId) return;
+
+    let projLat = pt[0];
+    let projLng = pt[1];
+    if (waypoints.length >= 2) {
+      const proj = projectPointOnPolyline(pt, waypoints);
+      projLat = proj[0];
+      projLng = proj[1];
+    }
+
+    const newOrder = stops.length + 1;
+    const newStop: StopItem = {
+      id: `stp_${selectedBranchId}_${direction}_${Date.now()}`,
+      branch_id: selectedBranchId,
+      direction: direction,
+      stop_order: newOrder,
+      name: `Parada ${newOrder}`,
+      lat: pt[0],
+      lng: pt[1],
+      proj_lat: projLat,
+      proj_lng: projLng
+    };
+
+    setStops(prev => [...prev, newStop]);
+    showNotification?.('success', `Parada #${newOrder} añadida al mapa`);
+  };
+
+  const handleDeleteStop = (stopId: string) => {
+    setStops(prev => {
+      const remaining = prev.filter(s => s.id !== stopId);
+      return remaining.map((s, idx) => ({ ...s, stop_order: idx + 1 }));
+    });
+    showNotification?.('success', 'Parada eliminada');
+  };
+
+  const handleReverseStops = () => {
+    setStops(prev => {
+      const reversed = [...prev].reverse();
+      return reversed.map((s, idx) => ({ ...s, stop_order: idx + 1 }));
+    });
+    showNotification?.('success', 'Orden de paradas invertido');
+  };
+
+  const handleProjectStopsOnRoute = () => {
+    if (waypoints.length < 2) {
+      showNotification?.('error', 'Crea o carga un trazado primero para proyectar las paradas');
       return;
     }
-    if (waypoints.length < 2) {
-      showNotification?.('error', 'Marca al menos 2 puntos en el mapa para crear el recorrido');
+    setStops(prev => {
+      return prev.map(s => {
+        const proj = projectPointOnPolyline([s.lat, s.lng], waypoints);
+        return { ...s, proj_lat: proj[0], proj_lng: proj[1] };
+      });
+    });
+    showNotification?.('success', `${stops.length} paradas proyectadas sobre el trazado`);
+  };
+
+  const handleClearAllStops = () => {
+    setStops([]);
+    showNotification?.('success', 'Todas las paradas eliminadas');
+  };
+
+  const handleSaveAll = async () => {
+    if (!selectedBranchId) {
+      showNotification?.('error', 'Selecciona un ramal');
       return;
     }
 
     setIsSaving(true);
-    const shapeId = existingShapeId || `shp_${selectedBranchId}_${direction}_${Date.now()}`;
-    const payload = {
-      id: shapeId,
-      branch_id: selectedBranchId,
-      direction: direction,
-      coordinates_json: JSON.stringify(waypoints),
-      total_distance_km: totalDistanceKm
-    };
-
     try {
-      const url = existingShapeId 
-        ? `/v1/admin/table/route_shapes/${encodeURIComponent(existingShapeId)}`
-        : `/v1/admin/table/route_shapes`;
-      const method = existingShapeId ? 'PUT' : 'POST';
+      if (waypoints.length >= 2) {
+        const shapeId = existingShapeId || `shp_${selectedBranchId}_${direction}_${Date.now()}`;
+        const shapePayload = {
+          id: shapeId,
+          branch_id: selectedBranchId,
+          direction: direction,
+          coordinates_json: JSON.stringify(waypoints),
+          total_distance_km: totalDistanceKm
+        };
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success || res.ok) {
-        showNotification?.('success', `Trazado de recorrido (${direction.toUpperCase()}) guardado en D1 con éxito! (${waypoints.length} puntos, ${totalDistanceKm} km)`);
+        const shapeUrl = existingShapeId
+          ? `/v1/admin/table/route_shapes/${encodeURIComponent(existingShapeId)}`
+          : `/v1/admin/table/route_shapes`;
+        const shapeMethod = existingShapeId ? 'PUT' : 'POST';
+
+        await fetch(shapeUrl, {
+          method: shapeMethod,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(shapePayload)
+        });
         setExistingShapeId(shapeId);
-        fetch('/v1/admin/cache/purge').catch(() => {});
-      } else {
-        showNotification?.('error', data.error || 'Error al guardar el trazado');
       }
+
+      for (const stop of stops) {
+        const stopPayload = {
+          id: stop.id,
+          branch_id: stop.branch_id,
+          direction: stop.direction,
+          stop_order: stop.stop_order,
+          name: stop.name,
+          lat: stop.lat,
+          lng: stop.lng,
+          proj_lat: stop.proj_lat || stop.lat,
+          proj_lng: stop.proj_lng || stop.lng
+        };
+
+        await fetch('/v1/admin/table/stops', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(stopPayload)
+        });
+      }
+
+      await fetch('/v1/admin/cache/purge');
+      showNotification?.('success', `¡Recorrido y ${stops.length} paradas guardados correctamente en D1!`);
     } catch (err: any) {
-      showNotification?.('error', `Error de conexión: ${err.message}`);
+      showNotification?.('error', `Error al guardar: ${err.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -213,205 +368,350 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   }, [branchesList, selectedBranchId]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: 'calc(100vh - 120px)' }}>
-      {/* Controls Bar */}
+    <div style={{ display: 'flex', gap: '1rem', height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
+      
+      {/* 1. LEFT SIDEBAR PANEL: Tree Explorer */}
       <div style={{
+        width: '320px',
         backgroundColor: '#111827',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
-        padding: '1rem 1.25rem',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '1rem'
+        flexDirection: 'column',
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
       }}>
-        {/* Line & Branch Selectors */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', flex: '1 1 500px' }}>
-          <div>
-            <label style={{ fontSize: '0.7rem', color: '#9ca3af', display: 'block', marginBottom: '0.25rem', textTransform: 'uppercase', fontWeight: 600 }}>Línea</label>
-            <select
-              value={selectedLineId}
-              onChange={e => setSelectedLineId(e.target.value)}
-              style={{
-                backgroundColor: '#1f2937',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 500
-              }}
-            >
-              {linesList.map(l => (
-                <option key={l.id} value={l.id}>
-                  Línea {l.code} - {l.name}
-                </option>
-              ))}
-            </select>
+        {/* Header */}
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
+            </h2>
+            <span style={{ fontSize: '0.65rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.15rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
+              EDICIÓN ACTIVA
+            </span>
           </div>
 
-          <div>
-            <label style={{ fontSize: '0.7rem', color: '#9ca3af', display: 'block', marginBottom: '0.25rem', textTransform: 'uppercase', fontWeight: 600 }}>Ramal</label>
-            <select
-              value={selectedBranchId}
-              onChange={e => setSelectedBranchId(e.target.value)}
+          {/* Quick Actions Bar */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+            <button
+              onClick={handleSaveAll}
+              disabled={isSaving}
               style={{
-                backgroundColor: '#1f2937',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                padding: '0.5rem 0.75rem',
+                flex: 1,
+                padding: '0.5rem',
+                backgroundColor: '#10b981',
+                color: 'white',
+                border: 'none',
                 borderRadius: '8px',
-                fontSize: '0.85rem',
-                fontWeight: 500
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.35rem'
               }}
             >
-              {filteredBranches.map(b => (
-                <option key={b.id} value={b.id}>
-                  {b.code ? `${b.code} - ${b.name}` : b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.7rem', color: '#9ca3af', display: 'block', marginBottom: '0.25rem', textTransform: 'uppercase', fontWeight: 600 }}>Sentido</label>
-            <div style={{ display: 'flex', backgroundColor: '#1f2937', borderRadius: '8px', padding: '3px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <button
-                type="button"
-                onClick={() => setDirection('ida')}
-                style={{
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: direction === 'ida' ? '#0284c7' : 'transparent',
-                  color: direction === 'ida' ? '#ffffff' : '#9ca3af',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-              >
-                Ida ({selectedBranchObj?.direction_ida_label || 'Ida'})
-              </button>
-              <button
-                type="button"
-                onClick={() => setDirection('vuelta')}
-                style={{
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: direction === 'vuelta' ? '#0284c7' : 'transparent',
-                  color: direction === 'vuelta' ? '#ffffff' : '#9ca3af',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s'
-                }}
-              >
-                Vuelta ({selectedBranchObj?.direction_vuelta_label || 'Vuelta'})
-              </button>
-            </div>
+              <Save size={14} /> Guardar
+            </button>
+            <button
+              onClick={loadBranchData}
+              style={{
+                padding: '0.5rem 0.75rem',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                color: '#ef4444',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              Descartar
+            </button>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        {/* Navigation Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#111827' }}>
           <button
-            type="button"
-            onClick={() => setIsDrawing(!isDrawing)}
+            onClick={() => setActiveSidebarTab('lineas')}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.55rem 0.9rem',
-              borderRadius: '8px',
-              border: isDrawing ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: isDrawing ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
-              color: isDrawing ? '#38bdf8' : '#9ca3af',
-              fontSize: '0.8rem',
+              flex: 1,
+              padding: '0.65rem',
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: '#38bdf8',
               fontWeight: 600,
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              borderBottom: '2px solid #38bdf8'
+            }}
+          >
+            🚌 Líneas
+          </button>
+          <button
+            onClick={() => setActiveSidebarTab('paradas')}
+            style={{
+              flex: 1,
+              padding: '0.65rem',
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: '#9ca3af',
+              fontWeight: 600,
+              fontSize: '0.8rem',
               cursor: 'pointer'
             }}
           >
-            <Compass size={15} />
-            <span>{isDrawing ? 'Modo Dibujar ACTIVO' : 'Modo Dibujar Inactivo'}</span>
+            🚏 Paradas ({stops.length})
           </button>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={waypoints.length === 0}
-            title="Deshacer último punto"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.55rem 0.75rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              backgroundColor: '#1f2937',
-              color: waypoints.length === 0 ? '#4b5563' : '#f3f4f6',
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            <Undo size={14} />
-            <span>Deshacer</span>
-          </button>
+        {/* Filter Input */}
+        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
+          <div style={{ position: 'relative' }}>
+            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+            <input
+              type="text"
+              placeholder="Filtrar líneas y ramales..."
+              value={sidebarSearch}
+              onChange={e => setSidebarSearch(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.45rem 0.5rem 0.45rem 2rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backgroundColor: '#1f2937',
+                color: '#ffffff',
+                fontSize: '0.8rem'
+              }}
+            />
+          </div>
+        </div>
 
-          <button
-            type="button"
-            onClick={handleClear}
-            disabled={waypoints.length === 0}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              padding: '0.55rem 0.75rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(239, 68, 68, 0.2)',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              color: waypoints.length === 0 ? '#4b5563' : '#ef4444',
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            <Trash2 size={14} />
-            <span>Limpiar</span>
-          </button>
+        {/* Tree Accordion / List Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {Object.entries(groupedBranches).map(([groupKey, groupItems]) => {
+            const isExpanded = expandedCompanies[groupKey] !== false;
+            return (
+              <div key={groupKey} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {/* Group Title */}
+                <button
+                  onClick={() => setExpandedCompanies(prev => ({ ...prev, [groupKey]: !isExpanded }))}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.4rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    border: 'none',
+                    borderRadius: '6px',
+                    color: '#9ca3af',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
+                  <span>🏢 {groupKey} ({groupItems.length})</span>
+                  <span>{isExpanded ? '▾' : '▸'}</span>
+                </button>
 
-          <button
-            type="button"
-            onClick={handleSaveShape}
-            disabled={isSaving || waypoints.length < 2}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.55rem 1.1rem',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: waypoints.length >= 2 ? '#10b981' : '#374151',
-              color: waypoints.length >= 2 ? '#ffffff' : '#9ca3af',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              cursor: (isSaving || waypoints.length < 2) ? 'not-allowed' : 'pointer',
-              boxShadow: waypoints.length >= 2 ? '0 4px 12px rgba(16, 185, 129, 0.25)' : 'none'
-            }}
-          >
-            <Save size={15} />
-            <span>{isSaving ? 'Guardando...' : 'Guardar Recorrido'}</span>
-          </button>
+                {/* Branch Cards */}
+                {isExpanded && groupItems.map(b => {
+                  const isSelected = b.id === selectedBranchId;
+                  return (
+                    <div
+                      key={b.id}
+                      onClick={() => setSelectedBranchId(b.id)}
+                      style={{
+                        padding: '0.65rem 0.75rem',
+                        borderRadius: '10px',
+                        backgroundColor: isSelected ? '#1e293b' : 'transparent',
+                        border: isSelected ? '1px solid #0284c7' : '1px solid transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isSelected ? '#38bdf8' : '#6b7280' }} />
+                          <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#ffffff' : '#e5e7eb' }}>
+                            {b.code ? `${b.code} - ${b.name}` : b.name}
+                          </span>
+                        </div>
+                        <span style={{
+                          fontSize: '0.65rem',
+                          backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                          color: '#10b981',
+                          padding: '0.15rem 0.4rem',
+                          borderRadius: '4px',
+                          fontWeight: 600
+                        }}>
+                          PUBLICADO
+                        </span>
+                      </div>
+
+                      {isSelected && (
+                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
+                          <button
+                            onClick={e => { e.stopPropagation(); setDirection('ida'); }}
+                            style={{
+                              flex: 1,
+                              padding: '0.25rem 0.4rem',
+                              borderRadius: '6px',
+                              border: 'none',
+                              backgroundColor: direction === 'ida' ? '#0284c7' : '#334155',
+                              color: '#ffffff',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            + {b.direction_ida_label || 'Ida'}
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); setDirection('vuelta'); }}
+                            style={{
+                              flex: 1,
+                              padding: '0.25rem 0.4rem',
+                              borderRadius: '6px',
+                              border: 'none',
+                              backgroundColor: direction === 'vuelta' ? '#0284c7' : '#334155',
+                              color: '#ffffff',
+                              fontSize: '0.7rem',
+                              fontWeight: 600,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            + {b.direction_vuelta_label || 'Vuelta'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main Map & Side Details */}
-      <div style={{ flex: 1, display: 'flex', gap: '1rem', position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
+      {/* 2. LEAFLET MAP CANVAS & TOOLBAR */}
+      <div style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative' }}>
+        
+        {/* Map Top Action Toolbar */}
+        <div style={{
+          backgroundColor: '#111827',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '14px',
+          padding: '0.75rem 1.25rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem'
+        }}>
+          {/* Active Branch Info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
+              {selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Selecciona un Ramal'}
+            </span>
+            <span style={{
+              backgroundColor: direction === 'ida' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(225, 29, 72, 0.2)',
+              color: direction === 'ida' ? '#38bdf8' : '#fb7185',
+              padding: '0.2rem 0.6rem',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}>
+              {direction.toUpperCase()} ({direction === 'ida' ? (selectedBranchObj?.direction_ida_label || 'Ida') : (selectedBranchObj?.direction_vuelta_label || 'Vuelta')})
+            </span>
+          </div>
+
+          {/* Map Editing Tools */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              onClick={() => setActiveTool(activeTool === 'draw_route' ? 'none' : 'draw_route')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: activeTool === 'draw_route' ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTool === 'draw_route' ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
+                color: activeTool === 'draw_route' ? '#38bdf8' : '#9ca3af',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Compass size={14} />
+              <span>{activeTool === 'draw_route' ? '✏️ Modo Dibujar Recorrido ACTIVO' : '✏️ Dibujar Recorrido'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTool(activeTool === 'add_stop' ? 'none' : 'add_stop')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: activeTool === 'add_stop' ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: activeTool === 'add_stop' ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
+                color: activeTool === 'add_stop' ? '#10b981' : '#9ca3af',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <MapPin size={14} />
+              <span>{activeTool === 'add_stop' ? '🚏 Modo Agregar Parada ACTIVO' : '🚏 Agregar Parada'}</span>
+            </button>
+
+            <button
+              onClick={handleUndoWaypoint}
+              disabled={waypoints.length === 0}
+              title="Deshacer último punto del trazado"
+              style={{
+                padding: '0.45rem 0.65rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: '#1f2937',
+                color: waypoints.length === 0 ? '#4b5563' : '#f3f4f6',
+                cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Undo size={14} />
+            </button>
+
+            <button
+              onClick={handleClearWaypoints}
+              disabled={waypoints.length === 0}
+              title="Limpiar trazado"
+              style={{
+                padding: '0.45rem 0.65rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                color: waypoints.length === 0 ? '#4b5563' : '#ef4444',
+                cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+
         {/* Leaflet Map Canvas */}
-        <div style={{ flex: 1, height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+        <div style={{ flex: 1, borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.08)', position: 'relative' }}>
           <MapContainer
             center={waypoints.length > 0 ? waypoints[0] : ZARATE_CENTER}
             zoom={13}
@@ -419,13 +719,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             zoomControl={false}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              attribution='&copy; OpenStreetMap contributors &copy; CARTO'
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               maxZoom={19}
             />
 
-            <MapClickHandler isDrawing={isDrawing} onMapClick={handleMapClick} />
+            <MapFocusController focusCoords={focusCoords} />
+            <MapClickHandler activeTool={activeTool} onAddWaypoint={handleAddWaypoint} onAddStop={handleAddStop} />
 
+            {/* Polyline path for Route Shape */}
             {waypoints.length > 1 && (
               <Polyline
                 positions={waypoints}
@@ -433,11 +735,12 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   color: direction === 'ida' ? '#0284c7' : '#e11d48',
                   weight: 5,
                   opacity: 0.85,
-                  dashArray: isDrawing ? '6, 8' : undefined
+                  dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
                 }}
               />
             )}
 
+            {/* Start (A) & End (B) Route Markers */}
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
@@ -445,95 +748,231 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               // Ocultar totalmente los puntos intermedios
               if (!isStart && !isEnd) return null;
 
-              const radius = 6;
-              const fillColor = isStart ? '#10b981' : '#ef4444';
-
               return (
                 <CircleMarker
-                  key={idx}
+                  key={`pt_${idx}`}
                   center={pt}
-                  radius={radius}
+                  radius={6}
                   pathOptions={{
                     color: '#ffffff',
                     weight: 2,
-                    fillColor: fillColor,
+                    fillColor: isStart ? '#10b981' : '#ef4444',
                     fillOpacity: 1
                   }}
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
                       {isStart ? '🚩 Inicio de Recorrido (Punto 1)' : '🏁 Fin de Recorrido'}
-                      <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '4px' }}>
-                        Lat: {pt[0].toFixed(5)}, Lng: {pt[1].toFixed(5)}
-                      </div>
                     </div>
                   </Popup>
                 </CircleMarker>
               );
             })}
+
+            {/* Stop Markers on Map */}
+            {stops.map(st => (
+              <CircleMarker
+                key={st.id}
+                center={[st.lat, st.lng]}
+                radius={7}
+                pathOptions={{
+                  color: '#ffffff',
+                  weight: 2,
+                  fillColor: '#3b82f6',
+                  fillOpacity: 1
+                }}
+              >
+                <Tooltip permanent direction="top" offset={[0, -8]} opacity={0.9}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#0f172a' }}>
+                    {st.stop_order}. {st.name}
+                  </span>
+                </Tooltip>
+              </CircleMarker>
+            ))}
           </MapContainer>
         </div>
+      </div>
 
-        {/* Floating Side Details Panel */}
+      {/* 3. RIGHT FLOATING DOCK: Paradas Manager */}
+      {showRightPanel && (
         <div style={{
-          width: '280px',
-          backgroundColor: '#111827',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          width: '320px',
+          backgroundColor: '#0f172a',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '16px',
-          padding: '1.25rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.25rem',
-          overflowY: 'auto'
+          overflow: 'hidden',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.5)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffffff', fontWeight: 700, fontSize: '0.95rem' }}>
-            <RouteIcon size={18} style={{ color: '#38bdf8' }} />
-            <span>Resumen del Recorrido</span>
+          {/* Header */}
+          <div style={{ padding: '0.85rem 1.1rem', backgroundColor: '#1e293b', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Paradas: {selectedBranchObj ? (selectedBranchObj.code || selectedBranchObj.name) : 'Ramal'}
+              </span>
+              <span style={{ fontSize: '0.75rem', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.15rem 0.5rem', borderRadius: '10px', fontWeight: 800 }}>
+                {stops.length}
+              </span>
+            </div>
+
+            {/* Direction Tabs */}
+            <div style={{ display: 'flex', marginTop: '0.65rem', backgroundColor: '#0f172a', borderRadius: '8px', padding: '2px' }}>
+              <button
+                onClick={() => setDirection('ida')}
+                style={{
+                  flex: 1,
+                  padding: '0.35rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: direction === 'ida' ? '#1e293b' : 'transparent',
+                  color: direction === 'ida' ? '#ffffff' : '#9ca3af',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                }}
+              >
+                IDA
+              </button>
+              <button
+                onClick={() => setDirection('vuelta')}
+                style={{
+                  flex: 1,
+                  padding: '0.35rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: direction === 'vuelta' ? '#1e293b' : 'transparent',
+                  color: direction === 'vuelta' ? '#ffffff' : '#9ca3af',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  cursor: 'pointer'
+                }}
+              >
+                VUELTA
+              </button>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ backgroundColor: '#1f2937', padding: '0.85rem', borderRadius: '10px' }}>
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 }}>Distancia Total Aprox.</span>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10b981', marginTop: '0.2rem' }}>
-                {totalDistanceKm} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>km</span>
+          {/* Stops List */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {stops.length === 0 ? (
+              <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#6b7280', fontSize: '0.8rem' }}>
+                <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#4b5563' }} />
+                No hay paradas agregadas para {direction.toUpperCase()}.<br />
+                Haz clic en <strong>🚏 Agregar Parada</strong> para sumar paradas sobre el mapa.
               </div>
-            </div>
+            ) : (
+              stops.map((st) => (
+                <div
+                  key={st.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '8px',
+                    backgroundColor: '#1e293b',
+                    border: '1px solid rgba(255, 255, 255, 0.04)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38bdf8', minWidth: '24px' }}>
+                      {st.stop_order}.
+                    </span>
 
-            <div style={{ backgroundColor: '#1f2937', padding: '0.85rem', borderRadius: '10px' }}>
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 }}>Puntos Clickeados</span>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#38bdf8', marginTop: '0.2rem' }}>
-                {waypoints.length} <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>puntos</span>
-              </div>
-            </div>
+                    {editingStopId === st.id ? (
+                      <input
+                        type="text"
+                        value={editingStopName}
+                        onChange={e => setEditingStopName(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            setStops(prev => prev.map(s => s.id === st.id ? { ...s, name: editingStopName } : s));
+                            setEditingStopId(null);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: '#0f172a',
+                          color: '#ffffff',
+                          border: '1px solid #38bdf8',
+                          borderRadius: '4px',
+                          padding: '0.2rem 0.4rem',
+                          fontSize: '0.78rem',
+                          flex: 1
+                        }}
+                      />
+                    ) : (
+                      <span
+                        onClick={() => { setEditingStopId(st.id); setEditingStopName(st.name); }}
+                        style={{ fontSize: '0.8rem', color: '#f8fafc', fontWeight: 500, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      >
+                        {st.name}
+                      </span>
+                    )}
+                  </div>
 
-            <div style={{ backgroundColor: '#1f2937', padding: '0.85rem', borderRadius: '10px' }}>
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af', textTransform: 'uppercase', fontWeight: 600 }}>Estado de Guardado</span>
-              <div style={{ fontSize: '0.85rem', fontWeight: 600, color: existingShapeId ? '#38bdf8' : '#f59e0b', marginTop: '0.3rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                {existingShapeId ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
-                <span>{existingShapeId ? 'Trazado Existente en D1' : 'Trazado Nuevo sin Guardar'}</span>
-              </div>
-            </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <button
+                      onClick={() => setFocusCoords([st.lat, st.lng])}
+                      title="Centrar en mapa"
+                      style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                    >
+                      <Search size={13} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStop(st.id)}
+                      title="Eliminar parada"
+                      style={{ backgroundColor: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '2px' }}
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
+          {/* Bottom Dock Toolbar */}
           <div style={{
-            backgroundColor: 'rgba(56, 189, 248, 0.08)',
-            border: '1px solid rgba(56, 189, 248, 0.2)',
-            borderRadius: '10px',
-            padding: '0.85rem',
-            fontSize: '0.75rem',
-            color: '#93c5fd',
-            lineHeight: '1.4'
+            padding: '0.65rem 0.75rem',
+            backgroundColor: '#1e293b',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.35rem'
           }}>
-            <div style={{ fontWeight: 700, marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#38bdf8' }}>
-              <Info size={14} /> Instrucciones de Uso:
-            </div>
-            1. Asegúrate de tener el <strong>Modo Dibujar ACTIVO</strong>.<br />
-            2. Haz clic sobre el mapa para ir trazando el camino del ramal.<br />
-            3. Usa <strong>Deshacer</strong> si te equivocas de punto.<br />
-            4. Presiona <strong>Guardar Recorrido</strong> para persisitir el trazado en Cloudflare D1.
+            <button
+              onClick={() => setActiveTool('add_stop')}
+              title="Agregar Parada"
+              style={{ padding: '0.4rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer' }}
+            >
+              <Plus size={14} />
+            </button>
+            <button
+              onClick={handleReverseStops}
+              title="Invertir orden"
+              style={{ padding: '0.4rem', borderRadius: '6px', border: 'none', backgroundColor: '#3b82f6', color: 'white', cursor: 'pointer' }}
+            >
+              <ArrowUpDown size={14} />
+            </button>
+            <button
+              onClick={handleProjectStopsOnRoute}
+              title="Proyectar sobre el trazado"
+              style={{ padding: '0.4rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer' }}
+            >
+              <Compass size={14} />
+            </button>
+            <button
+              onClick={handleClearAllStops}
+              title="Eliminar todas las paradas"
+              style={{ padding: '0.4rem', borderRadius: '6px', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: 'pointer' }}
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
