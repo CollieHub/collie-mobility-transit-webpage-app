@@ -36,21 +36,41 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createWaypointIcon(isStart: boolean, isEnd: boolean) {
+function createWaypointIcon(orderNum: number, isStart: boolean, isEnd: boolean, isSelected: boolean = false, showNumbers: boolean = true) {
+  const size = isSelected ? 30 : 26;
   const bgColor = isStart ? '#10b981' : isEnd ? '#ef4444' : '#0284c7';
+  const borderColor = isSelected ? '#38bdf8' : '#ffffff';
+  const strokeWidth = isSelected ? 3 : 2;
+
+  if (!showNumbers) {
+    return L.divIcon({
+      className: 'custom-waypoint-icon',
+      html: `<div style="
+        width: ${isSelected ? '18px' : '14px'};
+        height: ${isSelected ? '18px' : '14px'};
+        background-color: ${bgColor};
+        border: ${strokeWidth}px solid ${borderColor};
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        cursor: grab;
+      "></div>`,
+      iconSize: [isSelected ? 18 : 14, isSelected ? 18 : 14],
+      iconAnchor: [isSelected ? 9 : 7, isSelected ? 9 : 7]
+    });
+  }
+
+  const svgCode = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 2px 6px rgba(0,0,0,0.6));">
+      <circle cx="16" cy="16" r="14" fill="${bgColor}"/>
+      <circle cx="16" cy="16" r="14" fill="none" stroke="${borderColor}" stroke-width="${strokeWidth}"/>
+      <text x="16" y="21" font-size="13" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#ffffff" text-anchor="middle">${orderNum}</text>
+    </svg>`;
+
   return L.divIcon({
-    className: 'custom-waypoint-icon',
-    html: `<div style="
-      width: 14px;
-      height: 14px;
-      background-color: ${bgColor};
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-      cursor: grab;
-    "></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7]
+    className: 'custom-waypoint-number-icon',
+    html: svgCode,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2]
   });
 }
 
@@ -424,6 +444,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null);
+  const [selectedWaypointIdx, setSelectedWaypointIdx] = useState<number | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
 
@@ -440,6 +461,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [showClearStopsModal, setShowClearStopsModal] = useState<boolean>(false);
   const [showClearRouteModal, setShowClearRouteModal] = useState<boolean>(false);
   const [showReverseRouteModal, setShowReverseRouteModal] = useState<boolean>(false);
+
+  // Smooth Route Modal State
+  const [showSmoothRouteModal, setShowSmoothRouteModal] = useState<boolean>(false);
+  const [smoothStartIdx, setSmoothStartIdx] = useState<number>(0);
+  const [smoothEndIdx, setSmoothEndIdx] = useState<number>(0);
+  const [smoothSimplification, setSmoothSimplification] = useState<'auto' | 'min' | 'all'>('auto');
+  const [isSmoothing, setIsSmoothing] = useState<boolean>(false);
 
   const nestedBranchesForCombo = useMemo(() => {
     if (selectedLineFilterId === 'all') return branchesList;
@@ -751,6 +779,70 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     setWaypoints(reversedControls);
     await updateFullPolylinePathFromControls(reversedControls);
     showNotification?.('success', 'Trazado invertido (ideal para configurar Vuelta)');
+  };
+
+  const handleOpenSmoothModal = () => {
+    if (waypoints.length < 2) {
+      showNotification?.('error', 'Se requieren al menos 2 puntos de control para suavizar el recorrido');
+      return;
+    }
+    setSmoothStartIdx(0);
+    setSmoothEndIdx(waypoints.length - 1);
+    setShowSmoothRouteModal(true);
+  };
+
+  const handleApplySmoothRoute = async () => {
+    if (smoothStartIdx >= smoothEndIdx) {
+      showNotification?.('error', 'El punto inicial debe ser menor al punto final');
+      return;
+    }
+    if (smoothEndIdx - smoothStartIdx < 1) {
+      showNotification?.('error', 'Selecciona un tramo de al menos 2 puntos');
+      return;
+    }
+
+    setIsSmoothing(true);
+    try {
+      const segment = waypoints.slice(smoothStartIdx, smoothEndIdx + 1);
+      const osrmRes = await fetchOsrmFullRoute(segment);
+      const rawPoints = osrmRes.points;
+
+      if (!rawPoints || rawPoints.length === 0) {
+        showNotification?.('error', 'No se pudo obtener el trazado OSRM para el tramo seleccionado');
+        setIsSmoothing(false);
+        return;
+      }
+
+      let smoothedControls: [number, number][] = rawPoints;
+      if (smoothSimplification === 'auto') {
+        smoothedControls = simplifyPolylineRdp(rawPoints, 0.015);
+      } else if (smoothSimplification === 'min') {
+        smoothedControls = simplifyPolylineRdp(rawPoints, 0.035);
+      } else {
+        smoothedControls = rawPoints;
+      }
+
+      if (smoothedControls.length > 0) {
+        smoothedControls[0] = segment[0];
+        smoothedControls[smoothedControls.length - 1] = segment[segment.length - 1];
+      }
+
+      const nextWaypoints = [
+        ...waypoints.slice(0, smoothStartIdx),
+        ...smoothedControls,
+        ...waypoints.slice(smoothEndIdx + 1)
+      ];
+
+      setWaypoints(nextWaypoints);
+      await updateFullPolylinePathFromControls(nextWaypoints);
+      showNotification?.('success', 'Tramo suavizado vialmente con éxito usando OSRM');
+      setShowSmoothRouteModal(false);
+    } catch (err: any) {
+      console.error('Error al suavizar recorrido:', err);
+      showNotification?.('error', 'Error al intentar suavizar el tramo del recorrido');
+    } finally {
+      setIsSmoothing(false);
+    }
   };
 
   const handleAddStop = (pt: [number, number]) => {
@@ -1470,45 +1562,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <span>{stopIconMode === 'number' ? '🔢 Números: SÍ' : '🚌 Íconos: SÍ'}</span>
             </button>
 
-
-
-
-
-            {/* Assistant 3: Invert & Create Vuelta Shape */}
-            <button
-              onClick={() => setShowReverseRouteModal(true)}
-              title="Invertir trazado para crear la Vuelta"
-              className="btn-animated btn-animated-dark"
-              style={{
-                padding: '0.45rem 0.65rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                backgroundColor: '#1f2937',
-                color: '#f3f4f6',
-                cursor: 'pointer'
-              }}
-            >
-              <GitCompare size={14} />
-            </button>
-
-
-            <button
-              onClick={handleClearWaypoints}
-              disabled={waypoints.length === 0}
-              title="Limpiar trazado"
-              className="btn-animated btn-animated-danger"
-              style={{
-                padding: '0.45rem 0.65rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: waypoints.length === 0 ? '#4b5563' : '#ef4444',
-                cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer'
-              }}
-            >
-              <Trash2 size={14} />
-            </button>
-
             <button
               onClick={() => setShowRightDock(!showRightDock)}
               title="Alternar dock flotante"
@@ -1577,18 +1630,24 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               />
             )}
 
-            {/* Control Waypoint Markers: ONLY render the key control handles (5-15 max, zero clutter!) */}
+            {/* Control Waypoint Markers: Render key control handles with numbers matching the Recorrido list */}
             {waypoints.map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
+              const isSelected = selectedWaypointIdx === idx;
+              const showNumbers = rightDockTab === 'recorrido' || stopIconMode === 'number';
 
               return (
                 <Marker
                   key={`wpt_control_marker_${idx}`}
                   position={pt}
                   draggable={isEditingEnabled}
-                  icon={createWaypointIcon(isStart, isEnd)}
+                  zIndexOffset={rightDockTab === 'recorrido' ? 3000 + (isSelected ? 500 : 0) : 1000}
+                  icon={createWaypointIcon(idx + 1, isStart, isEnd, isSelected, showNumbers)}
                   eventHandlers={{
+                    click() {
+                      setSelectedWaypointIdx(idx);
+                    },
                     dragend(e: any) {
                       if (!isEditingEnabled) return;
                       const newLat = e.target.getLatLng().lat;
@@ -1599,7 +1658,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto de Control ${idx + 1}`}
+                      {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto ${idx + 1}`}
                       <br />
                       <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-rutar las calles</span>
                     </div>
@@ -1608,12 +1667,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               );
             })}
 
-            {/* Stop Draggable Markers: Paradas en mapa con el icono oficial o numero secuencial */}
+            {/* Stop Draggable Markers: Paradas en mapa (atenuadas cuando se edita/ve la pestaña Recorrido) */}
             {stops.map(st => (
               <Marker
                 key={`stop_marker_${st.id}`}
                 position={[st.lat, st.lng]}
                 draggable={isEditingEnabled}
+                opacity={rightDockTab === 'recorrido' ? 0.35 : 1}
+                zIndexOffset={rightDockTab === 'paradas' ? 2000 : 500}
                 icon={
                   stopIconMode === 'number'
                     ? createStopIconWithNumber(st.stop_order, direction === 'ida' ? '#0284c7' : '#ea580c')
@@ -1900,38 +1961,52 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     waypoints.map((pt, idx) => {
                       const isStart = idx === 0;
                       const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
+                      const isSelected = selectedWaypointIdx === idx;
                       return (
                         <div
                           key={`wpt_${idx}`}
+                          onClick={() => {
+                            setFocusCoords(pt);
+                            setSelectedWaypointIdx(idx);
+                          }}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
                             padding: '0.55rem 0.75rem',
                             borderRadius: '8px',
-                            backgroundColor: '#131b2e',
-                            border: '1px solid rgba(255, 255, 255, 0.04)'
+                            backgroundColor: isSelected ? 'rgba(2, 132, 199, 0.22)' : '#131b2e',
+                            border: isSelected ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.04)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
                             <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isStart ? '#10b981' : isEnd ? '#ef4444' : '#38bdf8', minWidth: '22px' }}>
                               {idx + 1}.
                             </span>
-                            <span style={{ fontSize: '0.78rem', color: '#f1f5f9', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.78rem', color: '#f1f5f9', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {isStart ? '🚩 Inicio (Cabecera A)' : isEnd ? '🏁 Fin (Cabecera B)' : `Punto ${idx + 1}`} ({pt[0].toFixed(4)}, {pt[1].toFixed(4)})
                             </span>
                           </div>
 
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                             <button
-                              onClick={() => setFocusCoords(pt)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFocusCoords(pt);
+                                setSelectedWaypointIdx(idx);
+                              }}
                               title="Centrar punto en mapa"
                               style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
                             >
                               <Search size={13} />
                             </button>
                             <button
-                              onClick={() => handleDeleteWaypointIndex(idx)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteWaypointIndex(idx);
+                              }}
                               title="Eliminar punto"
                               style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
                             >
@@ -2016,7 +2091,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(5, 1fr)',
+                  gridTemplateColumns: 'repeat(6, 1fr)',
                   gap: '0.35rem'
                 }}>
                   <button
@@ -2027,6 +2102,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? (useStreetRouting ? '#10b981' : '#0284c7') : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Navigation size={14} />
+                  </button>
+                  <button
+                    onClick={() => executeIfEditing(handleOpenSmoothModal)}
+                    disabled={!isEditingEnabled || waypoints.length < 2}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Suavizar tramo del recorrido vialmente'}
+                    className="btn-animated btn-animated-primary"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && waypoints.length >= 2) ? '#0284c7' : '#1e293b', color: (isEditingEnabled && waypoints.length >= 2) ? 'white' : '#64748b', opacity: (isEditingEnabled && waypoints.length >= 2) ? 1 : 0.4, cursor: (isEditingEnabled && waypoints.length >= 2) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Wand2 size={14} />
                   </button>
                   <button
                     onClick={() => executeIfEditing(handleUndoWaypoint)}
@@ -2578,6 +2662,109 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#8b5cf6', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
               >
                 Sí, Invertir Trazado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 9: SUAVIZAR RECORRIDO */}
+      {showSmoothRouteModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            width: '440px',
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '1.25rem',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            color: '#f8fafc'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#38bdf8', fontSize: '1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Wand2 size={18} /> Suavizar Recorrido Vialmente
+              </h3>
+              <button onClick={() => setShowSmoothRouteModal(false)} style={{ background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer' }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+              Selecciona un tramo de puntos para corregirlos automáticamente y alinearlos al trazado de las calles mediante el seguimiento de Leaflet (OSRM).
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Punto Inicial:</label>
+                <select
+                  value={smoothStartIdx}
+                  onChange={(e) => setSmoothStartIdx(Number(e.target.value))}
+                  style={{ backgroundColor: '#1f2937', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.82rem', outline: 'none' }}
+                >
+                  {waypoints.map((pt, idx) => (
+                    <option key={`smooth-start-${idx}`} value={idx}>
+                      {idx + 1}. Punto {idx + 1} ({pt[0].toFixed(4)}, {pt[1].toFixed(4)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Punto Final:</label>
+                <select
+                  value={smoothEndIdx}
+                  onChange={(e) => setSmoothEndIdx(Number(e.target.value))}
+                  style={{ backgroundColor: '#1f2937', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.82rem', outline: 'none' }}
+                >
+                  {waypoints.map((pt, idx) => (
+                    <option key={`smooth-end-${idx}`} value={idx}>
+                      {idx + 1}. Punto {idx + 1} ({pt[0].toFixed(4)}, {pt[1].toFixed(4)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Simplificación de Puntos:</label>
+                <select
+                  value={smoothSimplification}
+                  onChange={(e) => setSmoothSimplification(e.target.value as any)}
+                  style={{ backgroundColor: '#1f2937', color: '#f8fafc', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '0.5rem', fontSize: '0.82rem', outline: 'none' }}
+                >
+                  <option value="auto">Automático (Recomendado - reduce exceso de puntos)</option>
+                  <option value="min">Simplificación Máxima (Sólo esquinas y giros principales)</option>
+                  <option value="all">Sin Simplificar (Conserva todos los nodos de calle OSRM)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                onClick={() => setShowSmoothRouteModal(false)}
+                className="btn-animated btn-animated-dark"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', backgroundColor: '#1f2937', color: '#f1f5f9', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button
+                disabled={isSmoothing}
+                onClick={handleApplySmoothRoute}
+                className="btn-animated btn-animated-primary"
+                style={{ flex: 1, padding: '0.65rem', borderRadius: '8px', border: 'none', backgroundColor: '#0284c7', color: '#ffffff', fontWeight: 700, fontSize: '0.8rem', cursor: isSmoothing ? 'not-allowed' : 'pointer', opacity: isSmoothing ? 0.7 : 1 }}
+              >
+                {isSmoothing ? 'Procesando...' : 'Suavizar Recorrido'}
               </button>
             </div>
           </div>
