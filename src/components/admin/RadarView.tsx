@@ -20,7 +20,9 @@ import {
   Copy,
   Wand2,
   GitCompare,
-  Navigation
+  Navigation,
+  Lock,
+  Unlock
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -221,11 +223,13 @@ async function fetchOsrmFullRoute(controls: [number, number][]): Promise<OsrmRou
 }
 
 function MapClickHandler({
+  isEditingEnabled,
   activeTool,
   rightDockTab,
   onAddWaypoint,
   onAddStop
 }: {
+  isEditingEnabled: boolean;
   activeTool: 'none' | 'draw_route' | 'add_stop';
   rightDockTab: 'paradas' | 'recorrido';
   onAddWaypoint: (point: [number, number]) => void;
@@ -233,6 +237,7 @@ function MapClickHandler({
 }) {
   useMapEvents({
     click(e) {
+      if (!isEditingEnabled) return;
       if (rightDockTab === 'paradas' || activeTool === 'add_stop') {
         onAddStop([e.latlng.lat, e.latlng.lng]);
       } else {
@@ -274,6 +279,7 @@ interface RadarViewProps {
 export default function RadarView({ linesList = [], branchesList = [], showNotification }: RadarViewProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
+  const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(true);
 
   const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
   const [selectedLineFilterId, setSelectedLineFilterId] = useState<string>('all');
@@ -825,31 +831,63 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       }}>
         {/* Header */}
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
             <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
             </h2>
-            <span style={{ fontSize: '0.65rem', backgroundColor: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.15rem 0.5rem', borderRadius: '6px', fontWeight: 700 }}>
-              EDICIÓN ACTIVA
+            <span style={{
+              fontSize: '0.65rem',
+              backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              color: isEditingEnabled ? '#10b981' : '#f59e0b',
+              padding: '0.15rem 0.5rem',
+              borderRadius: '6px',
+              fontWeight: 700
+            }}>
+              {isEditingEnabled ? 'EDICIÓN ACTIVA' : 'SOLO LECTURA'}
             </span>
           </div>
 
+          {/* Habilitar Edicion Toggle Button (Above Guardar) */}
+          <button
+            onClick={() => setIsEditingEnabled(!isEditingEnabled)}
+            className={isEditingEnabled ? "btn-animated btn-animated-success" : "btn-animated btn-animated-dark"}
+            style={{
+              width: '100%',
+              padding: '0.5rem 0.75rem',
+              marginBottom: '0.65rem',
+              borderRadius: '8px',
+              border: isEditingEnabled ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.15)',
+              backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
+              color: isEditingEnabled ? '#10b981' : '#9ca3af',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem'
+            }}
+          >
+            {isEditingEnabled ? <Unlock size={14} /> : <Lock size={14} />}
+            <span>{isEditingEnabled ? '✏️ Habilitar Edición: SÍ' : '🔒 Habilitar Edición: NO'}</span>
+          </button>
+
           {/* Quick Actions Bar */}
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               onClick={handleSaveAll}
-              disabled={isSaving}
+              disabled={isSaving || !isEditingEnabled}
               className="btn-animated btn-animated-success"
               style={{
                 flex: 1,
                 padding: '0.5rem',
-                backgroundColor: '#10b981',
+                backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: 600,
                 fontSize: '0.8rem',
-                cursor: 'pointer',
+                cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1292,6 +1330,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
             <MapFocusController focusCoords={focusCoords} />
             <MapClickHandler
+              isEditingEnabled={isEditingEnabled}
               activeTool={activeTool}
               rightDockTab={rightDockTab}
               onAddWaypoint={handleAddWaypoint}
@@ -1326,10 +1365,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 <Marker
                   key={`wpt_control_marker_${idx}`}
                   position={pt}
-                  draggable={true}
+                  draggable={isEditingEnabled}
                   icon={createWaypointIcon(isStart, isEnd)}
                   eventHandlers={{
                     dragend(e: any) {
+                      if (!isEditingEnabled) return;
                       const newLat = e.target.getLatLng().lat;
                       const newLng = e.target.getLatLng().lng;
                       handleWaypointDragEnd(idx, [newLat, newLng]);
@@ -1352,7 +1392,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <Marker
                 key={`stop_marker_${st.id}`}
                 position={[st.lat, st.lng]}
-                draggable={true}
+                draggable={isEditingEnabled}
                 icon={createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')}
                 eventHandlers={{
                   dragend(e: any) {
