@@ -499,33 +499,52 @@ function resolveCurrentDayType(nowDate = new Date()) {
   };
 }
 
-async function resolveCurrentDayTypeAsync(db?: any, company = 'SIT', nowDate = new Date()) {
+async function resolveCurrentDayTypeAsync(db?: any, company = 'SIT', routeId?: string, nowDate = new Date()) {
   const dateStr = nowDate.toISOString().split('T')[0];
 
   if (db) {
     try {
-      // 1. Revisar si hay una Excepción de Calendario configurada para esta fecha
-      const excRes = await db.prepare(`
+      if (routeId) {
+        const branchExc = await db.prepare(`
+          SELECT override_day_type, description FROM calendar_exceptions
+          WHERE date = ? AND (branch_id = ? OR LOWER(branch_id) = LOWER(?))
+          LIMIT 1
+        `).bind(dateStr, routeId, routeId).first();
+
+        if (branchExc && branchExc.override_day_type) {
+          const override = branchExc.override_day_type;
+          if (override === 'saturday' || override === 'sabados') {
+            return { code: 'sabados', name: 'Sábado (Excepción)', id: '26453d08-1d87-57ea-910e-1e14de95a162' };
+          } else if (override === 'sunday' || override === 'domingos_feriados') {
+            return { code: 'domingos_feriados', name: 'Domingos y Feriados (Excepción)', id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e' };
+          } else if (override === 'weekday' || override === 'lunes_a_viernes') {
+            return { code: 'lunes_a_viernes', name: 'Lunes a Viernes (Excepción)', id: '88f18fc3-ba8e-521a-a093-07db0825cf3a' };
+          } else {
+            return { code: override, name: `Excepción (${override})`, id: override };
+          }
+        }
+      }
+
+      const lineExc = await db.prepare(`
         SELECT override_day_type, description FROM calendar_exceptions
-        WHERE date = ? AND (company = ? OR company = 'all')
+        WHERE date = ? AND (company = ? OR company = 'all') AND (branch_id IS NULL OR branch_id = '')
         ORDER BY CASE WHEN company = ? THEN 1 ELSE 2 END
         LIMIT 1
       `).bind(dateStr, company, company).first();
 
-      if (excRes && excRes.override_day_type) {
-        const override = excRes.override_day_type;
+      if (lineExc && lineExc.override_day_type) {
+        const override = lineExc.override_day_type;
         if (override === 'saturday' || override === 'sabados') {
-          return { code: 'sabados', name: 'Sábado (Excepción)', id: '26453d08-1d87-57ea-910e-1e14de95a162' };
+          return { code: 'sabados', name: 'Sábado (Excepción Línea)', id: '26453d08-1d87-57ea-910e-1e14de95a162' };
         } else if (override === 'sunday' || override === 'domingos_feriados') {
-          return { code: 'domingos_feriados', name: 'Domingos y Feriados (Excepción)', id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e' };
+          return { code: 'domingos_feriados', name: 'Domingos y Feriados (Excepción Línea)', id: 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e' };
         } else if (override === 'weekday' || override === 'lunes_a_viernes') {
-          return { code: 'lunes_a_viernes', name: 'Lunes a Viernes (Excepción)', id: '88f18fc3-ba8e-521a-a093-07db0825cf3a' };
+          return { code: 'lunes_a_viernes', name: 'Lunes a Viernes (Excepción Línea)', id: '88f18fc3-ba8e-521a-a093-07db0825cf3a' };
         } else {
-          return { code: override, name: `Excepción (${override})`, id: override };
+          return { code: override, name: `Excepción Línea (${override})`, id: override };
         }
       }
 
-      // 2. Revisar si la fecha es un Feriado Nacional en la tabla holidays
       const holRes = await db.prepare('SELECT name, type FROM holidays WHERE date = ?').bind(dateStr).first();
       if (holRes) {
         return {
@@ -664,7 +683,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
       });
     }
 
-    const currentDayTypeInfo = await resolveCurrentDayTypeAsync(c.env.DB);
+    const currentDayTypeInfo = await resolveCurrentDayTypeAsync(c.env.DB, 'SIT', routeId);
     let dayTypesList: any[] = [];
     try {
       const dtRes = await c.env.DB.prepare('SELECT id, code, name, description, display_order, is_enabled FROM day_types WHERE is_enabled = 1 ORDER BY display_order ASC').all();
@@ -1132,7 +1151,7 @@ app.delete('/v1/holidays/:id', async (c) => {
 
 app.get('/v1/calendar_exceptions', async (c) => {
   try {
-    const res = await c.env.DB.prepare('SELECT id, date, company, override_day_type as overrideDayType, description, created_at FROM calendar_exceptions ORDER BY date ASC').all();
+    const res = await c.env.DB.prepare('SELECT id, date, company, branch_id as branchId, branch_id, override_day_type as overrideDayType, description, created_at FROM calendar_exceptions ORDER BY date ASC').all();
     return c.json(res.results || []);
   } catch (err: any) {
     return c.json([]);
@@ -1147,17 +1166,18 @@ app.post('/v1/calendar_exceptions', async (c) => {
     }
     const id = body.id || `cexc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const company = body.company || 'SIT';
+    const branchId = body.branchId || body.branch_id || null;
     const overrideDayType = body.overrideDayType || body.override_day_type || 'saturday';
     const description = body.description || '';
 
     await c.env.DB.prepare(`
-      INSERT INTO calendar_exceptions (id, date, company, override_day_type, description)
-      VALUES (?, ?, ?, ?, ?)
-    `).bind(id, body.date, company, overrideDayType, description).run();
+      INSERT INTO calendar_exceptions (id, date, company, branch_id, override_day_type, description)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(id, body.date, company, branchId, overrideDayType, description).run();
 
     await purgeKvCache(c.env.FLEET_KV);
 
-    return c.json({ success: true, id, date: body.date, company, overrideDayType, description });
+    return c.json({ success: true, id, date: body.date, company, branchId, branch_id: branchId, overrideDayType, description });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
   }
@@ -1530,7 +1550,7 @@ const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; 
     label: 'Excepciones de Calendario (Calendar Exceptions)',
     primaryKey: 'id',
     orderBy: 'date DESC',
-    fields: ['id', 'date', 'day_types_id', 'note', 'is_holiday']
+    fields: ['id', 'date', 'company', 'branch_id', 'override_day_type', 'description']
   },
   branch_statuses: {
     label: 'Estados Operativos (Branch Statuses)',

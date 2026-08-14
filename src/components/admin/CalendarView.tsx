@@ -12,6 +12,8 @@ interface CalendarException {
   id?: string;
   date: string;
   company: string;
+  branchId?: string;
+  branch_id?: string;
   overrideDayType: string;
   description: string;
 }
@@ -84,12 +86,14 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
 
   // Exceptions State
   const [exceptions, setExceptions] = useState<CalendarException[]>([]);
+  const [branches, setBranches] = useState<any[]>([]);
   const [isLoadingExceptions, setIsLoadingExceptions] = useState<boolean>(false);
   const [showAddException, setShowAddException] = useState<boolean>(false);
   const [newExceptionForm, setNewExceptionForm] = useState({
     dateStart: '',
     dateEnd: '',
     company: 'SIT',
+    branchId: '',
     overrideDayType: 'saturday',
     description: ''
   });
@@ -146,9 +150,20 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
     setIsLoadingExceptions(false);
   };
 
+  const fetchBranches = async () => {
+    try {
+      const res = await fetch('/v1/admin/table/branches?limit=500');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.rows) setBranches(data.rows);
+      }
+    } catch (_) {}
+  };
+
   useEffect(() => {
     fetchHolidays();
     fetchExceptions();
+    fetchBranches();
   }, []);
 
   const sortedHolidays = useMemo(() => {
@@ -240,6 +255,8 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
         id: `cexc_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
         date: dStr,
         company: newExceptionForm.company,
+        branchId: newExceptionForm.branchId || undefined,
+        branch_id: newExceptionForm.branchId || undefined,
         overrideDayType: newExceptionForm.overrideDayType,
         description: newExceptionForm.description || `Excepción de calendario para ${newExceptionForm.company}`
       };
@@ -247,9 +264,9 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
       curr.setDate(curr.getDate() + 1);
     }
 
-    setExceptions(prev => [...prev.filter(e => !createdItems.some(c => c.date === e.date && c.company === e.company)), ...createdItems]);
+    setExceptions(prev => [...prev.filter(e => !createdItems.some(c => c.date === e.date && c.company === e.company && c.branchId === e.branchId)), ...createdItems]);
     showNotification?.('success', `${createdItems.length} excepción(es) de calendario registrada(s)`);
-    setNewExceptionForm({ dateStart: '', dateEnd: '', company: 'SIT', overrideDayType: 'saturday', description: '' });
+    setNewExceptionForm({ dateStart: '', dateEnd: '', company: 'SIT', branchId: '', overrideDayType: 'saturday', description: '' });
     setShowAddException(false);
 
     for (const item of createdItems) {
@@ -257,6 +274,8 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
         const payload = {
           date: item.date,
           company: item.company,
+          branch_id: item.branchId || null,
+          branchId: item.branchId || null,
           override_day_type: item.overrideDayType,
           overrideDayType: item.overrideDayType,
           description: item.description
@@ -795,6 +814,30 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
               </div>
 
               <div style={{ flex: '1 1 180px' }}>
+                <label style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase' }}>Ramal (Opcional)</label>
+                <select
+                  value={newExceptionForm.branchId}
+                  onChange={e => setNewExceptionForm({ ...newExceptionForm, branchId: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    backgroundColor: '#1f2937',
+                    color: '#ffffff',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <option value="">Todos los Ramales (Toda la Línea)</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id}>
+                      {b.code ? `${b.code} - ${b.name}` : b.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ flex: '1 1 180px' }}>
                 <label style={{ fontSize: '0.75rem', color: '#9ca3af', display: 'block', marginBottom: '0.35rem', textTransform: 'uppercase' }}>Cronograma a Usar</label>
                 <select
                   value={newExceptionForm.overrideDayType}
@@ -873,13 +916,17 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
               exceptions.map((exc, idx) => {
                 const isPast = exc.date < today;
                 const cfg = OVERRIDE_CONFIG[exc.overrideDayType] || OVERRIDE_CONFIG.saturday;
+                const bId = exc.branchId || exc.branch_id;
+                const matchedBranch = branches.find(b => b.id === bId);
+                const branchLabel = matchedBranch ? (matchedBranch.code ? `${matchedBranch.code} - ${matchedBranch.name}` : matchedBranch.name) : bId;
+
                 return (
                   <div
                     key={exc.id || idx}
                     className="cal-row"
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '150px 130px 1fr 180px 48px',
+                      gridTemplateColumns: '150px 200px 1fr 180px 48px',
                       alignItems: 'center',
                       padding: '0.85rem 1.25rem',
                       borderBottom: idx < exceptions.length - 1 ? '1px solid rgba(255, 255, 255, 0.04)' : 'none',
@@ -893,7 +940,7 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
                       </span>
                     </div>
 
-                    <div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
                       <span style={{
                         backgroundColor: exc.company === 'all' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(255, 255, 255, 0.08)',
                         color: exc.company === 'all' ? '#a78bfa' : '#ffffff',
@@ -904,6 +951,29 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
                       }}>
                         🏢 {exc.company === 'all' ? 'Global' : exc.company}
                       </span>
+                      {bId ? (
+                        <span style={{
+                          backgroundColor: 'rgba(56, 189, 248, 0.12)',
+                          color: '#38bdf8',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600
+                        }}>
+                          🌿 {branchLabel}
+                        </span>
+                      ) : (
+                        <span style={{
+                          backgroundColor: 'rgba(156, 163, 175, 0.12)',
+                          color: '#9ca3af',
+                          padding: '0.2rem 0.5rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600
+                        }}>
+                          🚌 Toda la Línea
+                        </span>
+                      )}
                     </div>
 
                     <div>

@@ -279,6 +279,7 @@ CREATE TABLE IF NOT EXISTS calendar_exceptions (
     id TEXT PRIMARY KEY,
     date TEXT NOT NULL,
     company TEXT NOT NULL DEFAULT 'SIT',
+    branch_id TEXT DEFAULT NULL,
     override_day_type TEXT NOT NULL,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
