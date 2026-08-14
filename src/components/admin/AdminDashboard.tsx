@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import RamalScheduleEditor from './RamalScheduleEditor';
 import CalendarView from './CalendarView';
+import RadarView from './RadarView';
 import {
   BuildingIcon,
   BusIcon,
@@ -36,6 +37,12 @@ interface AdminDashboardProps {
 }
 
 const NAVIGATION_GROUPS = [
+  {
+    title: 'Monitoreo & Trazados',
+    items: [
+      { key: 'radar', label: 'Radar', icon: RouteIcon },
+    ]
+  },
   {
     title: 'Catálogo & Red',
     items: [
@@ -661,10 +668,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
         }}>
           <div>
             <h1 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, color: '#ffffff', letterSpacing: '-0.01em' }}>
-              {activeTable === 'schedules' ? 'Horarios' : (currentMeta.label || activeTable)}
+              {activeTable === 'radar' ? 'Radar & Trazados' : activeTable === 'schedules' ? 'Horarios' : (currentMeta.label || activeTable)}
             </h1>
             <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-              Tabla D1: <code style={{ color: '#38bdf8' }}>{activeTable}</code>
+              {activeTable === 'radar' ? 'Monitoreo de Red y Creador de Recorridos' : `Tabla D1: ${activeTable}`}
             </span>
           </div>
 
@@ -716,7 +723,13 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
         {/* Main Content Workspace */}
         <main style={{ flex: 1, padding: '1.5rem 2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {activeTable === 'schedules' ? (
+          {activeTable === 'radar' ? (
+            <RadarView
+              linesList={linesList}
+              branchesList={branchesList}
+              showNotification={showNotification}
+            />
+          ) : activeTable === 'schedules' ? (
             <RamalScheduleEditor
               linesList={linesList}
               branchesList={branchesList}
