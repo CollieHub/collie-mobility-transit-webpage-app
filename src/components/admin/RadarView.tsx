@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -226,18 +226,24 @@ function MapClickHandler({
   isEditingEnabled,
   activeTool,
   rightDockTab,
+  isPolylineClickRef,
   onAddWaypoint,
   onAddStop
 }: {
   isEditingEnabled: boolean;
   activeTool: 'none' | 'draw_route' | 'add_stop';
   rightDockTab: 'paradas' | 'recorrido';
+  isPolylineClickRef: React.RefObject<boolean>;
   onAddWaypoint: (point: [number, number]) => void;
   onAddStop: (point: [number, number]) => void;
 }) {
   useMapEvents({
     click(e) {
       if (!isEditingEnabled) return;
+      if (isPolylineClickRef.current) {
+        // Ignorar click del mapa si provino de tocar la linea del recorrido
+        return;
+      }
       if (rightDockTab === 'paradas' || activeTool === 'add_stop') {
         onAddStop([e.latlng.lat, e.latlng.lng]);
       } else {
@@ -280,6 +286,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
   const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(true);
+  const isPolylineClickRef = useRef<boolean>(false);
 
   const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
   const [selectedLineFilterId, setSelectedLineFilterId] = useState<string>('all');
@@ -360,11 +367,28 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     return groups;
   }, [nestedBranchesForCombo]);
 
+  // Seleccionar la línea SIT por defecto cuando abre la aplicación
   useEffect(() => {
-    if (branchesList.length > 0 && !selectedBranchId) {
+    if (linesList.length > 0 && selectedLineFilterId === 'all') {
+      const sitLine = linesList.find(l =>
+        l.id === 'linea_sit' ||
+        l.code === 'SIT' ||
+        (l.name && l.name.toLowerCase().includes('sit'))
+      );
+
+      if (sitLine) {
+        setSelectedLineFilterId(sitLine.id);
+        const sitBranch = branchesList.find(b => b.line_id === sitLine.id);
+        if (sitBranch) {
+          setSelectedBranchId(sitBranch.id);
+        }
+      } else if (branchesList.length > 0 && !selectedBranchId) {
+        setSelectedBranchId(branchesList[0].id);
+      }
+    } else if (branchesList.length > 0 && !selectedBranchId) {
       setSelectedBranchId(branchesList[0].id);
     }
-  }, [branchesList, selectedBranchId]);
+  }, [linesList, branchesList, selectedLineFilterId, selectedBranchId]);
 
   const updateFullPolylinePathFromControls = useCallback(async (controls: [number, number][]) => {
     if (controls.length < 2) {
@@ -1393,6 +1417,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               isEditingEnabled={isEditingEnabled}
               activeTool={activeTool}
               rightDockTab={rightDockTab}
+              isPolylineClickRef={isPolylineClickRef}
               onAddWaypoint={handleAddWaypoint}
               onAddStop={handleAddStop}
             />
@@ -1403,8 +1428,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 positions={displayPolylinePath}
                 eventHandlers={{
                   click(e) {
-                    L.DomEvent.stopPropagation(e.originalEvent);
+                    if (!isEditingEnabled) return;
+                    if (e.originalEvent) {
+                      L.DomEvent.stopPropagation(e.originalEvent);
+                    }
+                    isPolylineClickRef.current = true;
                     handleInsertPolylineWaypoint([e.latlng.lat, e.latlng.lng]);
+                    setTimeout(() => {
+                      isPolylineClickRef.current = false;
+                    }, 200);
                   }
                 }}
                 pathOptions={{
