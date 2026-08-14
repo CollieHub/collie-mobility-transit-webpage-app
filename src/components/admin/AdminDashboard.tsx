@@ -228,6 +228,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   };
 
   const fetchTableRows = (tableName: string, query = '') => {
+    if (tableName === 'radar') {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     setSelectedRowKeys(new Set());
     const url = `/v1/admin/table/${tableName}?limit=500&q=${encodeURIComponent(query)}`;
@@ -286,6 +290,11 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   };
 
   useEffect(() => {
+    if (activeTable === 'radar') {
+      setIsSidebarCollapsed(true);
+      setIsLoading(false);
+      return;
+    }
     fetchTableRows(activeTable, searchQuery);
   }, [activeTable]);
 
