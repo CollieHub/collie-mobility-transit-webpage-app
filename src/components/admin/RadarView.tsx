@@ -51,20 +51,24 @@ function createWaypointIcon(isStart: boolean, isEnd: boolean) {
   });
 }
 
-function createStopIcon() {
+function createStopIcon(color: string = '#ea580c') {
+  const size = 24;
+  const svgCode = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
+      <!-- Fondo del Icono Naranja / Color del Ramal -->
+      <rect width="32" height="32" rx="7" fill="${color}"/>
+      <!-- Borde interior blanco continuo -->
+      <rect x="1.5" y="1.5" width="29" height="29" rx="5.5" fill="none" stroke="#ffffff" stroke-width="1.8" />
+      <!-- Icono de Colectivo Blanco -->
+      <g transform="translate(4,4)">
+          <path fill="#FFFFFF" d="M4,16c0,0.88 0.39,1.67 1,2.22l0,1.78c0,0.55 0.45,1 1,1l1,0c0.55,0 1,-0.45 1,-1l0,-1l8,0l0,1c0,0.55 0.45,1 1,1l1,0c0.55,0 1,-0.45 1,-1l0,-1.78c0.61,-0.55 1,-1.34 1,-2.22L20,6c0,-3.5 -3.58,-4 -8,-4s-8,0.5 -8,4l0,10zM7.5,17c-0.83,0 -1.5,-0.67 -1.5,-1.5S6.67,14 7.5,14s1.5,0.67 1.5,1.5S8.33,17 7.5,17zM16.5,17c-0.83,0 -1.5,-0.67 -1.5,-1.5s0.67,-1.5 1.5,-1.5s1.5,0.67 1.5,1.5S17.33,17 16.5,17zM18,11L6,11L6,6l12,0L18,11z"/>
+      </g>
+    </svg>`;
   return L.divIcon({
     className: 'custom-stop-icon',
-    html: `<div style="
-      width: 14px;
-      height: 14px;
-      background-color: #3b82f6;
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-      cursor: grab;
-    "></div>`,
-    iconSize: [14, 14],
-    iconAnchor: [7, 7]
+    html: svgCode,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2]
   });
 }
 
@@ -1316,13 +1320,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               );
             })}
 
-            {/* Stop Draggable Markers: Paradas en mapa */}
+            {/* Stop Draggable Markers: Paradas en mapa con el icono oficial de la app publica */}
             {stops.map(st => (
               <Marker
                 key={`stop_marker_${st.id}`}
                 position={[st.lat, st.lng]}
                 draggable={true}
-                icon={createStopIcon()}
+                icon={createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')}
                 eventHandlers={{
                   dragend(e: any) {
                     const newLat = e.target.getLatLng().lat;
