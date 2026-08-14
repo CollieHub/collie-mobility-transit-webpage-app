@@ -146,21 +146,74 @@ function simplifyPolylineRdp(points: [number, number][], epsilonKm: number = 0.2
   }
 }
 
-async function fetchOsrmStreetRoute(from: [number, number], to: [number, number]): Promise<[number, number][]> {
-  try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
-    const res = await fetch(url);
-    if (!res.ok) return [to];
-    const data = await res.json();
-    if (data.routes && data.routes.length > 0 && data.routes[0].geometry?.coordinates) {
-      const coords = data.routes[0].geometry.coordinates;
-      const points: [number, number][] = coords.slice(1).map((c: [number, number]) => [c[1], c[0]]);
-      return points.length > 0 ? points : [to];
-    }
-  } catch (err) {
-    console.warn('Error al consultar ruteo OSRM:', err);
+interface OsrmRouteResult {
+  points: [number, number][];
+  distanceKm: number;
+}
+
+// Multi-waypoint OSRM routing in a single query to prevent detour loops and calculate exact road distance
+async function fetchOsrmFullRoute(controls: [number, number][]): Promise<OsrmRouteResult> {
+  if (controls.length < 2) {
+    return { points: controls, distanceKm: 0 };
   }
-  return [to];
+
+  if (controls.length <= 80) {
+    try {
+      const coordString = controls.map(c => `${c[1]},${c[0]}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const coords = route.geometry?.coordinates || [];
+          const points: [number, number][] = coords.map((c: [number, number]) => [c[1], c[0]]);
+          const distanceKm = Math.round((route.distance / 1000) * 100) / 100;
+          return { points: points.length > 0 ? points : controls, distanceKm };
+        }
+      }
+    } catch (err) {
+      console.warn('Error en ruteo OSRM multi-punto:', err);
+    }
+  }
+
+  try {
+    let fullPoints: [number, number][] = [];
+    let totalMeters = 0;
+    const chunkSize = 50;
+
+    for (let i = 0; i < controls.length - 1; i += chunkSize - 1) {
+      const chunk = controls.slice(i, i + chunkSize);
+      const coordString = chunk.map(c => `${c[1]},${c[0]}`).join(';');
+      const url = `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          totalMeters += route.distance || 0;
+          const coords = route.geometry?.coordinates || [];
+          const pts: [number, number][] = coords.map((c: [number, number]) => [c[1], c[0]]);
+          if (fullPoints.length > 0 && pts.length > 0) {
+            fullPoints = [...fullPoints, ...pts.slice(1)];
+          } else {
+            fullPoints = [...fullPoints, ...pts];
+          }
+        }
+      }
+    }
+
+    const distanceKm = Math.round((totalMeters / 1000) * 100) / 100;
+    return { points: fullPoints.length > 0 ? fullPoints : controls, distanceKm };
+  } catch (err) {
+    console.warn('Error en ruteo OSRM por lotes:', err);
+  }
+
+  let sum = 0;
+  for (let i = 0; i < controls.length - 1; i++) {
+    sum += calculateDistanceKm(controls[i][0], controls[i][1], controls[i + 1][0], controls[i + 1][1]);
+  }
+  return { points: controls, distanceKm: Math.round(sum * 100) / 100 };
 }
 
 function MapClickHandler({
@@ -228,6 +281,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
   // Full polyline path: Detailed OSRM curve geometry coordinates for clean street polyline rendering
   const [fullPolylinePath, setFullPolylinePath] = useState<[number, number][]>([]);
+  // Exact road distance calculated by OSRM or Haversine
+  const [routeDistanceKm, setRouteDistanceKm] = useState<number>(0);
 
   const [existingShapeId, setExistingShapeId] = useState<string | null>(null);
 
@@ -277,22 +332,25 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const updateFullPolylinePathFromControls = useCallback(async (controls: [number, number][]) => {
     if (controls.length < 2) {
       setFullPolylinePath(controls);
+      setRouteDistanceKm(0);
       return;
     }
 
     if (!useStreetRouting) {
       setFullPolylinePath(controls);
+      let sum = 0;
+      for (let i = 0; i < controls.length - 1; i++) {
+        sum += calculateDistanceKm(controls[i][0], controls[i][1], controls[i + 1][0], controls[i + 1][1]);
+      }
+      setRouteDistanceKm(Math.round(sum * 100) / 100);
       return;
     }
 
     setIsRouting(true);
     try {
-      let resultPath: [number, number][] = [controls[0]];
-      for (let i = 0; i < controls.length - 1; i++) {
-        const seg = await fetchOsrmStreetRoute(controls[i], controls[i + 1]);
-        resultPath = [...resultPath, ...seg];
-      }
-      setFullPolylinePath(resultPath);
+      const res = await fetchOsrmFullRoute(controls);
+      setFullPolylinePath(res.points);
+      setRouteDistanceKm(res.distanceKm);
     } catch (_) {
       setFullPolylinePath(controls);
     } finally {
@@ -319,24 +377,34 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             });
 
             setFullPolylinePath(formatted);
-            // Simplify dense 1,800+ coordinates into significant control waypoints for crisp map display
             const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
             setWaypoints(simplifiedControls);
             setExistingShapeId(match.id);
+
+            // Re-calculate clean distance directly from OSRM or simplified control waypoints
+            if (simplifiedControls.length >= 2) {
+              const osrmRes = await fetchOsrmFullRoute(simplifiedControls);
+              setRouteDistanceKm(osrmRes.distanceKm);
+            } else if (match.total_distance_km && match.total_distance_km > 0) {
+              setRouteDistanceKm(match.total_distance_km);
+            }
           } catch (_) {
             setWaypoints([]);
             setFullPolylinePath([]);
+            setRouteDistanceKm(0);
             setExistingShapeId(null);
           }
         } else {
           setWaypoints([]);
           setFullPolylinePath([]);
+          setRouteDistanceKm(0);
           setExistingShapeId(null);
         }
       }
     } catch (_) {
       setWaypoints([]);
       setFullPolylinePath([]);
+      setRouteDistanceKm(0);
       setExistingShapeId(null);
     }
 
@@ -364,13 +432,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   }, [fullPolylinePath, waypoints]);
 
   const totalDistanceKm = useMemo(() => {
-    if (displayPolylinePath.length < 2) return 0;
-    let sum = 0;
-    for (let i = 0; i < displayPolylinePath.length - 1; i++) {
-      sum += calculateDistanceKm(displayPolylinePath[i][0], displayPolylinePath[i][1], displayPolylinePath[i + 1][0], displayPolylinePath[i + 1][1]);
-    }
-    return Math.round(sum * 100) / 100;
-  }, [displayPolylinePath]);
+    return routeDistanceKm;
+  }, [routeDistanceKm]);
 
   // 1. Clic en el mapa: Suma un punto de control al recorrido
   const handleAddWaypoint = async (pt: [number, number]) => {
@@ -438,6 +501,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const handleClearWaypoints = () => {
     setWaypoints([]);
     setFullPolylinePath([]);
+    setRouteDistanceKm(0);
   };
 
   const handleDeleteWaypointIndex = async (idx: number) => {
