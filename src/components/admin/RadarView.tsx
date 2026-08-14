@@ -377,6 +377,14 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
   const [isRouting, setIsRouting] = useState<boolean>(false);
 
+  const executeIfEditing = useCallback((action: () => void) => {
+    if (!isEditingEnabled) {
+      showNotification?.('error', 'Haz clic en "🔒 Habilitar Edición: NO" en el panel izquierdo para activar la edición');
+      return;
+    }
+    action();
+  }, [isEditingEnabled, showNotification]);
+
   // Control waypoints: High-level control handles (5-15 points max)
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
   // Full polyline path: Detailed OSRM curve geometry coordinates for clean street polyline rendering
@@ -1937,7 +1945,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </div>
               )}
 
-              {/* BOTTOM TOOLBAR GRID (6 BOTONES ÚNICOS) */}
+              {/* BOTTOM TOOLBAR GRID (6 BOTONES ÚNICOS Y PROTEGIDOS) */}
               {rightDockTab === 'paradas' ? (
                 <div style={{
                   padding: '0.6rem 0.75rem',
@@ -1948,50 +1956,56 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   gap: '0.35rem'
                 }}>
                   <button
-                    onClick={() => setShowProjectStopsModal(true)}
-                    title="Posicionar y proyectar paradas a la derecha del trazado"
+                    onClick={() => executeIfEditing(() => setShowProjectStopsModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Posicionar y proyectar paradas a la derecha del trazado'}
                     className="btn-animated btn-animated-success"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#10b981' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <MapPin size={14} />
                   </button>
                   <button
-                    onClick={() => setShowReverseStopsModal(true)}
-                    title="Invertir secuencia de paradas (1->N a N->1)"
+                    onClick={() => executeIfEditing(() => setShowReverseStopsModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Invertir secuencia de paradas (1->N a N->1)'}
                     className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#0284c7' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <ArrowUpDown size={14} />
                   </button>
                   <button
-                    onClick={() => setShowSortStopsModal(true)}
-                    title="Reordenar paradas de inicio a fin según el recorrido"
+                    onClick={() => executeIfEditing(() => setShowSortStopsModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Reordenar paradas de inicio a fin según el recorrido'}
                     className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#d97706', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#d97706' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Compass size={14} />
                   </button>
                   <button
-                    onClick={() => setShowReplicateModal(true)}
-                    title="Replicar paradas a otro ramal"
+                    onClick={() => executeIfEditing(() => setShowReplicateModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Replicar paradas a otro ramal'}
                     className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#0284c7' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Copy size={14} />
                   </button>
                   <button
-                    onClick={() => setShowAutoStopsModal(true)}
-                    title="Autogenerar paradas por distancia cada X metros"
+                    onClick={() => executeIfEditing(() => setShowAutoStopsModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Autogenerar paradas por distancia cada X metros'}
                     className="btn-animated btn-animated-purple"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#8b5cf6' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Wand2 size={14} />
                   </button>
                   <button
-                    onClick={() => setShowClearStopsModal(true)}
-                    title="Eliminar todas las paradas de esta solapa"
+                    onClick={() => executeIfEditing(() => setShowClearStopsModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Eliminar todas las paradas de esta solapa'}
                     className="btn-animated btn-animated-danger"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#ef4444', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#ef4444' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -2006,45 +2020,47 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   gap: '0.35rem'
                 }}>
                   <button
-                    onClick={() => setUseStreetRouting(!useStreetRouting)}
-                    title={useStreetRouting ? 'Desactivar ruteo OSRM por calles' : 'Activar ruteo OSRM por calles'}
+                    onClick={() => executeIfEditing(() => setUseStreetRouting(!useStreetRouting))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : (useStreetRouting ? 'Desactivar ruteo OSRM por calles' : 'Activar ruteo OSRM por calles')}
                     className="btn-animated btn-animated-success"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: useStreetRouting ? '#10b981' : '#0284c7', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? (useStreetRouting ? '#10b981' : '#0284c7') : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Navigation size={14} />
                   </button>
                   <button
-                    onClick={handleUndoWaypoint}
-                    disabled={waypoints.length === 0}
-                    title="Deshacer último punto"
+                    onClick={() => executeIfEditing(handleUndoWaypoint)}
+                    disabled={!isEditingEnabled || waypoints.length === 0}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Deshacer último punto'}
                     className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#0284c7', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && waypoints.length > 0) ? '#0284c7' : '#1e293b', color: (isEditingEnabled && waypoints.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && waypoints.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && waypoints.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Undo size={14} />
                   </button>
                   <button
-                    onClick={() => setShowClearRouteModal(true)}
-                    disabled={waypoints.length === 0}
-                    title="Limpiar todo el trazado"
+                    onClick={() => executeIfEditing(() => setShowClearRouteModal(true))}
+                    disabled={!isEditingEnabled || waypoints.length === 0}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Limpiar todo el trazado'}
                     className="btn-animated btn-animated-danger"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: waypoints.length === 0 ? '#334155' : '#dc2626', color: 'white', cursor: waypoints.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && waypoints.length > 0) ? '#dc2626' : '#1e293b', color: (isEditingEnabled && waypoints.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && waypoints.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && waypoints.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
                   </button>
                   <button
-                    onClick={handleSaveAll}
-                    disabled={isSaving}
-                    title="Guardar trazado a D1"
+                    onClick={() => executeIfEditing(handleSaveAll)}
+                    disabled={!isEditingEnabled || isSaving}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Guardar trazado a D1'}
                     className="btn-animated btn-animated-success"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#10b981' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Save size={14} />
                   </button>
                   <button
-                    onClick={() => setShowReverseRouteModal(true)}
-                    title="Invertir sentido del trazado"
+                    onClick={() => executeIfEditing(() => setShowReverseRouteModal(true))}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Invertir sentido del trazado'}
                     className="btn-animated btn-animated-purple"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: '#8b5cf6', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#8b5cf6' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <GitCompare size={14} />
                   </button>
