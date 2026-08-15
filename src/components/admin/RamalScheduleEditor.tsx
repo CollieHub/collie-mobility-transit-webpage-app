@@ -186,6 +186,32 @@ export default function RamalScheduleEditor({
     setSelectedImagePreview(URL.createObjectURL(file));
   };
 
+  const tryLoadFromClipboard = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.read) {
+        const items = await navigator.clipboard.read();
+        for (const item of items) {
+          const imageType = item.types.find(type => type.startsWith('image/'));
+          if (imageType) {
+            const blob = await item.getType(imageType);
+            const file = new File([blob], 'clipboard-image.png', { type: blob.type });
+            handleImageSelection(file);
+            showNotification('success', 'Imagen detectada y cargada automáticamente desde el portapapeles');
+            break;
+          }
+        }
+      }
+    } catch (_) {
+      // Silencioso si no hay imagen en el portapapeles
+    }
+  };
+
+  useEffect(() => {
+    if (isImageProcessModalOpen && !selectedImageFile) {
+      tryLoadFromClipboard();
+    }
+  }, [isImageProcessModalOpen]);
+
   const handlePasteImage = (e: React.ClipboardEvent) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -222,27 +248,41 @@ export default function RamalScheduleEditor({
       if (data.success) {
         setBackupRawText(csvText);
 
-        let newHeaders: string[] = data.headers || [];
-        const newMatrix = data.matrix || [];
+        const rawHeaders: string[] = data.headers || [];
+        const rawMatrix: string[][] = data.matrix || [];
 
-        // 🔤 Ejecutar automáticamente la corrección de ortografía en los encabezados recién importados
-        if (newHeaders.length > 0) {
-          newHeaders = newHeaders.map(h => correctSpellingAndCapitalization(h));
-          setHeaders(newHeaders);
-          setHeaderAliases(newHeaders.map(() => ''));
-          setStopAddresses(newHeaders.map(() => ''));
+        let finalHeaders = [...headers];
+        let finalMatrix: string[][] = [];
+
+        const isSingleColumnImport = (rawHeaders.length <= 1) || (rawMatrix.length > 0 && rawMatrix.every((r: string[]) => r.length <= 1));
+
+        if (isSingleColumnImport && finalHeaders.length > 1) {
+          finalMatrix = rawMatrix.map((r: string[]) => {
+            const firstTime = (r && r.length > 0) ? r[0].trim() : '';
+            const row = new Array(finalHeaders.length).fill('');
+            row[0] = firstTime;
+            return row;
+          });
+          showNotification('success', `Se cargaron ${finalMatrix.length} horarios iniciales en la primera columna manteniendo las paradas del recorrido`);
+        } else {
+          if (rawHeaders.length > 0) {
+            finalHeaders = rawHeaders.map(h => correctSpellingAndCapitalization(h));
+          }
+          finalMatrix = rawMatrix;
+          showNotification('success', 'Imagen procesada correctamente por IA');
         }
-        if (newMatrix.length > 0) {
-          setMatrixRows(newMatrix);
-        }
+
+        setHeaders(finalHeaders);
+        setHeaderAliases(finalHeaders.map(() => ''));
+        setStopAddresses(finalHeaders.map(() => ''));
+        setMatrixRows(finalMatrix);
 
         const formattedText = [
-          newHeaders.join(';'),
-          ...newMatrix.map((r: string[]) => r.join(';'))
+          finalHeaders.join(';'),
+          ...finalMatrix.map((r: string[]) => r.join(';'))
         ].join('\n');
         setCsvText(formattedText);
 
-        showNotification('success', 'Imagen procesada correctamente por IA');
         setIsImageProcessModalOpen(false);
         setSelectedImageFile(null);
         setSelectedImagePreview(null);
@@ -2814,7 +2854,11 @@ export default function RamalScheduleEditor({
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button
                 type="button"
-                onClick={() => { setSelectedImageFile(null); setSelectedImagePreview(null); setIsImageProcessModalOpen(false); }}
+                onClick={() => {
+                  setSelectedImageFile(null);
+                  setSelectedImagePreview(null);
+                  setIsImageProcessModalOpen(false);
+                }}
                 disabled={isUploadingOCR}
                 style={{
                   padding: '0.6rem 1.25rem', backgroundColor: 'rgba(255, 255, 255, 0.05)',

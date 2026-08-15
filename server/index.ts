@@ -1066,7 +1066,7 @@ Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.
           const lines = rawText.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0);
           for (const line of lines) {
             const timeMatches = line.match(/\b\d{1,2}:\d{2}\b/g);
-            if (timeMatches && timeMatches.length >= 2) {
+            if (timeMatches && timeMatches.length >= 1) {
               matrix.push(timeMatches);
             } else if (!line.includes(':') && line.includes(';')) {
               headers = line.split(';').map((s: string) => s.trim());
