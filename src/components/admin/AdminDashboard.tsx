@@ -156,7 +156,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       })
       .catch(() => {});
 
-    fetch('/v1/admin/table/branches')
+    fetch('/v1/admin/table/branches?limit=500')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.rows) {
@@ -443,7 +443,14 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
     })
     .sort((a, b) => {
       if (activeTable === 'day_types' || a.display_order !== undefined) {
-        return (a.display_order ?? 0) - (b.display_order ?? 0);
+        const orderDiff = (a.display_order ?? 0) - (b.display_order ?? 0);
+        if (orderDiff !== 0) return orderDiff;
+      }
+      if (a.code && b.code) {
+        return String(a.code).localeCompare(String(b.code), undefined, { numeric: true, sensitivity: 'base' });
+      }
+      if (a.name && b.name) {
+        return String(a.name).localeCompare(String(b.name), undefined, { numeric: true, sensitivity: 'base' });
       }
       return 0;
     });
@@ -1022,9 +1029,9 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                     No se encontraron registros en <strong>{activeTable}</strong>
                   </div>
                 ) : (
-                  <div style={{ overflowX: 'auto' }}>
+                  <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100vh - 270px)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-                      <thead>
+                      <thead style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                         <tr style={{ backgroundColor: '#0b0f19', color: '#9ca3af', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
                           <th style={{ padding: '0.85rem 0.75rem', width: '40px', textAlign: 'center' }}>
                             <input
