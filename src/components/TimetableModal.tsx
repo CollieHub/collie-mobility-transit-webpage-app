@@ -391,13 +391,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
       if (data.schedules[`holiday_${direction}`]) return data.schedules[`holiday_${direction}`];
     }
 
-    // 4. Fallback final: cualquier horario disponible para esa dirección
-    for (const k of Object.keys(data.schedules)) {
-      if (k.endsWith(`_${direction}`)) {
-        return data.schedules[k];
-      }
-    }
-
+    // No utilizar fallbacks cruzados entre días distintos
     return null;
   };
 

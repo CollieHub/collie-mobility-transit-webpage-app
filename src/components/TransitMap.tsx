@@ -1828,9 +1828,9 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
           ? trips.filter((t: any) => t.service_type === dayLabel)
           : [];
         
-        // Si no hay trips para el dayType especial, caer al base (weekday/saturday/sunday)
-        if (activeTrips.length === 0) {
-          activeTrips = trips.filter((t: any) => t.service_type === baseDayType);
+        // No utilizar fallbacks cruzados entre días distintos
+        if (dayLabel !== baseDayType && activeTrips.length === 0) {
+          // No simular viajes de otro tipo de día si no hay horarios cargados para este día especial
         }
         
         if (validStops.length < 2) {
