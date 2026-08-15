@@ -1652,7 +1652,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               fontSize: '0.75rem',
               fontWeight: 700
             }}>
-              {direction.toUpperCase()} ({direction === 'ida' ? (selectedBranchObj?.direction_ida_label || 'Ida') : (selectedBranchObj?.direction_vuelta_label || 'Vuelta')})
+              {(() => {
+                const customLabel = direction === 'ida' ? selectedBranchObj?.direction_ida_label : selectedBranchObj?.direction_vuelta_label;
+                if (customLabel && customLabel.toLowerCase().trim() !== direction && customLabel.toLowerCase().trim() !== (direction === 'ida' ? 'ida' : 'vuelta') && customLabel.trim() !== '') {
+                  return `${direction.toUpperCase()} (${customLabel.trim()})`;
+                }
+                return direction.toUpperCase();
+              })()}
             </span>
 
             {isRouting && (
