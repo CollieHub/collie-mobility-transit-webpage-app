@@ -448,6 +448,16 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
 
+  // Waypoint Undo History Stack
+  const [undoStack, setUndoStack] = useState<[number, number][][]>([]);
+
+  const pushUndoState = useCallback(() => {
+    setWaypoints(currentWaypoints => {
+      setUndoStack(prev => [...prev.slice(-30), [...currentWaypoints]]);
+      return currentWaypoints;
+    });
+  }, []);
+
   // Assistant Modals State
   const [showReplicateModal, setShowReplicateModal] = useState<boolean>(false);
   const [replicateTargetBranchId, setReplicateTargetBranchId] = useState<string>('');
@@ -579,6 +589,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             setFullPolylinePath(formatted);
             const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
             setWaypoints(simplifiedControls);
+            setUndoStack([]);
             setExistingShapeId(match.id);
 
             // Re-calculate clean distance directly from OSRM or simplified control waypoints
@@ -625,6 +636,24 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     loadBranchData();
   }, [loadBranchData]);
 
+  // Tecla rápida Ctrl+Z / Cmd+Z para Deshacer
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return;
+        }
+        if (isEditingEnabled && undoStack.length > 0) {
+          e.preventDefault();
+          handleUndoWaypoint();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isEditingEnabled, undoStack]);
+
   const displayPolylinePath = useMemo(() => {
     return fullPolylinePath.length > 0 ? fullPolylinePath : waypoints;
   }, [fullPolylinePath, waypoints]);
@@ -635,6 +664,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   // 1. Clic en el mapa: Suma un punto de control al recorrido
   const handleAddWaypoint = async (pt: [number, number]) => {
+    pushUndoState();
     const updatedControls = [...waypoints, pt];
     setWaypoints(updatedControls);
     await updateFullPolylinePathFromControls(updatedControls);
@@ -661,6 +691,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       }
     }
 
+    pushUndoState();
     const updatedControls = [...waypoints];
     updatedControls.splice(insertIdx, 0, clickPt);
     setWaypoints(updatedControls);
@@ -670,6 +701,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   // 3. Clic y mantener presionado (Drag & Drop): Recalcula ÚNICAMENTE el tramo entre los puntos contiguos
   const handleWaypointDragEnd = async (idx: number, newPt: [number, number]) => {
+    pushUndoState();
     const updatedControls = [...waypoints];
     updatedControls[idx] = newPt;
     setWaypoints(updatedControls);
@@ -753,18 +785,26 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   };
 
   const handleUndoWaypoint = async () => {
-    const updatedControls = waypoints.slice(0, -1);
-    setWaypoints(updatedControls);
-    await updateFullPolylinePathFromControls(updatedControls);
+    if (undoStack.length === 0) {
+      showNotification?.('error', 'No hay modificaciones anteriores para deshacer');
+      return;
+    }
+    const previousState = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    setWaypoints(previousState);
+    await updateFullPolylinePathFromControls(previousState);
+    showNotification?.('success', 'Deshecha la última modificación del recorrido');
   };
 
   const handleClearWaypoints = () => {
+    pushUndoState();
     setWaypoints([]);
     setFullPolylinePath([]);
     setRouteDistanceKm(0);
   };
 
   const handleDeleteWaypointIndex = async (idx: number) => {
+    pushUndoState();
     const updatedControls = waypoints.filter((_, i) => i !== idx);
     setWaypoints(updatedControls);
     await updateFullPolylinePathFromControls(updatedControls);
@@ -775,6 +815,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       showNotification?.('error', 'Se requieren al menos 2 puntos para invertir el trazado');
       return;
     }
+    pushUndoState();
     const reversedControls = [...waypoints].reverse();
     setWaypoints(reversedControls);
     await updateFullPolylinePathFromControls(reversedControls);
@@ -827,6 +868,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         smoothedControls[smoothedControls.length - 1] = segment[segment.length - 1];
       }
 
+      pushUndoState();
       const nextWaypoints = [
         ...waypoints.slice(0, smoothStartIdx),
         ...smoothedControls,
@@ -2114,10 +2156,10 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   </button>
                   <button
                     onClick={() => executeIfEditing(handleUndoWaypoint)}
-                    disabled={!isEditingEnabled || waypoints.length === 0}
-                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Deshacer último punto'}
+                    disabled={!isEditingEnabled || undoStack.length === 0}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : undoStack.length === 0 ? 'No hay modificaciones anteriores para deshacer' : 'Deshacer última modificación (Ctrl+Z)'}
                     className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && waypoints.length > 0) ? '#0284c7' : '#1e293b', color: (isEditingEnabled && waypoints.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && waypoints.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && waypoints.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && undoStack.length > 0) ? '#0284c7' : '#1e293b', color: (isEditingEnabled && undoStack.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && undoStack.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && undoStack.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Undo size={14} />
                   </button>
