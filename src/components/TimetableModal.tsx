@@ -154,11 +154,7 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   const [internalLoading, setInternalLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if ((routeData && routeData.schedules && Object.keys(routeData.schedules).length > 0) ||
-        (routeObj && routeObj.schedules && Object.keys(routeObj.schedules).length > 0)) {
-      return;
-    }
-
+    setInternalRouteData(null);
     const param = routeObj?.id || routeObj?.code || routeCode;
     if (!param) return;
 
@@ -187,9 +183,12 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   }, [routeCode, routeObj, routeData]);
 
   const effectiveRouteData = useMemo(() => {
+    if (internalRouteData && internalRouteData.schedules && Object.keys(internalRouteData.schedules).length > 0) {
+      return internalRouteData;
+    }
     if (routeData && routeData.schedules && Object.keys(routeData.schedules).length > 0) return routeData;
     if (routeObj && routeObj.schedules && Object.keys(routeObj.schedules).length > 0) return routeObj;
-    return internalRouteData;
+    return internalRouteData || routeObj || routeData;
   }, [routeData, routeObj, internalRouteData]);
   const effectiveLoading = isLoadingDetail || (internalLoading && (!effectiveRouteData || !effectiveRouteData.schedules));
 
