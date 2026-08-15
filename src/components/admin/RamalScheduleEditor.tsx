@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import TimetableModal from '../TimetableModal';
 import {
   SaveIcon,
@@ -94,6 +94,35 @@ function correctSpellingAndCapitalization(text: string): string {
   formattedText = formattedText.replace(/\bY\b/g, 'y');
 
   return formattedText;
+}
+
+export function getBranchDirectionLabel(branch: any, dir: 'ida' | 'vuelta'): string {
+  if (!branch) return dir === 'ida' ? 'Ida' : 'Vuelta';
+
+  const explicitLabel = dir === 'ida' ? branch.direction_ida_label : branch.direction_vuelta_label;
+  if (explicitLabel && explicitLabel.trim() !== '' && explicitLabel.toLowerCase() !== dir) {
+    return explicitLabel.trim();
+  }
+
+  const branchName = branch.name || '';
+  if (branchName && (branchName.includes('-') || branchName.includes('–') || branchName.includes('—'))) {
+    let cleanTitle = branchName;
+    if (branch.code && cleanTitle.startsWith(branch.code)) {
+      cleanTitle = cleanTitle.replace(branch.code, '').trim();
+    }
+    const parts = cleanTitle.split(/\s*[-–—]\s*/);
+    if (parts.length >= 2) {
+      let rawDest = dir === 'ida' ? parts[parts.length - 1].trim() : parts[0].trim();
+      if (dir === 'vuelta') {
+        rawDest = rawDest.replace(/^(COMUN|DIRECTO|EXPRESO|DIFERENCIAL|LOCAL)\s+/i, '').trim();
+      }
+      if (rawDest) {
+        return rawDest.replace(/\s*\(.*?\)/g, '').trim();
+      }
+    }
+  }
+
+  return dir === 'ida' ? 'Ida' : 'Vuelta';
 }
 
 export default function RamalScheduleEditor({
@@ -1120,6 +1149,14 @@ export default function RamalScheduleEditor({
 
   const currentBranch = branchesList.find(b => b.id === selectedBranchId);
 
+  const idaLabel = useMemo(() => {
+    return getBranchDirectionLabel(currentBranch, 'ida');
+  }, [currentBranch]);
+
+  const vueltaLabel = useMemo(() => {
+    return getBranchDirectionLabel(currentBranch, 'vuelta');
+  }, [currentBranch]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
       {/* 💾 BOTONES SUPERIORES (VISTA PREVIA + CANCELAR + GUARDAR) */}
@@ -1401,13 +1438,17 @@ export default function RamalScheduleEditor({
               borderRadius: '8px',
               border: 'none',
               backgroundColor: direction === 'ida' ? '#1f2937' : 'transparent',
-              color: direction === 'ida' ? '#ffffff' : '#9ca3af',
+              color: direction === 'ida' ? '#38bdf8' : '#9ca3af',
               fontSize: '0.85rem',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem'
             }}
           >
-            SENTIDO IDA
+            <span>➔</span>
+            <span>{idaLabel}</span>
           </button>
           <button
             type="button"
@@ -1417,13 +1458,17 @@ export default function RamalScheduleEditor({
               borderRadius: '8px',
               border: 'none',
               backgroundColor: direction === 'vuelta' ? '#1f2937' : 'transparent',
-              color: direction === 'vuelta' ? '#ffffff' : '#9ca3af',
+              color: direction === 'vuelta' ? '#38bdf8' : '#9ca3af',
               fontSize: '0.85rem',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem'
             }}
           >
-            SENTIDO VUELTA
+            <span>➔</span>
+            <span>{vueltaLabel}</span>
           </button>
         </div>
 
@@ -1576,7 +1621,7 @@ export default function RamalScheduleEditor({
             gap: '1rem'
           }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#9ca3af', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          <span>PARADAS ({direction.toUpperCase()}) - {currentBranch ? `[${currentBranch.code}] ${currentBranch.name}` : ''}</span>
+          <span>PARADAS (➔ {direction === 'ida' ? idaLabel : vueltaLabel}) - {currentBranch ? `[${currentBranch.code}] ${currentBranch.name}` : ''}</span>
         </div>
 
         <div style={{
