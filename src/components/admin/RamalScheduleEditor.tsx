@@ -467,8 +467,28 @@ export default function RamalScheduleEditor({
                 : matchingSched.stop_addresses_json || [];
             } catch (_) {}
 
+            // Si la grilla encontrada no tiene encabezados, intentar heredar de otra grilla del mismo ramal y sentido
             if (hList.length === 0) {
-              hList = ['BARRIO BOSCH', 'TERMINAL (fonavi)', 'JUSTA LIMA Y DORREGO', 'BOLIVAR Y AVELLANEDA', 'ESTACION', 'CARRIEGO Y FRENCH', 'BARRIO ESPAÑA'];
+              const siblingSched = data.rows.find((s: any) => 
+                s.branch_id === selectedBranchId && 
+                s.direction?.toLowerCase() === direction?.toLowerCase() &&
+                s.headers_json && s.headers_json !== '[]' && s.headers_json !== '""'
+              );
+              if (siblingSched) {
+                try { hList = typeof siblingSched.headers_json === 'string' ? JSON.parse(siblingSched.headers_json) : siblingSched.headers_json; } catch (_) {}
+                try { aList = typeof siblingSched.header_aliases_json === 'string' ? JSON.parse(siblingSched.header_aliases_json) : siblingSched.header_aliases_json; } catch (_) {}
+                try { addrList = typeof siblingSched.stop_addresses_json === 'string' ? JSON.parse(siblingSched.stop_addresses_json) : siblingSched.stop_addresses_json; } catch (_) {}
+              }
+            }
+
+            if (hList.length === 0) {
+              const currentBranch = branchesList.find(b => b.id === selectedBranchId);
+              if (currentBranch && currentBranch.name && currentBranch.name.includes(' - ')) {
+                const parts = currentBranch.name.split(/\s*-\s*/);
+                hList = direction === 'ida' ? [parts[0].trim(), parts[1].trim()] : [parts[1].trim(), parts[0].trim()];
+              } else {
+                hList = ['Origen', 'Destino'];
+              }
             }
 
             setHeaders(hList);
@@ -496,12 +516,6 @@ export default function RamalScheduleEditor({
                     }
                   });
 
-                  if (mRows.length === 0) {
-                    mRows.push(['04:35', '04:40', '04:49', '04:57', '05:03', '05:09', '05:20']);
-                    mRows.push(['05:55', '06:00', '06:12', '06:22', '06:29', '06:35', '06:50']);
-                    mRows.push(['06:10', '06:15', '06:27', '06:37', '06:44', '06:50', '07:05']);
-                  }
-
                   setMatrixRows(mRows);
                   buildCsvFromState(hList, mRows);
                 }
@@ -511,17 +525,39 @@ export default function RamalScheduleEditor({
 
           } else {
             setScheduleId(null);
-            const defaultH = ['BARRIO BOSCH', 'TERMINAL (fonavi)', 'JUSTA LIMA Y DORREGO', 'BOLIVAR Y AVELLANEDA', 'ESTACION', 'CARRIEGO Y FRENCH', 'BARRIO ESPAÑA'];
-            const defaultRows = [
-              ['04:35', '04:40', '04:49', '04:57', '05:03', '05:09', '05:20'],
-              ['05:55', '06:00', '06:12', '06:22', '06:29', '06:35', '06:50'],
-              ['06:10', '06:15', '06:27', '06:37', '06:44', '06:50', '07:05']
-            ];
+
+            // Intentar heredar encabezados de otra grilla ya creada del mismo ramal y sentido
+            const siblingSched = data.rows.find((s: any) => 
+              s.branch_id === selectedBranchId && 
+              s.direction?.toLowerCase() === direction?.toLowerCase() &&
+              s.headers_json && s.headers_json !== '[]' && s.headers_json !== '""'
+            );
+
+            let defaultH: string[] = [];
+            let defaultAliases: string[] = [];
+            let defaultAddresses: string[] = [];
+
+            if (siblingSched) {
+              try { defaultH = typeof siblingSched.headers_json === 'string' ? JSON.parse(siblingSched.headers_json) : siblingSched.headers_json; } catch (_) {}
+              try { defaultAliases = typeof siblingSched.header_aliases_json === 'string' ? JSON.parse(siblingSched.header_aliases_json) : siblingSched.header_aliases_json; } catch (_) {}
+              try { defaultAddresses = typeof siblingSched.stop_addresses_json === 'string' ? JSON.parse(siblingSched.stop_addresses_json) : siblingSched.stop_addresses_json; } catch (_) {}
+            }
+
+            if (!defaultH || defaultH.length === 0) {
+              const currentBranch = branchesList.find(b => b.id === selectedBranchId);
+              if (currentBranch && currentBranch.name && currentBranch.name.includes(' - ')) {
+                const parts = currentBranch.name.split(/\s*-\s*/);
+                defaultH = direction === 'ida' ? [parts[0].trim(), parts[1].trim()] : [parts[1].trim(), parts[0].trim()];
+              } else {
+                defaultH = ['Origen', 'Destino'];
+              }
+            }
+
             setHeaders(defaultH);
-            setHeaderAliases(Array(defaultH.length).fill(''));
-            setStopAddresses(Array(defaultH.length).fill(''));
-            setMatrixRows(defaultRows);
-            buildCsvFromState(defaultH, defaultRows);
+            setHeaderAliases(defaultAliases.length === defaultH.length ? defaultAliases : Array(defaultH.length).fill(''));
+            setStopAddresses(defaultAddresses.length === defaultH.length ? defaultAddresses : Array(defaultH.length).fill(''));
+            setMatrixRows([]);
+            buildCsvFromState(defaultH, []);
             setIsLoading(false);
           }
         } else {
