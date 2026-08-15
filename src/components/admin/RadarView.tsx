@@ -1558,6 +1558,31 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
           {/* Map Editing Tools & Assistants */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Botón Deshacer en Cabecera (a la izquierda de Ruteo Calles) */}
+            <button
+              onClick={() => executeIfEditing(handleUndoWaypoint)}
+              disabled={!isEditingEnabled || undoStack.length === 0}
+              title={!isEditingEnabled ? 'Debes habilitar la edición primero' : undoStack.length === 0 ? 'No hay modificaciones anteriores para deshacer' : 'Deshacer última modificación (Ctrl+Z)'}
+              className="btn-animated btn-animated-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: (isEditingEnabled && undoStack.length > 0) ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: (isEditingEnabled && undoStack.length > 0) ? 'rgba(56, 189, 248, 0.15)' : '#1f2937',
+                color: (isEditingEnabled && undoStack.length > 0) ? '#38bdf8' : '#64748b',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                opacity: (isEditingEnabled && undoStack.length > 0) ? 1 : 0.4,
+                cursor: (isEditingEnabled && undoStack.length > 0) ? 'pointer' : 'not-allowed'
+              }}
+            >
+              <Undo size={14} />
+              <span>Deshacer</span>
+            </button>
+
             {/* Street Routing OSRM Toggle */}
             <button
               onClick={() => setUseStreetRouting(!useStreetRouting)}
@@ -2133,18 +2158,9 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(6, 1fr)',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
                   gap: '0.35rem'
                 }}>
-                  <button
-                    onClick={() => executeIfEditing(() => setUseStreetRouting(!useStreetRouting))}
-                    disabled={!isEditingEnabled}
-                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : (useStreetRouting ? 'Desactivar ruteo OSRM por calles' : 'Activar ruteo OSRM por calles')}
-                    className="btn-animated btn-animated-success"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? (useStreetRouting ? '#10b981' : '#0284c7') : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Navigation size={14} />
-                  </button>
                   <button
                     onClick={() => executeIfEditing(handleOpenSmoothModal)}
                     disabled={!isEditingEnabled || waypoints.length < 2}
@@ -2155,15 +2171,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     <Wand2 size={14} />
                   </button>
                   <button
-                    onClick={() => executeIfEditing(handleUndoWaypoint)}
-                    disabled={!isEditingEnabled || undoStack.length === 0}
-                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : undoStack.length === 0 ? 'No hay modificaciones anteriores para deshacer' : 'Deshacer última modificación (Ctrl+Z)'}
-                    className="btn-animated btn-animated-primary"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && undoStack.length > 0) ? '#0284c7' : '#1e293b', color: (isEditingEnabled && undoStack.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && undoStack.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && undoStack.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Undo size={14} />
-                  </button>
-                  <button
                     onClick={() => executeIfEditing(() => setShowClearRouteModal(true))}
                     disabled={!isEditingEnabled || waypoints.length === 0}
                     title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Limpiar todo el trazado'}
@@ -2171,15 +2178,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                     style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: (isEditingEnabled && waypoints.length > 0) ? '#dc2626' : '#1e293b', color: (isEditingEnabled && waypoints.length > 0) ? 'white' : '#64748b', opacity: (isEditingEnabled && waypoints.length > 0) ? 1 : 0.4, cursor: (isEditingEnabled && waypoints.length > 0) ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                   >
                     <Trash2 size={14} />
-                  </button>
-                  <button
-                    onClick={() => executeIfEditing(handleSaveAll)}
-                    disabled={!isEditingEnabled || isSaving}
-                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Guardar trazado a D1'}
-                    className="btn-animated btn-animated-success"
-                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#10b981' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  >
-                    <Save size={14} />
                   </button>
                   <button
                     onClick={() => executeIfEditing(() => setShowReverseRouteModal(true))}
