@@ -163,6 +163,8 @@ export default function RamalScheduleEditor({
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isDeletingGrid, setIsDeletingGrid] = useState<boolean>(false);
+  const [rowToDeleteIdx, setRowToDeleteIdx] = useState<number | null>(null);
+  const [colToDeleteIdx, setColToDeleteIdx] = useState<number | null>(null);
 
   // Modal y Estado de Procesar Imagen (OCR)
   const [isImageProcessModalOpen, setIsImageProcessModalOpen] = useState<boolean>(false);
@@ -1772,7 +1774,7 @@ export default function RamalScheduleEditor({
 
                         <button
                           type="button"
-                          onClick={() => handleDeleteColumn(cIdx)}
+                          onClick={() => setColToDeleteIdx(cIdx)}
                           title="Eliminar columna de parada"
                           style={{
                             padding: '0.25rem 0.4rem',
@@ -1963,10 +1965,7 @@ export default function RamalScheduleEditor({
 
                         <button
                           type="button"
-                          onClick={() => {
-                            setActiveSequenceState(null);
-                            handleDeleteRow(rIdx);
-                          }}
+                          onClick={() => setRowToDeleteIdx(rIdx)}
                           title="Eliminar Fila"
                           style={{
                             padding: '0.3rem 0.45rem',
@@ -2236,6 +2235,213 @@ export default function RamalScheduleEditor({
                 }}
               >
                 <span>{isDeletingGrid ? 'Eliminando...' : 'Sí, Eliminar Grilla'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🗑️ MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE FILA */}
+      {rowToDeleteIdx !== null && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setRowToDeleteIdx(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#111827',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '20px',
+              padding: '1.75rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ef4444',
+                flexShrink: 0
+              }}>
+                <TrashIcon size={22} color="#ef4444" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                  ¿Eliminar Fila #{rowToDeleteIdx + 1}?
+                </h3>
+                <span style={{ fontSize: '0.775rem', color: '#9ca3af' }}>
+                  Horario inicial: <strong style={{ color: '#38bdf8' }}>{matrixRows[rowToDeleteIdx]?.[0] || 'Sin especificar'}</strong>
+                </span>
+              </div>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+              Esta acción eliminará la fila <strong>#{rowToDeleteIdx + 1}</strong> de la tabla de horarios actual. ¿Estás seguro de que deseas continuar?
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setRowToDeleteIdx(null)}
+                style={{
+                  padding: '0.6rem 1.1rem',
+                  backgroundColor: '#374151',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  color: '#e5e7eb',
+                  fontSize: '0.825rem',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSequenceState(null);
+                  handleDeleteRow(rowToDeleteIdx);
+                  setRowToDeleteIdx(null);
+                }}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '0.825rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <TrashIcon size={14} />
+                <span>Sí, Eliminar Fila</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🗑️ MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE COLUMNA */}
+      {colToDeleteIdx !== null && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setColToDeleteIdx(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#111827',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '20px',
+              padding: '1.75rem',
+              maxWidth: '440px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.6)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ef4444',
+                flexShrink: 0
+              }}>
+                <TrashIcon size={22} color="#ef4444" />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                  ¿Eliminar Parada?
+                </h3>
+                <span style={{ fontSize: '0.775rem', color: '#9ca3af' }}>
+                  Parada: <strong style={{ color: '#38bdf8' }}>{headers[colToDeleteIdx]}</strong>
+                </span>
+              </div>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+              Esta acción eliminará la columna <strong>"{headers[colToDeleteIdx]}"</strong> y todos los horarios asociados en este ramal. ¿Estás seguro de que deseas continuar?
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setColToDeleteIdx(null)}
+                style={{
+                  padding: '0.6rem 1.1rem',
+                  backgroundColor: '#374151',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  color: '#e5e7eb',
+                  fontSize: '0.825rem',
+                  fontWeight: 500,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleDeleteColumn(colToDeleteIdx);
+                  setColToDeleteIdx(null);
+                }}
+                style={{
+                  padding: '0.6rem 1.25rem',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '0.825rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <TrashIcon size={14} />
+                <span>Sí, Eliminar Parada</span>
               </button>
             </div>
           </div>
