@@ -240,7 +240,7 @@ app.get('/v1/catalog/public/data', async (c) => {
         `SELECT s.*, b.id as branch_id, dt.code as day_type_code, dt.name as day_type_name
          FROM schedules s
          JOIN branches b ON s.branch_id = b.id
-         JOIN day_types dt ON s.day_types_id = dt.id
+         JOIN day_types dt ON (s.day_types_id = dt.id OR s.day_types_id = dt.code)
          WHERE s.branch_id IN (${placeholders})`
       ).bind(...branchIds).all();
 
@@ -598,7 +598,7 @@ app.get('/v1/catalog/public/timetables', async (c) => {
        FROM schedules s 
        JOIN branches b ON s.branch_id = b.id 
        JOIN lines l ON b.line_id = l.id 
-       JOIN day_types dt ON s.day_types_id = dt.id 
+       JOIN day_types dt ON (s.day_types_id = dt.id OR s.day_types_id = dt.code) 
        WHERE (b.id = ? OR b.line_id = ? OR b.code = ? OR b.code = ?)
          AND ${branchFilter}
          AND ${lineFilter}`
@@ -1259,7 +1259,7 @@ async function getOrComputeActiveUnitsSummary(env: any) {
   const schRes = await env.DB.prepare(`
     SELECT s.id, s.branch_id, s.direction, dt.code as day_type_code
     FROM schedules s
-    JOIN day_types dt ON s.day_types_id = dt.id
+    JOIN day_types dt ON (s.day_types_id = dt.id OR s.day_types_id = dt.code)
     WHERE dt.code = ? OR dt.code LIKE ? OR s.day_types_id = ?
   `).bind(dayTypeCode, `%${dayTypeCode}%`, dayTypeCode).all();
 
@@ -1656,6 +1656,17 @@ app.post('/v1/admin/schedules/batch', async (c) => {
     }
 
     let scheduleId = schedule.id;
+    const activeDayTypeId = schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a';
+
+    if (!scheduleId && schedule.branch_id) {
+      const existing = await c.env.DB.prepare(
+        `SELECT id FROM schedules WHERE branch_id = ? AND direction = ? AND (day_types_id = ? OR day_types_id = ?)`
+      ).bind(schedule.branch_id, schedule.direction || 'ida', activeDayTypeId, schedule.day_types_id).all();
+      if (existing.results && existing.results.length > 0) {
+        scheduleId = (existing.results[0] as any).id;
+      }
+    }
+
     const statements: any[] = [];
 
     // 1. Guardar o actualizar schedule maestro
@@ -1668,7 +1679,7 @@ app.post('/v1/admin/schedules/batch', async (c) => {
         `).bind(
           schedule.branch_id,
           schedule.direction || 'ida',
-          schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+          activeDayTypeId,
           schedule.name || 'Grilla',
           schedule.headers_json || '[]',
           schedule.header_aliases_json || '[]',

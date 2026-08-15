@@ -343,11 +343,26 @@ export default function RamalScheduleEditor({
       .then(res => res.json())
       .then(async data => {
         if (data.success && data.rows) {
-          const matchingSched = data.rows.find((s: any) =>
-            s.branch_id === selectedBranchId &&
-            s.direction?.toLowerCase() === direction &&
-            (s.day_types_id?.toLowerCase() === selectedDayTypeCode || s.day_types_id === '88f18fc3-ba8e-521a-a093-07db0825cf3a')
-          );
+          const DAY_TYPE_ID_FALLBACKS: Record<string, string> = {
+            'lunes_a_viernes': '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+            'sabados': '26453d08-1d87-57ea-910e-1e14de95a162',
+            'domingos_feriados': 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e',
+            'especial': '4dd8ea7a-abb2-552e-b6da-1bb945d7c515'
+          };
+
+          const activeDayTypeObj = dayTypesList.find(dt => dt.code === selectedDayTypeCode || dt.id === selectedDayTypeCode);
+          const targetDayTypeId = activeDayTypeObj?.id || DAY_TYPE_ID_FALLBACKS[selectedDayTypeCode] || selectedDayTypeCode;
+
+          const matchingSched = data.rows.find((s: any) => {
+            if (s.branch_id !== selectedBranchId) return false;
+            if (s.direction?.toLowerCase() !== direction?.toLowerCase()) return false;
+            
+            const sDayId = (s.day_types_id || '').toLowerCase();
+            const targetIdLower = targetDayTypeId.toLowerCase();
+            const targetCodeLower = selectedDayTypeCode.toLowerCase();
+
+            return sDayId === targetIdLower || sDayId === targetCodeLower;
+          });
 
           if (matchingSched) {
             setScheduleId(matchingSched.id);
@@ -1047,8 +1062,16 @@ export default function RamalScheduleEditor({
 
     setIsSaving(true);
     try {
-      const activeDayType = dayTypesList.find(dt => dt.code === selectedDayTypeCode);
-      const activeDayTypeId = activeDayType?.id || '88f18fc3-ba8e-521a-a093-07db0825cf3a';
+      const DAY_TYPE_ID_FALLBACKS: Record<string, string> = {
+        'lunes_a_viernes': '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+        'sabados': '26453d08-1d87-57ea-910e-1e14de95a162',
+        'domingos_feriados': 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e',
+        'especial': '4dd8ea7a-abb2-552e-b6da-1bb945d7c515'
+      };
+
+      const activeDayType = dayTypesList.find(dt => dt.code === selectedDayTypeCode || dt.id === selectedDayTypeCode);
+      const fallbackId = DAY_TYPE_ID_FALLBACKS[selectedDayTypeCode] || selectedDayTypeCode;
+      const activeDayTypeId = activeDayType?.id || fallbackId;
 
       const items = matrixRows.map((r, i) => ({
         departure_time: r[0] || '00:00',
