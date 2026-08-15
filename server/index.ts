@@ -1043,10 +1043,13 @@ Extrae todas las cabeceras/nombres de paradas y la matriz de horarios en formato
   "headers": ["NOMBRE_PARADA_1", "NOMBRE_PARADA_2"],
   "matrix": [
     ["HH:MM", "HH:MM"],
-    ["HH:MM", "HH:MM"]
+    ["HH:MM", ""]
   ]
 }
-Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.`;
+REGLAS IMPORTANTES:
+1. Extrae absolutamente TODAS las filas y celdas visibles en la imagen de arriba a abajo.
+2. Si alguna hora o valor en una celda es ilegible, borroso o indeterminado, pon "" (cadena vacía) en esa posición exacta para que la fila no se pierda.
+3. Responde UNICAMENTE con el objeto JSON estricto sin texto adicional.`;
 
         const response: any = await c.env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
           prompt: prompt,
@@ -1057,9 +1060,24 @@ Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.
 
         const jsonMatch = rawText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed.headers)) headers = parsed.headers.map((h: any) => String(h).trim());
-          if (Array.isArray(parsed.matrix)) matrix = parsed.matrix.map((row: any) => Array.isArray(row) ? row.map((cell: any) => String(cell).trim()) : []);
+          try {
+            const parsed = JSON.parse(jsonMatch[0]);
+            if (Array.isArray(parsed.headers)) headers = parsed.headers.map((h: any) => String(h).trim());
+            if (Array.isArray(parsed.matrix)) {
+              matrix = parsed.matrix.map((row: any) => {
+                if (!Array.isArray(row)) return [''];
+                return row.map((cell: any) => {
+                  const s = String(cell || '').trim();
+                  if (s === '' || /^\d{1,2}:\d{2}$/.test(s)) return s;
+                  // Reparación rápida de formatos como 0700 -> 07:00 o 7.45 -> 07:45
+                  const digits = s.replace(/\D/g, '');
+                  if (digits.length === 4) return `${digits.substring(0, 2)}:${digits.substring(2, 4)}`;
+                  if (digits.length === 3) return `0${digits.substring(0, 1)}:${digits.substring(1, 3)}`;
+                  return '';
+                });
+              });
+            }
+          } catch (_) {}
         }
 
         if (headers.length === 0 && matrix.length === 0) {
@@ -1070,6 +1088,12 @@ Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.
               matrix.push(timeMatches);
             } else if (!line.includes(':') && line.includes(';')) {
               headers = line.split(';').map((s: string) => s.trim());
+            } else {
+              // Si la línea contiene algún caracter pero no se pudo leer el horario exacto, agregar ítem en blanco ""
+              const cleanChars = line.replace(/[^a-zA-Z0-9]/g, '');
+              if (cleanChars.length >= 2) {
+                matrix.push(['']);
+              }
             }
           }
         }
@@ -1086,6 +1110,7 @@ Responde UNICAMENTE con el objeto JSON estricto sin texto explicativo adicional.
       headers = matrix[0].map((_, idx) => `Parada ${idx + 1}`);
     }
 
+    // Si aún no se detectó matriz pero hay texto reconocido, generar filas en blanco por cada línea detectada
     if (matrix.length === 0) {
       return c.json({
         success: false,
