@@ -39,7 +39,7 @@ export default function AdminLogin({ onSuccess, onCancel }: AdminLoginProps) {
     const cognitoDesc = urlParams.get('error_description') || hashParams?.get('error_description');
 
     if (cognitoError) {
-      setError(`Error de autenticación Google: ${cognitoError} ${cognitoDesc ? `(${cognitoDesc})` : ''}`);
+      setError('Inicio de sesión no autorizado');
       window.history.replaceState({}, document.title, window.location.pathname);
       return;
     }
