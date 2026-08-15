@@ -1272,12 +1272,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         setExistingShapeId(shapeId);
       }
 
-      for (const stop of stops) {
+      for (let idx = 0; idx < stops.length; idx++) {
+        const stop = stops[idx];
         const stopPayload = {
           id: stop.id,
           branch_id: stop.branch_id,
           direction: stop.direction,
-          stop_order: stop.stop_order,
+          stop_order: idx + 1,
           name: stop.name,
           lat: stop.lat,
           lng: stop.lng,
@@ -1857,35 +1858,38 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             })}
 
             {/* Stop Draggable Markers: Paradas en mapa (atenuadas cuando se edita/ve la pestaña Recorrido) */}
-            {stops.map(st => (
-              <Marker
-                key={`stop_marker_${st.id}`}
-                position={[st.lat, st.lng]}
-                draggable={isEditingEnabled}
-                opacity={rightDockTab === 'recorrido' ? 0.35 : 1}
-                zIndexOffset={rightDockTab === 'paradas' ? 2000 : 500}
-                icon={
-                  stopIconMode === 'number'
-                    ? createStopIconWithNumber(st.stop_order, direction === 'ida' ? '#0284c7' : '#ea580c')
-                    : createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')
-                }
-                eventHandlers={{
-                  dragend(e: any) {
-                    const newLat = e.target.getLatLng().lat;
-                    const newLng = e.target.getLatLng().lng;
-                    handleStopDragEnd(st.id, [newLat, newLng]);
+            {stops.map((st, idx) => {
+              const displayNum = idx + 1;
+              return (
+                <Marker
+                  key={`stop_marker_${st.id}`}
+                  position={[st.lat, st.lng]}
+                  draggable={isEditingEnabled}
+                  opacity={rightDockTab === 'recorrido' ? 0.35 : 1}
+                  zIndexOffset={rightDockTab === 'paradas' ? 2000 : 500}
+                  icon={
+                    stopIconMode === 'number'
+                      ? createStopIconWithNumber(displayNum, direction === 'ida' ? '#0284c7' : '#ea580c')
+                      : createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')
                   }
-                }}
-              >
-                <Popup>
-                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                    {st.stop_order}. {st.name}
-                    <br />
-                    <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                  eventHandlers={{
+                    dragend(e: any) {
+                      const newLat = e.target.getLatLng().lat;
+                      const newLng = e.target.getLatLng().lng;
+                      handleStopDragEnd(st.id, [newLat, newLng]);
+                    }
+                  }}
+                >
+                  <Popup>
+                    <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
+                      {displayNum}. {st.name}
+                      <br />
+                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
 
           {/* 3. RIGHT FLOATING WIDGET DOCK (CONMUTADOR DE PESTAÑAS: PARADAS vs RECORRIDO) */}
@@ -2089,7 +2093,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                       Simplemente toca cualquier punto del mapa para agregar una parada.
                     </div>
                   ) : (
-                    stops.map((st) => (
+                    stops.map((st, idx) => (
                       <div
                         key={st.id}
                         style={{
@@ -2106,7 +2110,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                           <div style={{ color: '#475569', fontSize: '0.75rem', cursor: 'grab', userSelect: 'none' }}>::</div>
 
                           <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#38bdf8', minWidth: '22px' }}>
-                            {st.stop_order}.
+                            {idx + 1}.
                           </span>
 
                           <span
