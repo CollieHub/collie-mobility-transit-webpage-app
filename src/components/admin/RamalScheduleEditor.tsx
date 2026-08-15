@@ -13,7 +13,8 @@ import {
   CalendarDayIcon,
   ClockIcon,
   ExternalLinkIcon,
-  XIcon
+  XIcon,
+  CopyIcon
 } from './Icons';
 
 interface RamalScheduleEditorProps {
@@ -165,6 +166,11 @@ export default function RamalScheduleEditor({
   const [isDeletingGrid, setIsDeletingGrid] = useState<boolean>(false);
   const [rowToDeleteIdx, setRowToDeleteIdx] = useState<number | null>(null);
   const [colToDeleteIdx, setColToDeleteIdx] = useState<number | null>(null);
+
+  // Modal y Estado de Copiar Paradas a otros Días
+  const [isCopyStopsModalOpen, setIsCopyStopsModalOpen] = useState<boolean>(false);
+  const [selectedCopyDestDays, setSelectedCopyDestDays] = useState<string[]>([]);
+  const [isCopyingStops, setIsCopyingStops] = useState<boolean>(false);
 
   // Modal y Estado de Procesar Imagen (OCR)
   const [isImageProcessModalOpen, setIsImageProcessModalOpen] = useState<boolean>(false);
@@ -855,6 +861,88 @@ export default function RamalScheduleEditor({
     buildCsvFromState(headers, newRows);
   };
 
+  const getAvailableCopyDestinations = () => {
+    const defaultDays = [
+      { id: 'lunes_a_viernes', name: 'Lunes a Viernes' },
+      { id: 'sabados', name: 'Sábados' },
+      { id: 'domingos_feriados', name: 'Domingos y Feriados' },
+      { id: 'especial', name: 'Especial (Invierno)' }
+    ];
+
+    const sourceList = (dayTypesList && dayTypesList.length > 0)
+      ? dayTypesList.map(dt => ({ id: dt.code || dt.id, name: dt.name }))
+      : defaultDays;
+
+    return sourceList.filter(d => d.id !== selectedDayTypeCode);
+  };
+
+  const handleConfirmCopyStopsToOtherDays = async () => {
+    if (selectedCopyDestDays.length === 0 || !selectedBranchId || headers.length === 0) {
+      showNotification('error', 'Selecciona al menos un día de destino para copiar');
+      return;
+    }
+
+    setIsCopyingStops(true);
+    try {
+      const DAY_TYPE_ID_FALLBACKS: Record<string, string> = {
+        'lunes_a_viernes': '88f18fc3-ba8e-521a-a093-07db0825cf3a',
+        'sabados': '26453d08-1d87-57ea-910e-1e14de95a162',
+        'domingos_feriados': 'ce073f89-6031-5bb6-8d6a-fc16e1b3ca1e',
+        'especial': '4dd8ea7a-abb2-552e-b6da-1bb945d7c515'
+      };
+
+      const res = await fetch('/v1/admin/table/schedules?limit=500');
+      const data = await res.json();
+      const allSchedules = (data.success && data.rows) ? data.rows : [];
+
+      for (const destCode of selectedCopyDestDays) {
+        const targetDayTypeObj = dayTypesList.find(dt => dt.code === destCode || dt.id === destCode);
+        const targetDayTypeId = targetDayTypeObj?.id || DAY_TYPE_ID_FALLBACKS[destCode] || destCode;
+
+        const existingSched = allSchedules.find((s: any) => {
+          if (s.branch_id !== selectedBranchId) return false;
+          if (s.direction?.toLowerCase() !== direction?.toLowerCase()) return false;
+          const sDayId = (s.day_types_id || '').toLowerCase();
+          return sDayId === targetDayTypeId.toLowerCase() || sDayId === destCode.toLowerCase();
+        });
+
+        const payload = {
+          schedule: {
+            id: existingSched?.id || null,
+            branch_id: selectedBranchId,
+            direction: direction,
+            day_types_id: targetDayTypeId,
+            name: `Grilla ${targetDayTypeObj?.name || destCode}`,
+            headers_json: JSON.stringify(headers),
+            header_aliases_json: JSON.stringify(headerAliases),
+            stop_addresses_json: JSON.stringify(stopAddresses)
+          },
+          items: []
+        };
+
+        await fetch('/v1/admin/schedules/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      const friendlyNames = selectedCopyDestDays.map(id => {
+        const match = dayTypesList.find(dt => dt.code === id || dt.id === id);
+        return match ? match.name : id;
+      }).join(', ');
+
+      showNotification('success', `Paradas y puntos de referencia copiados a: ${friendlyNames} (➔ ${direction === 'ida' ? idaLabel : vueltaLabel})`);
+      setIsCopyStopsModalOpen(false);
+      setSelectedCopyDestDays([]);
+      if (onRefreshData) onRefreshData();
+    } catch (err: any) {
+      showNotification('error', `Error al copiar paradas: ${err.message}`);
+    } finally {
+      setIsCopyingStops(false);
+    }
+  };
+
   // 🔤 HANDLER 1: Corregir Encabezado Actual
   const handleCorrectCurrentHeaderSpelling = () => {
     if (headers.length === 0) {
@@ -1411,8 +1499,28 @@ export default function RamalScheduleEditor({
             >
               Ordenar Horarios
             </button>
-            <button type="button" style={{ padding: '0.4rem 0.85rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', backgroundColor: '#0b0f19', color: '#d1d5db', fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer' }}>
-              Copiar a otros Días
+            <button
+              type="button"
+              onClick={() => setIsCopyStopsModalOpen(true)}
+              disabled={!selectedBranchId || headers.length === 0}
+              title={!selectedBranchId ? 'Selecciona un ramal primero' : headers.length === 0 ? 'No hay paradas cargadas' : 'Copiar los puntos de referencia y paradas a otros días'}
+              style={{
+                padding: '0.4rem 0.85rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                color: '#38bdf8',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                cursor: (!selectedBranchId || headers.length === 0) ? 'not-allowed' : 'pointer',
+                opacity: (!selectedBranchId || headers.length === 0) ? 0.5 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+            >
+              <CopyIcon size={14} />
+              <span>Copiar a otros Días</span>
             </button>
           </div>
         </div>
@@ -2442,6 +2550,153 @@ export default function RamalScheduleEditor({
               >
                 <TrashIcon size={14} />
                 <span>Sí, Eliminar Parada</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 📋 MODAL COPIAR PARADAS Y PUNTOS DE REFERENCIA A OTROS DÍAS */}
+      {isCopyStopsModalOpen && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setIsCopyStopsModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#111827',
+              border: '1px solid rgba(56, 189, 248, 0.35)',
+              borderRadius: '20px',
+              padding: '1.75rem',
+              maxWidth: '460px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.65)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#38bdf8'
+                }}>
+                  <CopyIcon size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+                    Copiar paradas a otros días
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                    Sentido actual: <strong style={{ color: '#38bdf8' }}>➔ {direction === 'ida' ? idaLabel : vueltaLabel}</strong>
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCopyStopsModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '1.1rem' }}
+              >
+                <XIcon size={18} />
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.45 }}>
+              Copiá los puntos de referencia, paradas y asociaciones de encabezados actuales ({headers.length} paradas) a otros tipos de días de este mismo ramal en el sentido actual.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', backgroundColor: '#0b0f19', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                SELECCIONAR DÍAS DE DESTINO:
+              </span>
+              {getAvailableCopyDestinations().map(day => (
+                <label
+                  key={day.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    color: '#ffffff',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    padding: '0.35rem 0'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedCopyDestDays.includes(day.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedCopyDestDays(prev => [...prev, day.id]);
+                      } else {
+                        setSelectedCopyDestDays(prev => prev.filter(id => id !== day.id));
+                      }
+                    }}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      cursor: 'pointer',
+                      accentColor: '#0284c7'
+                    }}
+                  />
+                  <span>{day.name}</span>
+                </label>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setIsCopyStopsModalOpen(false)}
+                style={{
+                  flex: 1,
+                  padding: '0.65rem 1rem',
+                  backgroundColor: '#374151',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  color: '#e5e7eb',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCopyStopsToOtherDays}
+                disabled={selectedCopyDestDays.length === 0 || isCopyingStops}
+                style={{
+                  flex: 1,
+                  padding: '0.65rem 1rem',
+                  backgroundColor: (selectedCopyDestDays.length === 0 || isCopyingStops) ? 'rgba(2, 132, 199, 0.3)' : '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: (selectedCopyDestDays.length === 0 || isCopyingStops) ? 'not-allowed' : 'pointer',
+                  boxShadow: (selectedCopyDestDays.length === 0 || isCopyingStops) ? 'none' : '0 4px 12px rgba(2, 132, 199, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <span>{isCopyingStops ? 'Copiando...' : 'Confirmar y Copiar'}</span>
               </button>
             </div>
           </div>
