@@ -1820,44 +1820,56 @@ export default function RamalScheduleEditor({
                 </tr>
               </thead>
               <tbody>
-                {matrixRows.map((r, rIdx) => (
-                  <tr
-                    key={rIdx}
-                    style={{
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                      backgroundColor: rIdx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)'
-                    }}
-                  >
-                    <td style={{ padding: '0.6rem', color: '#6b7280', fontWeight: 600 }}>
-                      {rIdx + 1}
-                    </td>
+                {matrixRows.map((r, rIdx) => {
+                  const isSequenceNewRow = Boolean(
+                    activeSequenceState &&
+                    activeSequenceState.count > 0 &&
+                    rIdx > activeSequenceState.sourceRowIdx &&
+                    rIdx <= activeSequenceState.lastRowIdxInserted
+                  );
 
-                    {headers.map((_, cIdx) => {
-                      const cellVal = r[cIdx] || '';
-                      return (
-                        <td key={cIdx} style={{ padding: '0.4rem 0.3rem' }}>
-                          <input
-                            type="text"
-                            value={cellVal}
-                            placeholder="hh:mm"
-                            maxLength={5}
-                            onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)}
-                            style={{
-                              width: '76px',
-                              padding: '0.4rem 0.35rem',
-                              textAlign: 'center',
-                              backgroundColor: '#0b0f19',
-                              border: '1px solid rgba(255, 255, 255, 0.08)',
-                              borderRadius: '6px',
-                              color: '#ffffff',
-                              fontWeight: 600,
-                              fontSize: '0.85rem',
-                              outline: 'none'
-                            }}
-                          />
-                        </td>
-                      );
-                    })}
+                  return (
+                    <tr
+                      key={rIdx}
+                      style={{
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                        backgroundColor: isSequenceNewRow
+                          ? 'rgba(16, 185, 129, 0.12)'
+                          : (rIdx % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.015)'),
+                        boxShadow: isSequenceNewRow ? 'inset 3px 0 0 #10b981' : 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <td style={{ padding: '0.6rem', color: isSequenceNewRow ? '#34d399' : '#6b7280', fontWeight: isSequenceNewRow ? 700 : 600 }}>
+                        {rIdx + 1}
+                      </td>
+
+                      {headers.map((_, cIdx) => {
+                        const cellVal = r[cIdx] || '';
+                        return (
+                          <td key={cIdx} style={{ padding: '0.4rem 0.3rem' }}>
+                            <input
+                              type="text"
+                              value={cellVal}
+                              placeholder="hh:mm"
+                              maxLength={5}
+                              onChange={(e) => handleCellChange(rIdx, cIdx, e.target.value)}
+                              style={{
+                                width: '76px',
+                                padding: '0.4rem 0.35rem',
+                                textAlign: 'center',
+                                backgroundColor: isSequenceNewRow ? 'rgba(16, 185, 129, 0.18)' : '#0b0f19',
+                                border: isSequenceNewRow ? '1px solid rgba(16, 185, 129, 0.45)' : '1px solid rgba(255, 255, 255, 0.08)',
+                                borderRadius: '6px',
+                                color: isSequenceNewRow ? '#6ee7b7' : '#ffffff',
+                                fontWeight: 600,
+                                fontSize: '0.85rem',
+                                outline: 'none'
+                              }}
+                            />
+                          </td>
+                        );
+                      })}
 
                     <td style={{ padding: '0.4rem', textAlign: 'center', whiteSpace: 'nowrap' }}>
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -1970,7 +1982,8 @@ export default function RamalScheduleEditor({
                       </div>
                     </td>
                   </tr>
-                ))}
+                );
+              })}
               </tbody>
             </table>
           </div>
