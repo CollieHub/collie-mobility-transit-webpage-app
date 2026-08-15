@@ -111,6 +111,21 @@ function createStopIconWithNumber(orderNum: number, color: string = '#ea580c') {
   });
 }
 
+function createSearchedPinIcon() {
+  const size = 32;
+  const svgCode = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="${size}" height="${size * 1.3}" style="filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.6));">
+      <path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 26 16 26s16-14 16-26C32 7.163 24.837 0 16 0z" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="16" cy="16" r="6" fill="#ffffff"/>
+    </svg>`;
+  return L.divIcon({
+    className: 'custom-search-pin-icon',
+    html: svgCode,
+    iconSize: [size, size * 1.3],
+    iconAnchor: [size / 2, size * 1.3]
+  });
+}
+
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -354,6 +369,160 @@ function MapClickHandler({
   return null;
 }
 
+function LeafletStreetSearch({
+  onSelectLocation
+}: {
+  onSelectLocation: (coords: [number, number], displayName: string) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!query.trim() || query.trim().length < 3) {
+      setResults([]);
+      setIsOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const viewbox = '-59.25,-34.25,-58.80,-33.95';
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&countrycodes=ar&accept-language=es&viewbox=${viewbox}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(Array.isArray(data) ? data : []);
+          setIsOpen(true);
+        }
+      } catch (err) {
+        console.warn('Error en búsqueda de calles:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: '14px',
+        left: '14px',
+        zIndex: 1000,
+        width: '320px',
+        maxWidth: 'calc(100% - 28px)'
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          backgroundColor: 'rgba(17, 24, 39, 0.92)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          borderRadius: '12px',
+          padding: '0.5rem 0.75rem',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)'
+        }}
+      >
+        <Search size={16} color="#38bdf8" style={{ flexShrink: 0 }} />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar calle o dirección..."
+          style={{
+            flex: 1,
+            backgroundColor: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: '#ffffff',
+            fontSize: '0.82rem',
+            fontWeight: 500
+          }}
+        />
+        {isLoading && (
+          <div
+            style={{
+              width: '14px',
+              height: '14px',
+              border: '2px solid #38bdf8',
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite'
+            }}
+          />
+        )}
+        {query && !isLoading && (
+          <button
+            onClick={() => {
+              setQuery('');
+              setResults([]);
+              setIsOpen(false);
+            }}
+            style={{ backgroundColor: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: 0 }}
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      {isOpen && results.length > 0 && (
+        <div
+          style={{
+            marginTop: '0.4rem',
+            backgroundColor: 'rgba(17, 24, 39, 0.96)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            boxShadow: '0 12px 32px rgba(0, 0, 0, 0.55)',
+            maxHeight: '260px',
+            overflowY: 'auto'
+          }}
+        >
+          {results.map((item, idx) => (
+            <div
+              key={`search_item_${idx}`}
+              onClick={() => {
+                const lat = parseFloat(item.lat);
+                const lon = parseFloat(item.lon);
+                onSelectLocation([lat, lon], item.display_name);
+                setQuery(item.display_name.split(',')[0]);
+                setIsOpen(false);
+              }}
+              style={{
+                padding: '0.6rem 0.85rem',
+                fontSize: '0.78rem',
+                color: '#e2e8f0',
+                cursor: 'pointer',
+                borderBottom: idx < results.length - 1 ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'background-color 0.15s ease'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(56, 189, 248, 0.18)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              <MapPin size={14} color="#38bdf8" style={{ flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {item.display_name}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MapFocusController({ focusCoords }: { focusCoords: [number, number] | null }) {
   const map = useMap();
   useEffect(() => {
@@ -544,6 +713,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null);
+  const [searchedLocation, setSearchedLocation] = useState<{ coords: [number, number]; name: string } | null>(null);
+
+  const handleSelectSearchedStreet = useCallback((coords: [number, number], name: string) => {
+    setFocusCoords(coords);
+    setSearchedLocation({ coords, name });
+    showNotification?.('success', `📍 Centrado en: ${name.split(',')[0]}`);
+  }, [showNotification]);
   const [selectedWaypointIdx, setSelectedWaypointIdx] = useState<number | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
@@ -1776,6 +1952,22 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               maxZoom={19}
             />
+
+            <LeafletStreetSearch onSelectLocation={handleSelectSearchedStreet} />
+
+            {searchedLocation && (
+              <Marker
+                position={searchedLocation.coords}
+                icon={createSearchedPinIcon()}
+                zIndexOffset={3500}
+              >
+                <Popup>
+                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
+                    📍 {searchedLocation.name}
+                  </div>
+                </Popup>
+              </Marker>
+            )}
 
             <MapFocusController focusCoords={focusCoords} />
             <MapClickHandler
