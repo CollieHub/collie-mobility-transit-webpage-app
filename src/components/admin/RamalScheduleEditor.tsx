@@ -905,6 +905,12 @@ export default function RamalScheduleEditor({
           return sDayId === targetDayTypeId.toLowerCase() || sDayId === destCode.toLowerCase();
         });
 
+        const itemsToCopy = matrixRows.map((r, i) => ({
+          departure_time: r[0] || '00:00',
+          dispatch_order: i + 1,
+          trip_times_json: JSON.stringify(r)
+        }));
+
         const payload = {
           schedule: {
             id: existingSched?.id || null,
@@ -916,7 +922,7 @@ export default function RamalScheduleEditor({
             header_aliases_json: JSON.stringify(headerAliases),
             stop_addresses_json: JSON.stringify(stopAddresses)
           },
-          items: []
+          items: itemsToCopy
         };
 
         await fetch('/v1/admin/schedules/batch', {

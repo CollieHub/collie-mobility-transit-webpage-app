@@ -1723,28 +1723,29 @@ app.post('/v1/admin/schedules/batch', async (c) => {
       );
     }
 
-    // 2. Limpiar ítems anteriores de esta grilla
-    statements.push(
-      c.env.DB.prepare('DELETE FROM schedule_items WHERE schedule_id = ?').bind(scheduleId)
-    );
+    // 2. Limpiar e insertar ítems solo si 'items' fue enviado explícitamente en el cuerpo del request
+    if (Array.isArray(items)) {
+      statements.push(
+        c.env.DB.prepare('DELETE FROM schedule_items WHERE schedule_id = ?').bind(scheduleId)
+      );
 
-    // 3. Preparar inserción masiva de ítems (schedule_items)
-    if (Array.isArray(items) && items.length > 0) {
-      items.forEach((item: any, idx: number) => {
-        const itemId = `sitem-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`;
-        statements.push(
-          c.env.DB.prepare(`
-            INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
-            VALUES (?, ?, ?, ?, ?)
-          `).bind(
-            itemId,
-            scheduleId,
-            item.departure_time || '00:00',
-            item.dispatch_order || (idx + 1),
-            typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || [])
-          )
-        );
-      });
+      if (items.length > 0) {
+        items.forEach((item: any, idx: number) => {
+          const itemId = `sitem-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`;
+          statements.push(
+            c.env.DB.prepare(`
+              INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
+              VALUES (?, ?, ?, ?, ?)
+            `).bind(
+              itemId,
+              scheduleId,
+              item.departure_time || '00:00',
+              item.dispatch_order || (idx + 1),
+              typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || [])
+            )
+          );
+        });
+      }
     }
 
     // Ejecución masiva atómica en D1 (1 solo viaje de red)
