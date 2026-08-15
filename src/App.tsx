@@ -1262,8 +1262,8 @@ function App() {
             if (cached) {
               const parsed = JSON.parse(cached);
               if (parsed && parsed.data && parsed.data.directions) {
-                const cacheDuration = window.location.hostname === 'localhost' ? 0 : 3600000; // 0 en local, 1 hora en producción
-                const isExpired = parsed.timestamp ? (Date.now() - parsed.timestamp > cacheDuration) : true;
+                const cacheDuration = 0; // Se desactiva la caché local estática de 1 hora para obtener siempre trazados e itinerarios actualizados en vivo
+                const isExpired = true;
                 const hasSchedules = parsed.data.schedulesList && parsed.data.schedulesList.length > 0;
                 
                 if (!isExpired && hasSchedules) {
