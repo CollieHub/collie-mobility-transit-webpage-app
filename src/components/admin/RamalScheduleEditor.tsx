@@ -185,10 +185,12 @@ export default function RamalScheduleEditor({
       if (data.success) {
         setBackupRawText(csvText);
 
-        const newHeaders = data.headers || [];
+        let newHeaders: string[] = data.headers || [];
         const newMatrix = data.matrix || [];
 
+        // 🔤 Ejecutar automáticamente la corrección de ortografía en los encabezados recién importados
         if (newHeaders.length > 0) {
+          newHeaders = newHeaders.map(h => correctSpellingAndCapitalization(h));
           setHeaders(newHeaders);
           setHeaderAliases(newHeaders.map(() => ''));
           setStopAddresses(newHeaders.map(() => ''));
