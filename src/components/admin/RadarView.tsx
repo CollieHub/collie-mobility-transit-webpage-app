@@ -1387,17 +1387,20 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               <Save size={14} /> Guardar
             </button>
             <button
-              onClick={loadBranchData}
+              onClick={() => executeIfEditing(loadBranchData)}
+              disabled={!isEditingEnabled}
+              title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Descartar cambios no guardados'}
               className="btn-animated btn-animated-danger"
               style={{
                 padding: '0.5rem 0.75rem',
-                backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                color: '#ef4444',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                backgroundColor: isEditingEnabled ? 'rgba(239, 68, 68, 0.15)' : '#1e293b',
+                color: isEditingEnabled ? '#ef4444' : '#64748b',
+                border: isEditingEnabled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
                 borderRadius: '8px',
                 fontWeight: 600,
                 fontSize: '0.8rem',
-                cursor: 'pointer'
+                opacity: isEditingEnabled ? 1 : 0.4,
+                cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
               }}
             >
               Descartar
