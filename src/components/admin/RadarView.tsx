@@ -907,7 +907,13 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     pushUndoState();
     const updatedControls = waypoints.filter((_, i) => i !== idx);
     setWaypoints(updatedControls);
+    if (selectedWaypointIdx === idx) {
+      setSelectedWaypointIdx(null);
+    } else if (selectedWaypointIdx !== null && selectedWaypointIdx > idx) {
+      setSelectedWaypointIdx(selectedWaypointIdx - 1);
+    }
     await updateFullPolylinePathFromControls(updatedControls);
+    showNotification?.('success', `Punto #${idx + 1} eliminado del recorrido`);
   };
 
   const handleReverseRouteShape = async () => {
@@ -1813,7 +1819,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
               return (
                 <Marker
-                  key={`wpt_control_marker_${idx}`}
+                  key={`wpt_control_marker_${idx}_${pt[0]}_${pt[1]}`}
                   position={pt}
                   draggable={isEditingEnabled}
                   zIndexOffset={rightDockTab === 'recorrido' ? 3000 + (isSelected ? 500 : 0) : 1000}
@@ -2138,7 +2144,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                       const isSelected = selectedWaypointIdx === idx;
                       return (
                         <div
-                          key={`wpt_${idx}`}
+                          key={`wpt_${idx}_${pt[0]}_${pt[1]}`}
                           onClick={() => {
                             setFocusCoords(pt);
                             setSelectedWaypointIdx(idx);
@@ -2179,10 +2185,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteWaypointIndex(idx);
+                                executeIfEditing(() => handleDeleteWaypointIndex(idx));
                               }}
-                              title="Eliminar punto"
-                              style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                              disabled={!isEditingEnabled}
+                              title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Eliminar punto del recorrido'}
+                              style={{ backgroundColor: 'transparent', border: 'none', color: isEditingEnabled ? '#ef4444' : '#64748b', cursor: isEditingEnabled ? 'pointer' : 'not-allowed', padding: '2px' }}
                             >
                               <X size={14} />
                             </button>
