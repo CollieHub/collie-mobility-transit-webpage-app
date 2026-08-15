@@ -77,7 +77,34 @@ const NAVIGATION_GROUPS = [
 
 export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboardProps) {
   const [tables, setTables] = useState<Record<string, TableMeta>>({});
-  const [activeTable, setActiveTable] = useState<string>('radar');
+  const [activeTable, setActiveTable] = useState<string>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab') || urlParams.get('table');
+        if (tabParam) return tabParam;
+
+        const saved = localStorage.getItem('collie_admin_active_table') || sessionStorage.getItem('collie_admin_active_table');
+        if (saved) return saved;
+      }
+    } catch (_) {}
+    return 'radar';
+  });
+
+  useEffect(() => {
+    if (activeTable && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('collie_admin_active_table', activeTable);
+        sessionStorage.setItem('collie_admin_active_table', activeTable);
+
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') !== activeTable) {
+          url.searchParams.set('tab', activeTable);
+          window.history.replaceState(null, '', url.toString());
+        }
+      } catch (_) {}
+    }
+  }, [activeTable]);
   const [rows, setRows] = useState<any[]>([]);
   const [linesList, setLinesList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
