@@ -1605,7 +1605,10 @@ app.get('/v1/admin/table/:tableName', async (c) => {
     return c.json({ success: false, error: `Tabla no autorizada o inexistente: '${tableName}'` }, 400);
   }
 
-  const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 500);
+  const requestedLimit = parseInt(c.req.query('limit') || '100', 10);
+  const hasSpecificFilter = !!(c.req.query('schedule_id') || c.req.query('branch_id') || c.req.query('line_id'));
+  const maxLimit = (hasSpecificFilter || tableName === 'schedule_items') ? 5000 : 500;
+  const limit = Math.min(requestedLimit, maxLimit);
   const offset = parseInt(c.req.query('offset') || '0', 10);
   const search = (c.req.query('q') || '').trim().toLowerCase();
 
@@ -1613,15 +1616,29 @@ app.get('/v1/admin/table/:tableName', async (c) => {
     let countSql = `SELECT COUNT(*) as total FROM ${tableName}`;
     let dataSql = `SELECT * FROM ${tableName}`;
     const params: any[] = [];
+    const whereConditions: string[] = [];
+
+    for (const field of tableConfig.fields) {
+      const fieldVal = c.req.query(field);
+      if (fieldVal !== undefined && fieldVal !== '') {
+        whereConditions.push(`${field} = ?`);
+        params.push(fieldVal);
+      }
+    }
 
     if (search) {
       const searchCols = tableConfig.fields.filter(f => f !== 'id' && !f.endsWith('_json'));
       if (searchCols.length > 0) {
-        const whereClause = searchCols.map(col => `LOWER(CAST(${col} AS TEXT)) LIKE ?`).join(' OR ');
-        countSql += ` WHERE ${whereClause}`;
-        dataSql += ` WHERE ${whereClause}`;
+        const searchClause = '(' + searchCols.map(col => `LOWER(CAST(${col} AS TEXT)) LIKE ?`).join(' OR ') + ')';
+        whereConditions.push(searchClause);
         searchCols.forEach(() => params.push(`%${search}%`));
       }
+    }
+
+    if (whereConditions.length > 0) {
+      const whereStr = ` WHERE ` + whereConditions.join(' AND ');
+      countSql += whereStr;
+      dataSql += whereStr;
     }
 
     const orderClause = tableConfig.orderBy || `${tableConfig.primaryKey} DESC`;

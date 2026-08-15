@@ -435,12 +435,11 @@ export default function RamalScheduleEditor({
             setHeaderAliases(aList.length === hList.length ? aList : Array(hList.length).fill(''));
             setStopAddresses(addrList.length === hList.length ? addrList : Array(hList.length).fill(''));
 
-            fetch(`/v1/admin/table/schedule_items?limit=500`)
+            fetch(`/v1/admin/table/schedule_items?schedule_id=${encodeURIComponent(matchingSched.id)}&limit=2000`)
               .then(r => r.json())
               .then(itemsData => {
                 if (itemsData.success && itemsData.rows) {
-                  const filteredItems = itemsData.rows
-                    .filter((item: any) => item.schedule_id === matchingSched.id)
+                  const filteredItems = (itemsData.rows || [])
                     .sort((a: any, b: any) => (a.dispatch_order || 0) - (b.dispatch_order || 0));
 
                   const mRows: string[][] = [];
