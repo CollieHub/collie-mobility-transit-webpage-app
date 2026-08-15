@@ -23,7 +23,8 @@ import {
   Navigation,
   Lock,
   Unlock,
-  Hash
+  Hash,
+  FileCode
 } from 'lucide-react';
 
 // Fix Leaflet marker icons
@@ -723,6 +724,108 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [selectedWaypointIdx, setSelectedWaypointIdx] = useState<number | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
+
+  const kmlInputRef = useRef<HTMLInputElement>(null);
+
+  const handleKmlFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!selectedBranchId) {
+      showNotification?.('error', 'Por favor selecciona un ramal primero');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const xmlText = event.target?.result as string;
+        if (!xmlText) throw new Error('El archivo KML está vacío');
+
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+        const parserError = xmlDoc.getElementsByTagName('parsererror');
+        if (parserError.length > 0) {
+          throw new Error('Formato XML/KML inválido');
+        }
+
+        const extractedStops: Array<{ name: string; lat: number; lng: number }> = [];
+
+        // 1. Extraer Placemarks con <Point>
+        const placemarks = Array.from(xmlDoc.getElementsByTagName('Placemark'));
+        placemarks.forEach((pm, idx) => {
+          const nameEl = pm.getElementsByTagName('name')[0];
+          let name = nameEl ? nameEl.textContent?.trim() || '' : '';
+          name = name.replace(/<[^>]*>?/gm, '').trim();
+          if (!name) name = `Parada KML ${idx + 1}`;
+
+          const pointEl = pm.getElementsByTagName('Point')[0];
+          if (pointEl) {
+            const coordEl = pointEl.getElementsByTagName('coordinates')[0];
+            if (coordEl && coordEl.textContent) {
+              const rawCoords = coordEl.textContent.trim().split(',');
+              if (rawCoords.length >= 2) {
+                const lng = parseFloat(rawCoords[0]);
+                const lat = parseFloat(rawCoords[1]);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  extractedStops.push({ name, lat, lng });
+                }
+              }
+            }
+          }
+        });
+
+        // 2. Si no se especificaron etiquetas <Point>, buscar en cualquier nodo <coordinates>
+        if (extractedStops.length === 0) {
+          const coordTags = Array.from(xmlDoc.getElementsByTagName('coordinates'));
+          coordTags.forEach((cTag, cIdx) => {
+            const rawText = cTag.textContent || '';
+            const tokens = rawText.trim().split(/\s+/);
+            tokens.forEach((tok, tIdx) => {
+              const parts = tok.split(',');
+              if (parts.length >= 2) {
+                const lng = parseFloat(parts[0]);
+                const lat = parseFloat(parts[1]);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  extractedStops.push({ name: `Parada KML ${cIdx + 1}.${tIdx + 1}`, lat, lng });
+                }
+              }
+            });
+          });
+        }
+
+        if (extractedStops.length === 0) {
+          showNotification?.('error', 'No se encontraron paradas ni coordenadas válidas en el archivo KML');
+          return;
+        }
+
+        // Convertir puntos a objetos StopItem
+        const newStops: StopItem[] = extractedStops.map((s, idx) => ({
+          id: `kml-stop-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 4)}`,
+          branch_id: selectedBranchId,
+          direction: direction,
+          stop_order: idx + 1,
+          name: s.name,
+          lat: s.lat,
+          lng: s.lng,
+          is_control_point: idx === 0 || idx === extractedStops.length - 1 ? 1 : 0
+        }));
+
+        setStops(newStops);
+        if (extractedStops.length > 0) {
+          setFocusCoords([extractedStops[0].lat, extractedStops[0].lng]);
+        }
+        showNotification?.('success', `¡Éxito! Se cargaron ${extractedStops.length} paradas desde el archivo KML. Recuerda hacer clic en 'Guardar' para publicar.`);
+
+      } catch (err: any) {
+        showNotification?.('error', `Error al procesar el archivo KML: ${err.message}`);
+      }
+    };
+
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   // Waypoint Undo History Stack
   const [undoStack, setUndoStack] = useState<[number, number][][]>([]);
@@ -2212,12 +2315,37 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 backgroundColor: '#0c1527',
                 borderBottom: rightDockTab === 'recorrido' ? 'none' : '1px solid rgba(255, 255, 255, 0.06)'
               }}>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: '0.5rem' }}>
                   {rightDockTab === 'paradas' ? 'Paradas' : 'Recorrido'}: {selectedBranchObj ? (selectedBranchObj.name || selectedBranchObj.code) : 'Ramal'}
                 </span>
-                <span style={{ fontSize: '0.75rem', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.15rem 0.55rem', borderRadius: '6px', fontWeight: 800 }}>
-                  {rightDockTab === 'paradas' ? stops.length : waypoints.length}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  {rightDockTab === 'paradas' && (
+                    <button
+                      onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
+                      disabled={!isEditingEnabled}
+                      title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde un archivo KML / Google Earth'}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        padding: '0.22rem 0.55rem',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
+                        backgroundColor: isEditingEnabled ? 'rgba(56, 189, 248, 0.12)' : '#1e293b',
+                        color: isEditingEnabled ? '#38bdf8' : '#64748b',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
+                      }}
+                    >
+                      <FileCode size={13} />
+                      Importar KML
+                    </button>
+                  )}
+                  <span style={{ fontSize: '0.75rem', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.15rem 0.55rem', borderRadius: '6px', fontWeight: 800 }}>
+                    {rightDockTab === 'paradas' ? stops.length : waypoints.length}
+                  </span>
+                </div>
               </div>
 
               {/* DISTANCE BADGE UNDER HEADER */}
@@ -2279,10 +2407,34 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               {rightDockTab === 'paradas' ? (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {stops.length === 0 ? (
-                    <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem' }}>
-                      <MapPin size={28} style={{ margin: '0 auto 0.5rem', color: '#475569' }} />
-                      No hay paradas en {direction.toUpperCase()}.<br />
-                      Simplemente toca cualquier punto del mapa para agregar una parada.
+                    <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+                      <MapPin size={28} style={{ color: '#475569' }} />
+                      <div>
+                        No hay paradas en {direction.toUpperCase()}.<br />
+                        Toca cualquier punto del mapa o importa desde KML.
+                      </div>
+                      <button
+                        onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
+                        disabled={!isEditingEnabled}
+                        className="btn-animated btn-animated-success"
+                        style={{
+                          padding: '0.5rem 1rem',
+                          borderRadius: '8px',
+                          border: 'none',
+                          backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
+                          color: 'white',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          marginTop: '0.3rem'
+                        }}
+                      >
+                        <FileCode size={16} />
+                        Importar paradas desde KML
+                      </button>
                     </div>
                   ) : (
                     stops.map((st, idx) => (
@@ -3129,6 +3281,15 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           </div>
         </div>
       )}
+
+      {/* HIDDEN FILE INPUT FOR KML IMPORT */}
+      <input
+        type="file"
+        ref={kmlInputRef}
+        accept=".kml,.xml"
+        onChange={handleKmlFileUpload}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 }
