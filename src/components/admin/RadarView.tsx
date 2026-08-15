@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -362,6 +362,106 @@ function MapFocusController({ focusCoords }: { focusCoords: [number, number] | n
     }
   }, [focusCoords, map]);
   return null;
+}
+
+function getPositionAtDistance(
+  pathData: { coordinates: [number, number][]; cumulativeDistances: number[]; totalDistance: number },
+  distance: number
+): { lat: number; lng: number } {
+  const { coordinates, cumulativeDistances, totalDistance } = pathData;
+  if (coordinates.length === 0) return { lat: -34.118, lng: -59.02 };
+  if (coordinates.length === 1 || distance <= 0) return { lat: coordinates[0][0], lng: coordinates[0][1] };
+  if (distance >= totalDistance) return { lat: coordinates[coordinates.length - 1][0], lng: coordinates[coordinates.length - 1][1] };
+
+  let lo = 0, hi = cumulativeDistances.length - 1;
+  while (lo < hi - 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (cumulativeDistances[mid] <= distance) lo = mid; else hi = mid;
+  }
+  const segStart = cumulativeDistances[lo], segEnd = cumulativeDistances[hi], segLen = segEnd - segStart;
+  const t = segLen > 0 ? (distance - segStart) / segLen : 0;
+  const p1 = coordinates[lo];
+  const p2 = coordinates[Math.min(hi, coordinates.length - 1)];
+  return { lat: p1[0] + (p2[0] - p1[0]) * t, lng: p1[1] + (p2[1] - p1[1]) * t };
+}
+
+function RouteDirectionArrows({
+  coordinates,
+  color,
+  direction
+}: {
+  coordinates: [number, number][];
+  color: string;
+  direction: 'ida' | 'vuelta';
+}) {
+  const map = useMap();
+  const [zoom, setZoom] = useState<number>(map.getZoom());
+
+  useMapEvents({
+    zoomend() {
+      setZoom(map.getZoom());
+    }
+  });
+
+  const arrowPolygons = useMemo(() => {
+    if (!coordinates || coordinates.length < 2 || zoom < 13) return [];
+
+    const cumulativeDistances: number[] = [0];
+    for (let i = 1; i < coordinates.length; i++) {
+      const prev = coordinates[i - 1];
+      const curr = coordinates[i];
+      const dist = calculateDistanceKm(prev[0], prev[1], curr[0], curr[1]) * 1000;
+      cumulativeDistances.push(cumulativeDistances[i - 1] + dist);
+    }
+    const totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
+    if (totalDistance <= 0) return [];
+
+    const pathData = { coordinates, cumulativeDistances, totalDistance };
+
+    let spacing = 350; // metros entre flechas para zoom >= 16
+    if (zoom === 15) spacing = 600;
+    else if (zoom === 14) spacing = 1200;
+    else if (zoom === 13) spacing = 2000;
+
+    const scaleFactor = Math.pow(2, 16 - Math.min(18, Math.max(10, zoom)));
+    const L = 0.00016 * scaleFactor;
+    const W = 0.00007 * scaleFactor;
+
+    const polygons: any[] = [];
+    for (let d = 40; d < totalDistance - 30; d += spacing) {
+      const p = getPositionAtDistance(pathData, d);
+      const nextP = getPositionAtDistance(pathData, Math.min(d + 4, totalDistance));
+
+      const dLat = nextP.lat - p.lat;
+      const dLng = nextP.lng - p.lng;
+      const length = Math.sqrt(dLat * dLat + dLng * dLng);
+      if (length > 0) {
+        const dirVec = { lat: dLat / length, lng: dLng / length };
+        const norm = { lat: -dirVec.lng, lng: dirVec.lat };
+
+        const pTip: [number, number] = [p.lat + dirVec.lat * L, p.lng + dirVec.lng * L];
+        const pLeft: [number, number] = [p.lat - dirVec.lat * L * 0.35 + norm.lat * W, p.lng - dirVec.lng * L * 0.35 + norm.lng * W];
+        const pRight: [number, number] = [p.lat - dirVec.lat * L * 0.35 - norm.lat * W, p.lng - dirVec.lng * L * 0.35 - norm.lng * W];
+
+        polygons.push(
+          <Polygon
+            key={`route_arrow_${direction}_${d}`}
+            positions={[pTip, pLeft, pRight]}
+            pathOptions={{
+              color: '#ffffff',
+              weight: 1.5,
+              fillColor: color,
+              fillOpacity: 1.0
+            }}
+            interactive={false}
+          />
+        );
+      }
+    }
+    return polygons;
+  }, [coordinates, color, direction, zoom]);
+
+  return <>{arrowPolygons}</>;
 }
 
 interface StopItem {
@@ -1673,28 +1773,35 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
             {/* Interactive Polyline: Continuous OSRM street route shape */}
             {displayPolylinePath.length > 1 && (
-              <Polyline
-                positions={displayPolylinePath}
-                eventHandlers={{
-                  click(e) {
-                    if (!isEditingEnabled) return;
-                    if (e.originalEvent) {
-                      L.DomEvent.stopPropagation(e.originalEvent);
+              <>
+                <Polyline
+                  positions={displayPolylinePath}
+                  eventHandlers={{
+                    click(e) {
+                      if (!isEditingEnabled) return;
+                      if (e.originalEvent) {
+                        L.DomEvent.stopPropagation(e.originalEvent);
+                      }
+                      isPolylineClickRef.current = true;
+                      handleInsertPolylineWaypoint([e.latlng.lat, e.latlng.lng]);
+                      setTimeout(() => {
+                        isPolylineClickRef.current = false;
+                      }, 200);
                     }
-                    isPolylineClickRef.current = true;
-                    handleInsertPolylineWaypoint([e.latlng.lat, e.latlng.lng]);
-                    setTimeout(() => {
-                      isPolylineClickRef.current = false;
-                    }, 200);
-                  }
-                }}
-                pathOptions={{
-                  color: direction === 'ida' ? '#0284c7' : '#e11d48',
-                  weight: 7,
-                  opacity: 0.85,
-                  dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
-                }}
-              />
+                  }}
+                  pathOptions={{
+                    color: direction === 'ida' ? '#0284c7' : '#e11d48',
+                    weight: 7,
+                    opacity: 0.85,
+                    dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
+                  }}
+                />
+                <RouteDirectionArrows
+                  coordinates={displayPolylinePath}
+                  color={direction === 'ida' ? '#0284c7' : '#e11d48'}
+                  direction={direction}
+                />
+              </>
             )}
 
             {/* Control Waypoint Markers: Render key control handles with numbers matching the Recorrido list */}
