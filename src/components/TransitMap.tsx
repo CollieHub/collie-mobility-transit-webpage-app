@@ -4694,16 +4694,16 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
                 (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
               );
-              const isWaypoint = showWaypoints && (
+              const isControlPoint = (
                 (route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules)) ||
                 transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
               );
               
-              // Determinar tamaño (un poco más grande que las paradas normales: 1.4x)
-              const size = isWaypoint ? Math.round(stopIconSize * 1.4) : stopIconSize;
+              // Determinar tamaño (los puntos de control se destacan a 1.4x tanto para usuarios públicos como administradores)
+              const size = isControlPoint ? Math.round(stopIconSize * 1.4) : stopIconSize;
               
               // Determinar zIndexOffset
-              const zIndex = isWaypoint ? 1000 : 0;
+              const zIndex = isControlPoint ? 1000 : 0;
               
               // Determinar sequence number por recorrido (routeId + direction)
               const routeId = stop.routeId || (route ? route.id : 'unknown');
@@ -4721,7 +4721,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               let markerIcon;
               if (showStopSequences) {
                 markerIcon = createStopSequenceIcon(stop.color, seq, size);
-              } else if (isWaypoint) {
+              } else if (isControlPoint) {
                 markerIcon = createWaypointCircleDotIcon('#f59e0b', size);
               } else {
                 markerIcon = createStopIcon(stop.color, stop.direction, size);
@@ -4729,7 +4729,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
 
               // Calculate active times for checkpoint Tooltip
               const activeTimes: string[] = [];
-              if (isWaypoint && Array.isArray(combinedBuses)) {
+              if (isControlPoint && Array.isArray(combinedBuses)) {
                 combinedBuses.forEach((bus: any) => {
                   if (bus.dir !== direction) return;
                   if (bus.routeId !== routeId) return;
@@ -4810,7 +4810,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                         }
                       } : undefined}
                     >
-                      {isWaypoint && (
+                      {(isControlPoint && (showWaypoints || hasTimes)) && (
                         <Tooltip 
                           permanent 
                           direction="top" 
