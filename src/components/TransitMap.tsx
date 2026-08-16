@@ -4662,14 +4662,6 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
           return (showStops !== false || showStopProjections || showWaypoints) && (showWaypoints || currentZoom >= 13) && transitStops
             .filter((stop: any) => {
                 if (visibleRouteIds.size === 0) return false; // PERFORMANCE FIX: Do not render all stops by default
-                
-                const route = transitRoutes.find((r: any) => r.id === stop.routeId);
-                const isWaypoint = route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules);
-
-                // Si está activo el botón de reloj (showWaypoints), SOLO mostrar las paradas que son Puntos de Control
-                if (showWaypoints && !isWaypoint) {
-                  return false;
-                }
 
                 if (stop.routeId) {
                     if (!visibleRouteIds.has(stop.routeId)) return false;
@@ -4698,8 +4690,8 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               const route = transitRoutes.find((r: any) => r.id === stop.routeId);
               const isWaypoint = showWaypoints && route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules);
               
-              // Determinar tamaño
-              const size = isWaypoint ? Math.round(stopIconSize * 1.5) : stopIconSize;
+              // Determinar tamaño (al activar el botón de reloj showWaypoints se duplica el tamaño del icono de los puntos de control)
+              const size = isWaypoint ? Math.round(stopIconSize * 2.0) : stopIconSize;
               
               // Determinar zIndexOffset
               const zIndex = isWaypoint ? 1000 : 0;
