@@ -2070,9 +2070,10 @@ function App() {
     s = s.toLowerCase();
     t = t.toLowerCase();
     if (s === t) return true;
-    if (s.includes('lunes') && t.includes('lunes')) return true;
-    if (s.includes('sab') && t.includes('sab')) return true;
-    if ((s.includes('domingo') || s.includes('feriado')) && (t.includes('domingo') || t.includes('feriado'))) return true;
+    if ((s.includes('lunes') || s.includes('weekday')) && (t.includes('lunes') || t.includes('weekday'))) return true;
+    if ((s.includes('sab') || s.includes('saturday')) && (t.includes('sab') || t.includes('saturday'))) return true;
+    if ((s.includes('domingo') || s.includes('feriado') || s.includes('sunday')) && (t.includes('domingo') || t.includes('feriado') || t.includes('sunday'))) return true;
+    if (s.includes('especial') && t.includes('especial')) return true;
     return false;
   };
 
@@ -2089,13 +2090,17 @@ function App() {
     const countForDir = (dir: 'ida' | 'vuelta') => {
       let dirCount = 0;
       if (route.schedules && typeof route.schedules === 'object') {
-        const keysToTry = [
-          `${targetCode}_${dir}`,
-          `weekday_${dir}`,
-          `saturday_${dir}`,
-          `sunday_holiday_${dir}`,
-          `sunday_${dir}`
-        ];
+        let keysToTry: string[] = [];
+        if (targetCode === 'lunes_a_viernes') {
+          keysToTry = [`lunes_a_viernes_${dir}`, `weekday_${dir}`, `lunes_viernes_${dir}`];
+        } else if (targetCode === 'sabados') {
+          keysToTry = [`sabados_${dir}`, `sabado_${dir}`, `saturday_${dir}`];
+        } else if (targetCode === 'domingos_feriados') {
+          keysToTry = [`domingos_feriados_${dir}`, `domingo_feriado_${dir}`, `sunday_holiday_${dir}`, `sunday_${dir}`];
+        } else if (targetCode === 'especial') {
+          keysToTry = [`especial_${dir}`];
+        }
+
         let sch = null;
         for (const k of keysToTry) {
           if (route.schedules[k]) {
@@ -2108,7 +2113,7 @@ function App() {
             if (!s) continue;
             if (s.direction === dir || k.endsWith(`_${dir}`)) {
               const formatted = formatSpecialLabel(s.dayTypeName || s.dayType || s.dayTypesId || k);
-              if (formatted === todayLabel) {
+              if (matchDayType(formatted, todayLabel) || matchDayType(k, targetCode)) {
                 sch = s;
                 break;
               }
@@ -2128,7 +2133,7 @@ function App() {
           const schDir = sch.direction || (sch.direction_id === '0' || sch.direction_id === 0 ? 'ida' : 'vuelta');
           if (schDir === dir) {
             const schDay = sch.service_type || sch.day_types_code || sch.dayType || '';
-            if (matchDayType(schDay, todayLabel) || schDay === '' || route.schedulesList.length === 1) {
+            if (matchDayType(schDay, todayLabel) || matchDayType(schDay, targetCode)) {
               const trips = sch.trips || [];
               trips.forEach((t: any) => {
                 if (t.times && Array.isArray(t.times)) {
