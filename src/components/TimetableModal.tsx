@@ -146,19 +146,50 @@ export const cleanControlPointHeader = (raw: string): string => {
   return cleaned.trim() || raw;
 };
 
+const TIMETABLE_MEMORY_CACHE = new Map<string, any>();
+
+function hasValidSchedules(obj: any): boolean {
+  return !!(obj && obj.schedules && typeof obj.schedules === 'object' && Object.keys(obj.schedules).length > 0);
+}
+
 export default function TimetableModal({ routeCode, onClose, routeData, isLoadingDetail, routeObj, calendarExceptions = [] }: TimetableModalProps) {
   const isMobile = useIsMobile();
   const [activeDirection, setActiveDirection] = useState<'ida' | 'vuelta'>('ida');
 
-  const [internalRouteData, setInternalRouteData] = useState<any>(null);
-  const [internalLoading, setInternalLoading] = useState<boolean>(false);
+  const param = routeObj?.id || routeObj?.code || routeCode || '';
+
+  const preloadedData = useMemo(() => {
+    if (hasValidSchedules(routeData)) return routeData;
+    if (hasValidSchedules(routeObj)) return routeObj;
+    if (param && TIMETABLE_MEMORY_CACHE.has(param)) return TIMETABLE_MEMORY_CACHE.get(param);
+    return null;
+  }, [routeData, routeObj, param]);
+
+  const [internalRouteData, setInternalRouteData] = useState<any>(preloadedData);
+  const [internalLoading, setInternalLoading] = useState<boolean>(!preloadedData);
 
   useEffect(() => {
-    setInternalRouteData(null);
-    const param = routeObj?.id || routeObj?.code || routeCode;
-    if (!param) return;
+    if (!param) {
+      setInternalLoading(false);
+      return;
+    }
 
-    setInternalLoading(true);
+    if (hasValidSchedules(routeData)) {
+      TIMETABLE_MEMORY_CACHE.set(param, routeData);
+    }
+    if (hasValidSchedules(routeObj)) {
+      TIMETABLE_MEMORY_CACHE.set(param, routeObj);
+    }
+
+    const cached = TIMETABLE_MEMORY_CACHE.get(param) || (hasValidSchedules(routeData) ? routeData : (hasValidSchedules(routeObj) ? routeObj : null));
+
+    if (cached) {
+      setInternalRouteData(cached);
+      setInternalLoading(false);
+    } else {
+      setInternalLoading(true);
+    }
+
     fetch(`/v1/catalog/public/timetables?route_id=${encodeURIComponent(param)}`)
       .then(res => res.json())
       .then(json => {
@@ -175,22 +206,24 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
               };
             }
           });
-          setInternalRouteData(consolidated);
+          if (hasValidSchedules(consolidated)) {
+            TIMETABLE_MEMORY_CACHE.set(param, consolidated);
+            setInternalRouteData(consolidated);
+          }
         }
       })
       .catch(err => console.warn('TimetableModal self-fetch error:', err))
       .finally(() => setInternalLoading(false));
-  }, [routeCode, routeObj, routeData]);
+  }, [param, routeCode, routeObj, routeData]);
 
   const effectiveRouteData = useMemo(() => {
-    if (internalRouteData && internalRouteData.schedules && Object.keys(internalRouteData.schedules).length > 0) {
-      return internalRouteData;
-    }
-    if (routeData && routeData.schedules && Object.keys(routeData.schedules).length > 0) return routeData;
-    if (routeObj && routeObj.schedules && Object.keys(routeObj.schedules).length > 0) return routeObj;
+    if (hasValidSchedules(internalRouteData)) return internalRouteData;
+    if (hasValidSchedules(routeData)) return routeData;
+    if (hasValidSchedules(routeObj)) return routeObj;
     return internalRouteData || routeObj || routeData;
   }, [routeData, routeObj, internalRouteData]);
-  const effectiveLoading = isLoadingDetail || (internalLoading && (!effectiveRouteData || !effectiveRouteData.schedules));
+
+  const effectiveLoading = isLoadingDetail || (internalLoading && !hasValidSchedules(effectiveRouteData));
 
   const routeObjToUse = useMemo(() => {
     if (routeObj) return routeObj;
