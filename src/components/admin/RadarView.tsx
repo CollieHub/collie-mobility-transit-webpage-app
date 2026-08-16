@@ -2369,29 +2369,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                   {rightDockTab === 'paradas' ? 'Paradas' : 'Recorrido'}: {selectedBranchObj ? (selectedBranchObj.name || selectedBranchObj.code) : 'Ramal'}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  {rightDockTab === 'paradas' && (
-                    <button
-                      onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
-                      disabled={!isEditingEnabled}
-                      title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde un archivo KML / Google Earth'}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        padding: '0.22rem 0.55rem',
-                        borderRadius: '6px',
-                        border: '1px solid rgba(56, 189, 248, 0.3)',
-                        backgroundColor: isEditingEnabled ? 'rgba(56, 189, 248, 0.12)' : '#1e293b',
-                        color: isEditingEnabled ? '#38bdf8' : '#64748b',
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
-                      }}
-                    >
-                      <FileCode size={13} />
-                      Importar KML
-                    </button>
-                  )}
                   <span style={{ fontSize: '0.75rem', backgroundColor: '#0284c7', color: '#ffffff', padding: '0.15rem 0.55rem', borderRadius: '6px', fontWeight: 800 }}>
                     {rightDockTab === 'paradas' ? stops.length : waypoints.length}
                   </span>
