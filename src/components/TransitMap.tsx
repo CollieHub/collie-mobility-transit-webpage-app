@@ -4241,8 +4241,8 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     const fetchLiveBuses = async () => {
       setIsLoadingBuses(true);
       const candidates = [
-        import.meta.env.VITE_TRANSIT_API_URL,
-        'http://localhost:6005/v1'
+        baseUrl,
+        import.meta.env.VITE_TRANSIT_API_URL
       ].filter(Boolean);
       const uniqueCandidates = Array.from(new Set(candidates));
 
