@@ -289,12 +289,16 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       });
   };
 
-  const handleBulkPublish = async (publish: boolean) => {
+  const handleBulkSetStatus = async (statusType: 'published' | 'draft' | 'unpublished') => {
     if (selectedRowKeys.size === 0) return;
     setIsLoading(true);
-    const targetStatusId = activeTable === 'lines' 
-      ? (publish ? 'lpub_published' : 'lpub_unpublished')
-      : (publish ? 'bpub_published' : 'bpub_unpublished');
+
+    let targetStatusId = 'bpub_published';
+    if (activeTable === 'lines') {
+      targetStatusId = statusType === 'published' ? 'lpub_published' : (statusType === 'draft' ? 'lpub_draft' : 'lpub_unpublished');
+    } else {
+      targetStatusId = statusType === 'published' ? 'bpub_published' : (statusType === 'draft' ? 'bpub_draft' : 'bpub_unpublished');
+    }
     const statusField = activeTable === 'lines' ? 'line_publication_statuses_id' : 'branch_publication_statuses_id';
 
     try {
@@ -307,7 +311,8 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
         });
       }
       await fetch('/v1/admin/cache/purge');
-      showNotification('success', `${publish ? 'Publicado' : 'Despublicado'} exitosamente (${selectedRowKeys.size} registros)`);
+      const labelMap = { published: 'Publicado', draft: 'Borrador', unpublished: 'Despublicado' };
+      showNotification('success', `Cambiado a ${labelMap[statusType]} exitosamente (${selectedRowKeys.size} registros)`);
       setSelectedRowKeys(new Set());
       fetchTableRows(activeTable, searchQuery);
     } catch (err: any) {
@@ -968,7 +973,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                         <>
                           <button
                             type="button"
-                            onClick={() => handleBulkPublish(true)}
+                            onClick={() => handleBulkSetStatus('published')}
                             style={{
                               padding: '0.45rem 0.85rem',
                               backgroundColor: 'rgba(16, 185, 129, 0.2)',
@@ -990,7 +995,28 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
                           <button
                             type="button"
-                            onClick={() => handleBulkPublish(false)}
+                            onClick={() => handleBulkSetStatus('draft')}
+                            style={{
+                              padding: '0.45rem 0.85rem',
+                              backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                              border: '1px solid rgba(245, 158, 11, 0.4)',
+                              color: '#fbbf24',
+                              borderRadius: '8px',
+                              fontSize: '0.775rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem'
+                            }}
+                            title="Pasar a Borrador (visible únicamente para usuarios logueados)"
+                          >
+                            <span>📝 Borrador</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleBulkSetStatus('unpublished')}
                             style={{
                               padding: '0.45rem 0.85rem',
                               backgroundColor: 'rgba(239, 68, 68, 0.2)',

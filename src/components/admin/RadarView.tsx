@@ -1933,16 +1933,26 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                             {b.code ? `${b.code} - ${b.name}` : b.name}
                           </span>
                         </div>
-                        <span style={{
-                          fontSize: '0.65rem',
-                          backgroundColor: 'rgba(16, 185, 129, 0.12)',
-                          color: '#10b981',
-                          padding: '0.15rem 0.4rem',
-                          borderRadius: '4px',
-                          fontWeight: 600
-                        }}>
-                          PUBLICADO
-                        </span>
+                        {(() => {
+                          const statusId = b.branch_publication_statuses_id;
+                          const isDraft = statusId === 'bpub_draft';
+                          const isUnpublished = statusId === 'bpub_unpublished';
+                          const label = isDraft ? 'BORRADOR' : (isUnpublished ? 'NO PUBLICADO' : 'PUBLICADO');
+                          const bg = isDraft ? 'rgba(245, 158, 11, 0.15)' : (isUnpublished ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.12)');
+                          const color = isDraft ? '#f59e0b' : (isUnpublished ? '#fca5a5' : '#10b981');
+                          return (
+                            <span style={{
+                              fontSize: '0.65rem',
+                              backgroundColor: bg,
+                              color: color,
+                              padding: '0.15rem 0.4rem',
+                              borderRadius: '4px',
+                              fontWeight: 700
+                            }}>
+                              {label}
+                            </span>
+                          );
+                        })()}
                       </div>
 
                       {isSelected && (
