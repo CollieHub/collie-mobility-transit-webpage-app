@@ -1648,25 +1648,27 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
               <button
-                onClick={() => setShowMyMapsIngestorModal(true)}
-                title="Importar My Maps (Ingestador de Recorridos)"
+                onClick={() => executeIfEditing(() => setShowMyMapsIngestorModal(true))}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar My Maps (Ingestador de Recorridos)'}
                 style={{
-                  backgroundColor: 'rgba(236, 72, 153, 0.14)',
-                  color: '#f472b6',
-                  border: '1px solid rgba(236, 72, 153, 0.3)',
+                  backgroundColor: isEditingEnabled ? 'rgba(236, 72, 153, 0.14)' : '#1e293b',
+                  color: isEditingEnabled ? '#f472b6' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(236, 72, 153, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
                   borderRadius: '8px',
                   padding: '0.45rem 0.5rem',
-                  cursor: 'pointer',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
                   fontSize: '0.74rem',
                   fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '0.35rem',
+                  opacity: isEditingEnabled ? 1 : 0.4,
                   transition: 'all 0.2s'
                 }}
               >
-                <MapPin size={13} color="#f472b6" /> Importar
+                <MapPin size={13} color={isEditingEnabled ? '#f472b6' : '#64748b'} /> Importar
               </button>
               <button
                 onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
