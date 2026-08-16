@@ -58,13 +58,38 @@ function normalizeStopName(name: string): string {
     .trim();
 }
 
+function matchesDeclaredControlStop(declaredStr: string, stopId: string, stopName: string): boolean {
+  if (!declaredStr) return false;
+  
+  // 1. Coincidencia exacta de ID
+  if (stopId && declaredStr === stopId) return true;
+
+  const normDeclared = normalizeStopName(declaredStr);
+  const cleanDeclared = normalizeStopName(declaredStr.replace(/^\d+[\.\s\-]+\s*/, ''));
+
+  const normStop = normalizeStopName(stopName);
+  const cleanStop = normalizeStopName((stopName || '').replace(/^\d+[\.\s\-]+\s*/, ''));
+
+  if (!normDeclared || !normStop) return false;
+
+  // 2. Coincidencia exacta de texto normalizado o texto limpio sin prefijo numerico
+  if (normDeclared === normStop || cleanDeclared === cleanStop || normDeclared === cleanStop || cleanDeclared === normStop) {
+    return true;
+  }
+
+  // 3. Coincidencia por prefijo/subcadena para encabezados concisos (ej. "Estación", "Barrio España")
+  if (normDeclared.length >= 4 && normStop.length >= 4) {
+    if (normStop.startsWith(normDeclared) || normDeclared.startsWith(normStop) || cleanStop.startsWith(cleanDeclared) || cleanDeclared.startsWith(cleanStop)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Verifica si la parada está configurada en la grilla de horarios de alguno de los ramales activos para la dirección dada
 function isStopInSchedule(stopId: string, stopName: string, stopDirection: string, schedules: any): boolean {
   if (!schedules) return false;
-  
-  const normalizedStop = normalizeStopName(stopName);
-  const cleanStop = (stopName || '').replace(/^\d+[\.\s\-]+\s*/, '');
-  const normalizedCleanStop = normalizeStopName(cleanStop);
 
   let scheduleEntries: any[] = [];
   if (Array.isArray(schedules)) {
@@ -83,37 +108,38 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
       if (isStopInSchedule(stopId, stopName, stopDirection, s.schedules)) return true;
     }
 
-    // 1. Verificar si tiene stopMappings definidos
+    // 1. Mapeos de paradas asignadas (stopMappings)
     if (s.stopMappings && typeof s.stopMappings === 'object') {
       for (const mapKey in s.stopMappings) {
-        const mappedVal = s.stopMappings[mapKey];
-        if (typeof mappedVal === 'string') {
-          const normMapped = normalizeStopName(mappedVal);
-          const cleanMapped = normalizeStopName(mappedVal.replace(/^\d+[\.\s\-]+\s*/, ''));
-          if ((stopId && mappedVal === stopId) || 
-              (normalizedStop && (normMapped === normalizedStop || normMapped === normalizedCleanStop)) ||
-              (normalizedCleanStop && (cleanMapped === normalizedCleanStop || cleanMapped === normalizedStop))) {
-            return true;
-          }
-        }
+        if (matchesDeclaredControlStop(s.stopMappings[mapKey], stopId, stopName)) return true;
       }
     }
 
-    // 2. Verificar en stopAddresses / stop_addresses_json (consultados directo de la base de datos)
+    // 2. Paradas asignadas (stopAddresses / stop_addresses_json)
     let addrs: string[] = [];
     try {
       addrs = Array.isArray(s.stopAddresses) ? s.stopAddresses : (typeof s.stop_addresses_json === 'string' ? JSON.parse(s.stop_addresses_json || '[]') : s.stop_addresses_json) || [];
     } catch (_) {}
     if (Array.isArray(addrs) && addrs.length > 0) {
-      const matchAddr = addrs.some((a: string) => {
-        if (!a) return false;
-        const normA = normalizeStopName(a);
-        const cleanA = normalizeStopName(a.replace(/^\d+[\.\s\-]+\s*/, ''));
-        return (stopId && a === stopId) || 
-               (normalizedStop && (normA === normalizedStop || normA === normalizedCleanStop)) ||
-               (normalizedCleanStop && (cleanA === normalizedCleanStop || cleanA === normalizedStop));
-      });
-      if (matchAddr) return true;
+      if (addrs.some((a: string) => matchesDeclaredControlStop(a, stopId, stopName))) return true;
+    }
+
+    // 3. Paradas de control declaradas (control_stops / controlStops)
+    let ctrlStops: string[] = [];
+    try {
+      ctrlStops = Array.isArray(s.control_stops) ? s.control_stops : (Array.isArray(s.controlStops) ? s.controlStops : []);
+    } catch (_) {}
+    if (Array.isArray(ctrlStops) && ctrlStops.length > 0) {
+      if (ctrlStops.some((cs: string) => matchesDeclaredControlStop(cs, stopId, stopName))) return true;
+    }
+
+    // 4. Encabezados de planilla (headers / headers_json)
+    let hdrs: string[] = [];
+    try {
+      hdrs = Array.isArray(s.headers) ? s.headers : (typeof s.headers_json === 'string' ? JSON.parse(s.headers_json || '[]') : s.headers_json) || [];
+    } catch (_) {}
+    if (Array.isArray(hdrs) && hdrs.length > 0) {
+      if (hdrs.some((h: string) => matchesDeclaredControlStop(h, stopId, stopName))) return true;
     }
   }
 
@@ -4664,7 +4690,17 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               );
               const isControlPoint = (
                 (route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules)) ||
-                transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && (r.id === stop.routeId || r.id === stop.branch_id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
+                transitRoutes.some((r: any) => {
+                  if (!visibleRouteIds.has(r.id)) return false;
+                  const isMatchingRamal = (
+                    r.id === stop.routeId ||
+                    r.id === stop.branch_id ||
+                    (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
+                    (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
+                  );
+                  if (!isMatchingRamal) return false;
+                  return isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules);
+                })
               );
               
               // Determinar tamaño (al activar el botón de reloj showWaypoints se agranda a 1.4x; para usuarios normales es del mismo tamaño que las demás paradas)
