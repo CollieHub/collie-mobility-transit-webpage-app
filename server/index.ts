@@ -1019,6 +1019,68 @@ app.get('/v1/admin/kml-proxy', async (c) => {
   }
 });
 
+// 3.4.2 Integración Atómica de KML (Recorrido Polilínea y/o Paradas)
+app.post('/v1/admin/kml/integrate', async (c) => {
+  try {
+    const { branch_id, direction, waypoints, stops, import_polyline, import_stops } = await c.req.json();
+    if (!branch_id || !direction) {
+      return c.json({ success: false, error: 'Ramal y sentido son requeridos' }, 400);
+    }
+
+    const statements: any[] = [];
+
+    // 1. Guardar Recorrido (Polilínea / Route Shape) si import_polyline es verdadero
+    if (import_polyline && Array.isArray(waypoints) && waypoints.length > 0) {
+      const existingShape = await c.env.DB.prepare(
+        'SELECT id FROM route_shapes WHERE branch_id = ? AND direction = ?'
+      ).bind(branch_id, direction).first();
+
+      const shapeJson = JSON.stringify(waypoints);
+
+      if (existingShape && (existingShape as any).id) {
+        statements.push(
+          c.env.DB.prepare('UPDATE route_shapes SET coordinates_json = ? WHERE id = ?').bind(shapeJson, (existingShape as any).id)
+        );
+      } else {
+        const newShapeId = `shape-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+        statements.push(
+          c.env.DB.prepare('INSERT INTO route_shapes (id, branch_id, direction, coordinates_json) VALUES (?, ?, ?, ?)').bind(newShapeId, branch_id, direction, shapeJson)
+        );
+      }
+    }
+
+    // 2. Guardar Paradas si import_stops es verdadero
+    if (import_stops && Array.isArray(stops) && stops.length > 0) {
+      statements.push(
+        c.env.DB.prepare('DELETE FROM stops WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
+      );
+
+      stops.forEach((st: any, idx: number) => {
+        const stopId = `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
+        const isControl = (idx === 0 || idx === stops.length - 1) ? 1 : 0;
+        statements.push(
+          c.env.DB.prepare(
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, isControl)
+        );
+      });
+    }
+
+    if (statements.length > 0) {
+      await c.env.DB.batch(statements);
+      await triggerKVAutoPurge(c.env);
+    }
+
+    return c.json({
+      success: true,
+      integrated_polyline: !!(import_polyline && Array.isArray(waypoints) && waypoints.length > 0),
+      integrated_stops_count: (import_stops && Array.isArray(stops)) ? stops.length : 0
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
 // 3.5 OCR Processing con AWS Textract (con fallback a Cloudflare Workers AI Vision)
 app.post('/v1/admin/ocr', async (c) => {
   try {

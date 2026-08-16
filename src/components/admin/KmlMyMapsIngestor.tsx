@@ -84,6 +84,7 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
   const [selectedLineIds, setSelectedLineIds] = useState<Record<string, boolean>>({});
   const [integratedLineIds, setIntegratedLineIds] = useState<Record<string, boolean>>({});
   const [lineAssignments, setLineAssignments] = useState<Record<string, { branchId: string; direction: 'ida' | 'vuelta' }>>({});
+  const [importOptions, setImportOptions] = useState<Record<string, { importPolyline: boolean; importStops: boolean }>>({});
 
   const [integrationFilter, setIntegrationFilter] = useState<'all' | 'integrated' | 'not_integrated'>('all');
   const [recentUrls, setRecentUrls] = useState<RecentUrl[]>([]);
@@ -291,23 +292,41 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
       return;
     }
 
+    const opts = importOptions[line.id] || { importPolyline: true, importStops: true };
+    if (!opts.importPolyline && !opts.importStops) {
+      showNotification?.('error', 'Debes seleccionar al menos Recorrido o Paradas para integrar.');
+      return;
+    }
+
+    // Filter stops belonging to this layer/folder
+    const stopsForThisLayer = detectedStops.filter(s =>
+      !s.folderName || !line.folderName || s.folderName === line.folderName || s.name === line.name
+    );
+
     try {
-      const res = await fetch('/v1/admin/table/shapes', {
+      const res = await fetch('/v1/admin/kml/integrate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           branch_id: assign.branchId,
           direction: assign.direction,
-          waypoints_json: JSON.stringify(line.coordinates),
-          polyline_json: JSON.stringify(line.coordinates)
+          waypoints: opts.importPolyline ? line.coordinates : [],
+          stops: opts.importStops ? stopsForThisLayer : [],
+          import_polyline: opts.importPolyline,
+          import_stops: opts.importStops
         })
       });
 
       const data = await res.json();
       if (data.success) {
         setIntegratedLineIds(prev => ({ ...prev, [line.id]: true }));
-        onIntegrateRoute?.(assign.branchId, assign.direction, line.coordinates);
-        showNotification?.('success', `¡Trazado "${line.name}" integrado exitosamente!`);
+        onIntegrateRoute?.(assign.branchId, assign.direction, opts.importPolyline ? line.coordinates : []);
+        
+        const details: string[] = [];
+        if (data.integrated_polyline) details.push('recorrido');
+        if (data.integrated_stops_count > 0) details.push(`${data.integrated_stops_count} paradas`);
+
+        showNotification?.('success', `¡Trazado "${line.name}" integrado exitosamente (${details.join(' y ')})!`);
       } else {
         throw new Error(data.error || 'Error al guardar el trazado');
       }
@@ -577,6 +596,53 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
                             </option>
                           ))}
                         </select>
+
+                        {/* Checkboxes para Elegir Importar Recorrido (Poliline) y/o Paradas */}
+                        {(() => {
+                          const opts = importOptions[line.id] || { importPolyline: true, importStops: true };
+                          const stopsForLayer = detectedStops.filter(s =>
+                            !s.folderName || !line.folderName || s.folderName === line.folderName || s.name === line.name
+                          );
+
+                          return (
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              backgroundColor: '#0c1527',
+                              padding: '0.45rem 0.65rem',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255, 255, 255, 0.08)',
+                              gap: '0.5rem'
+                            }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.74rem', color: opts.importPolyline ? '#f8fafc' : '#64748b', fontWeight: 600, userSelect: 'none' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={opts.importPolyline}
+                                  onChange={e => setImportOptions(prev => ({
+                                    ...prev,
+                                    [line.id]: { ...opts, importPolyline: e.target.checked }
+                                  }))}
+                                  style={{ cursor: 'pointer', width: '14px', height: '14px', accentColor: '#38bdf8' }}
+                                />
+                                <span>🗺️ Recorrido ({line.coordinates.length} pts)</span>
+                              </label>
+
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.74rem', color: opts.importStops ? '#f8fafc' : '#64748b', fontWeight: 600, userSelect: 'none' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={opts.importStops}
+                                  onChange={e => setImportOptions(prev => ({
+                                    ...prev,
+                                    [line.id]: { ...opts, importStops: e.target.checked }
+                                  }))}
+                                  style={{ cursor: 'pointer', width: '14px', height: '14px', accentColor: '#ec4899' }}
+                                />
+                                <span>📍 Paradas ({stopsForLayer.length})</span>
+                              </label>
+                            </div>
+                          );
+                        })()}
 
                         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'space-between' }}>
                           <button
