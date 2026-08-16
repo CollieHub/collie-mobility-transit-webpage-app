@@ -27,8 +27,52 @@ app.get('/v1/transit/config', (c) => c.json({ status: 'ok', features: { live_tra
 // Incidents Endpoint
 app.get('/v1/transit/incidents', (c) => c.json({ incidents: [] }));
 
-// Ads Endpoint
-app.get('/v1/transit/ads', (c) => c.json({ ads: [] }));
+// Ads Endpoint (Consulta tabla D1 ads con caché en KV de 1 hora)
+app.get('/v1/transit/ads', async (c) => {
+  try {
+    const cacheKey = 'transit_ads_snapshot';
+    if (c.env.FLEET_KV) {
+      try {
+        const cached = await c.env.FLEET_KV.get(cacheKey);
+        if (cached) {
+          c.header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+          c.header('X-Cache-Status', 'HIT-KV');
+          return c.json(JSON.parse(cached));
+        }
+      } catch (_) {}
+    }
+
+    const res = await c.env.DB.prepare(
+      'SELECT id, title, subtitle, image_url, redirect_url, color, border, text_color, display_order FROM ads WHERE is_active = 1 ORDER BY display_order ASC'
+    ).all();
+
+    const ads = (res.results || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      subtitle: row.subtitle || '',
+      imageUrl: row.image_url || undefined,
+      redirectUrl: row.redirect_url,
+      color: row.color || '#FFE600',
+      border: row.border || '#E6CF00',
+      text: row.text_color || '#2D3277',
+      order: row.display_order
+    }));
+
+    const payload = { success: true, ads };
+
+    if (c.env.FLEET_KV && ads.length > 0) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 3600 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+    c.header('X-Cache-Status', 'MISS-D1');
+    return c.json(payload);
+  } catch (err: any) {
+    return c.json({ success: false, ads: [], error: err.message });
+  }
+});
 
 // Helper para verificar si la petición proviene de un Admin logueado
 function isUserAdminRequest(c: any): boolean {
@@ -1731,10 +1775,10 @@ const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; 
     fields: ['id', 'branch_id', 'direction', 'coordinates_json']
   },
   ads: {
-    label: 'Anuncios y Alertas (Ads)',
+    label: 'Anuncios y Publicidades (Ads)',
     primaryKey: 'id',
-    orderBy: 'created_at DESC',
-    fields: ['id', 'title', 'content', 'badge', 'type', 'is_active', 'created_at']
+    orderBy: 'display_order ASC, created_at DESC',
+    fields: ['id', 'title', 'subtitle', 'image_url', 'redirect_url', 'color', 'border', 'text_color', 'display_order', 'is_active', 'created_at']
   }
 };
 

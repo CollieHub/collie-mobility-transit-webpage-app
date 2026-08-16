@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { Link, Unlink, Bus, MapPin, Clock, ChevronRight, Layers, LocateFixed, X, Maximize2, ChevronDown, Check, CheckSquare, Square, AlertTriangle, Navigation, Flag, Tag, Star, Search, Eye, EyeOff, Image, Sparkles, RotateCw, Hash, Map, Sliders, Info, Wrench, CloudDownload, Download, Menu, Shield, Bell, BellOff, GitCommit, Radio, Share2 } from 'lucide-react';
+import { Link, Unlink, Bus, MapPin, Clock, ChevronRight, Layers, LocateFixed, X, Maximize2, ChevronDown, Check, CheckSquare, Square, AlertTriangle, Navigation, Flag, Tag, Star, Search, Eye, EyeOff, Image, Sparkles, RotateCw, Hash, Map, Sliders, Info, Wrench, CloudDownload, Download, Menu, Shield, Bell, BellOff, GitCommit, Radio, Share2, ExternalLink } from 'lucide-react';
 import packageInfo from '../package.json';
 
 // Code-Splitting: Carga diferida del panel de administración
@@ -4797,7 +4797,16 @@ function App() {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', overflow: 'hidden', cursor: 'default', position: 'relative'
           }} onClick={e => e.stopPropagation()}>
             {dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl ? (
-              <img src={dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Ad Expanded" draggable={false} />
+              <div 
+                style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl ? 'pointer' : 'default' }}
+                onClick={() => {
+                  if (dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl) {
+                    window.open(dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+              >
+                <img src={dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Ad Expanded" draggable={false} />
+              </div>
             ) : (
               <>
                 <span style={{ fontSize: '3.5rem', fontWeight: 900, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text, textTransform: 'uppercase', letterSpacing: '2px', textAlign: 'center', marginBottom: '24px' }}>
@@ -4806,6 +4815,32 @@ function App() {
                 <span style={{ fontSize: '1.8rem', fontWeight: 600, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text, opacity: 0.8, textAlign: 'center' }}>
                   {dynamicBanners[expandedBanner.slot][expandedBanner.banner].subtitle}
                 </span>
+                {dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl && (
+                  <button
+                    onClick={() => window.open(dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl, '_blank', 'noopener,noreferrer')}
+                    style={{
+                      marginTop: '28px',
+                      background: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '16px',
+                      padding: '14px 32px',
+                      fontSize: '1.2rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  >
+                    <ExternalLink size={20} />
+                    <span>Ver oferta en Mercado Libre</span>
+                  </button>
+                )}
               </>
             )}
             <button 
