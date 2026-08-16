@@ -183,7 +183,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       })
       .catch(() => {});
 
-    fetch('/v1/admin/table/branches?limit=500')
+    fetch('/v1/admin/table/branches?limit=5000')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.rows) {
@@ -261,7 +261,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
     }
     setIsLoading(true);
     setSelectedRowKeys(new Set());
-    const url = `/v1/admin/table/${tableName}?limit=500&q=${encodeURIComponent(query)}`;
+    const url = `/v1/admin/table/${tableName}?limit=5000&q=${encodeURIComponent(query)}`;
     fetch(url)
       .then(res => res.json())
       .then(data => {

@@ -417,7 +417,7 @@ export default function RamalScheduleEditor({
     }
 
     setIsLoading(true);
-    const url = `/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=500`;
+    const url = `/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`;
     fetch(url)
       .then(res => res.json())
       .then(async data => {
@@ -966,7 +966,7 @@ export default function RamalScheduleEditor({
         'especial': '4dd8ea7a-abb2-552e-b6da-1bb945d7c515'
       };
 
-      const res = await fetch(`/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=500`);
+      const res = await fetch(`/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
       const data = await res.json();
       const allSchedules = (data.success && data.rows) ? data.rows : [];
 
@@ -1050,7 +1050,7 @@ export default function RamalScheduleEditor({
 
     setIsProcessingSpelling(true);
     try {
-      const res = await fetch(`/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=500`);
+      const res = await fetch(`/v1/admin/table/schedules?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
       const data = await res.json();
       if (data.success && data.rows) {
         const branchSchedules = data.rows.filter((s: any) => s.branch_id === selectedBranchId);

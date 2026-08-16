@@ -1762,9 +1762,8 @@ app.get('/v1/admin/table/:tableName', async (c) => {
     return c.json({ success: false, error: `Tabla no autorizada o inexistente: '${tableName}'` }, 400);
   }
 
-  const requestedLimit = parseInt(c.req.query('limit') || '100', 10);
-  const hasSpecificFilter = !!(c.req.query('schedule_id') || c.req.query('branch_id') || c.req.query('line_id'));
-  const maxLimit = (hasSpecificFilter || tableName === 'schedule_items') ? 5000 : 500;
+  const requestedLimit = parseInt(c.req.query('limit') || '1000', 10);
+  const maxLimit = 10000;
   const limit = Math.min(requestedLimit, maxLimit);
   const offset = parseInt(c.req.query('offset') || '0', 10);
   const search = (c.req.query('q') || '').trim().toLowerCase();

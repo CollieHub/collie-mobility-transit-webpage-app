@@ -117,7 +117,7 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
     } catch (error) {}
 
     try {
-      const res = await fetch('/v1/admin/table/holidays?limit=500');
+      const res = await fetch('/v1/admin/table/holidays?limit=5000');
       if (res.ok) {
         const data = await res.json();
         if (data.rows && data.rows.length > 0) setHolidays(data.rows);
@@ -143,7 +143,7 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
     } catch (error) {}
 
     try {
-      const res = await fetch('/v1/admin/table/calendar_exceptions?limit=500');
+      const res = await fetch('/v1/admin/table/calendar_exceptions?limit=5000');
       if (res.ok) {
         const data = await res.json();
         if (data.rows) setExceptions(data.rows);
@@ -157,7 +157,7 @@ export default function CalendarView({ showNotification }: CalendarViewProps) {
       const [cRes, lRes, bRes] = await Promise.all([
         fetch('/v1/admin/table/companies'),
         fetch('/v1/admin/table/lines'),
-        fetch('/v1/admin/table/branches?limit=500')
+        fetch('/v1/admin/table/branches?limit=5000')
       ]);
       if (cRes.ok) {
         const cData = await cRes.json();
