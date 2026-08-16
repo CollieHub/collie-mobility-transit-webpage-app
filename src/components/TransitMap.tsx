@@ -4688,20 +4688,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
                 (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
               );
-              const isControlPoint = stop.is_control_point === 1 || stop.is_control_point === true || (
-                (route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules)) ||
-                transitRoutes.some((r: any) => {
-                  if (!visibleRouteIds.has(r.id)) return false;
-                  const isMatchingRamal = (
-                    r.id === stop.routeId ||
-                    r.id === stop.branch_id ||
-                    (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
-                    (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
-                  );
-                  if (!isMatchingRamal) return false;
-                  return isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules);
-                })
-              );
+              const isControlPoint = Number(stop.is_control_point) === 1 || stop.is_control_point === true;
               
               // Determinar tamaño (al activar el botón de reloj showWaypoints se agranda a 1.4x; para usuarios normales es del mismo tamaño que las demás paradas)
               const size = (showWaypoints && isControlPoint) ? Math.round(stopIconSize * 1.4) : stopIconSize;
