@@ -992,6 +992,33 @@ function parseTextractBlocksToTable(blocks: any[]): { headers: string[]; matrix:
   return { headers, matrix };
 }
 
+// 3.4.1 Proxy KML para Ingestador de Recorridos desde Google My Maps
+app.get('/v1/admin/kml-proxy', async (c) => {
+  const mid = c.req.query('mid');
+  if (!mid) {
+    return c.json({ success: false, error: 'Se requiere el parámetro mid' }, 400);
+  }
+
+  try {
+    const googleUrl = `https://www.google.com/maps/d/kml?mid=${encodeURIComponent(mid)}&forcekml=1`;
+    const res = await fetch(googleUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+
+    if (!res.ok) {
+      return c.json({ success: false, error: `Error de Google My Maps (${res.status})` }, 400);
+    }
+
+    const kmlText = await res.text();
+    c.header('Content-Type', 'application/xml; charset=utf-8');
+    return c.text(kmlText);
+  } catch (err: any) {
+    return c.json({ success: false, error: `Error al obtener KML de Google: ${err.message}` }, 500);
+  }
+});
+
 // 3.5 OCR Processing con AWS Textract (con fallback a Cloudflare Workers AI Vision)
 app.post('/v1/admin/ocr', async (c) => {
   try {

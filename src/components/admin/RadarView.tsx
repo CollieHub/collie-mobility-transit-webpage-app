@@ -26,6 +26,7 @@ import {
   Hash,
   FileCode
 } from 'lucide-react';
+import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
 
 // Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -724,6 +725,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [selectedWaypointIdx, setSelectedWaypointIdx] = useState<number | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
+  const [showMyMapsIngestorModal, setShowMyMapsIngestorModal] = useState<boolean>(false);
 
   const kmlInputRef = useRef<HTMLInputElement>(null);
 
@@ -1643,48 +1645,96 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
           </button>
 
           {/* Quick Actions Bar */}
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={handleSaveAll}
-              disabled={isSaving || !isEditingEnabled}
-              className="btn-animated btn-animated-success"
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.35rem'
-              }}
-            >
-              <Save size={14} /> Guardar
-            </button>
-            <button
-              onClick={() => executeIfEditing(loadBranchData)}
-              disabled={!isEditingEnabled}
-              title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Descartar cambios no guardados'}
-              className="btn-animated btn-animated-danger"
-              style={{
-                padding: '0.5rem 0.75rem',
-                backgroundColor: isEditingEnabled ? 'rgba(239, 68, 68, 0.15)' : '#1e293b',
-                color: isEditingEnabled ? '#ef4444' : '#64748b',
-                border: isEditingEnabled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
-                borderRadius: '8px',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                opacity: isEditingEnabled ? 1 : 0.4,
-                cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
-              }}
-            >
-              Descartar
-            </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
+              <button
+                onClick={() => setShowMyMapsIngestorModal(true)}
+                title="Importar My Maps (Ingestador de Recorridos)"
+                style={{
+                  backgroundColor: 'rgba(236, 72, 153, 0.14)',
+                  color: '#f472b6',
+                  border: '1px solid rgba(236, 72, 153, 0.3)',
+                  borderRadius: '8px',
+                  padding: '0.45rem 0.5rem',
+                  cursor: 'pointer',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <MapPin size={13} color="#f472b6" /> Importar
+              </button>
+              <button
+                onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde archivo KML'}
+                style={{
+                  backgroundColor: isEditingEnabled ? 'rgba(56, 189, 248, 0.12)' : '#1e293b',
+                  color: isEditingEnabled ? '#38bdf8' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '8px',
+                  padding: '0.45rem 0.5rem',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  opacity: isEditingEnabled ? 1 : 0.4
+                }}
+              >
+                <FileCode size={13} /> Importar KML
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={handleSaveAll}
+                disabled={isSaving || !isEditingEnabled}
+                className="btn-animated btn-animated-success"
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem'
+                }}
+              >
+                <Save size={14} /> Guardar
+              </button>
+              <button
+                onClick={() => executeIfEditing(loadBranchData)}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Descartar cambios no guardados'}
+                className="btn-animated btn-animated-danger"
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  backgroundColor: isEditingEnabled ? 'rgba(239, 68, 68, 0.15)' : '#1e293b',
+                  color: isEditingEnabled ? '#ef4444' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  opacity: isEditingEnabled ? 1 : 0.4,
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Descartar
+              </button>
+            </div>
           </div>
         </div>
 
@@ -3289,6 +3339,19 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             </div>
           </div>
         </div>
+      )}
+
+      {/* INGESTADOR DE RECORRIDOS GOOGLE MY MAPS MODAL OVERLAY */}
+      {showMyMapsIngestorModal && (
+        <KmlMyMapsIngestor
+          onClose={() => setShowMyMapsIngestorModal(false)}
+          linesList={linesList || []}
+          branchesList={branchesList || []}
+          showNotification={showNotification}
+          onIntegrateRoute={() => {
+            loadBranchData();
+          }}
+        />
       )}
 
       {/* HIDDEN FILE INPUT FOR KML IMPORT */}
