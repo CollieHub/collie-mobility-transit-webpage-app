@@ -1397,13 +1397,23 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
       withDistance.sort((a, b) => a.distKm - b.distKm);
 
-      return withDistance.map((item, idx) => ({
-        ...item.stop,
-        stop_order: idx + 1
-      }));
+      return withDistance.map((item, idx) => {
+        const currentPt: [number, number] = [item.stop.lat, item.stop.lng];
+        const projOnLine = projectPointOnPolyline(currentPt, displayPolylinePath);
+        const rightOffset = offsetPointToRightOfPolyline(currentPt, displayPolylinePath, 6);
+
+        return {
+          ...item.stop,
+          lat: rightOffset[0],
+          lng: rightOffset[1],
+          proj_lat: projOnLine[0],
+          proj_lng: projOnLine[1],
+          stop_order: idx + 1
+        };
+      });
     });
 
-    showNotification?.('success', 'Paradas reordenadas secuencialmente de inicio a fin del recorrido');
+    showNotification?.('success', 'Paradas reordenadas y acomodadas a 6m a la derecha del recorrido');
   };
 
   const handleProjectStopsOnRoute = () => {
