@@ -1362,18 +1362,7 @@ const LeafletVehicleMarker = React.memo(({ bus, shapeCoords, isSelected = false,
         }
       }}
     >
-      {showWaypoints && bus.dispatchOrder && (
-        <Tooltip 
-          permanent 
-          direction="top" 
-          offset={[0, -15]} 
-          className="bus-cardinal-tooltip"
-        >
-          <div style={{ fontSize: '11px', fontWeight: 'bold' }}>
-            #{bus.dispatchOrder}
-          </div>
-        </Tooltip>
-      )}
+
       <Popup>
         <div style={{ color: '#0f172a', padding: '6px', minWidth: '160px', fontFamily: 'Inter, sans-serif' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
@@ -4766,22 +4755,28 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                         }
                       } : undefined}
                     >
-                      {hasTimes && (
+                      {isWaypoint && (
                         <Tooltip 
                           permanent 
                           direction="top" 
                           offset={[0, -18]}
                           className="stop-time-tooltip"
                         >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', fontWeight: 'bold' }}>
-                            {uniqueTimes.map((timeStr, idx) => (
-                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '3px', whiteSpace: 'nowrap' }}>
-                                <span style={{ color: stop.color || (route ? route.color : '#3b82f6') }}>
-                                  {route ? (route.code || 'SIT') : 'SIT'}
-                                </span>
-                                <span>{timeStr}</span>
+                          <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#ffffff', whiteSpace: 'nowrap' }}>
+                            {hasTimes ? (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                {uniqueTimes.map((timeStr, idx) => (
+                                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                    <span style={{ color: stop.color || (route ? route.color : '#3b82f6') }}>
+                                      {route ? (route.code || 'SIT') : 'SIT'}
+                                    </span>
+                                    <span>{timeStr}</span>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            ) : (
+                              (stop.name || '').replace(/^\d+[\.\s\-]+\s*/, '')
+                            )}
                           </div>
                         </Tooltip>
                       )}
