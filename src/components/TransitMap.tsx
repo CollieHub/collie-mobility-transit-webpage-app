@@ -4699,8 +4699,8 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
               );
               
-              // Determinar tamaño (los puntos de control se destacan a 1.4x tanto para usuarios públicos como administradores)
-              const size = isControlPoint ? Math.round(stopIconSize * 1.4) : stopIconSize;
+              // Determinar tamaño (al activar el botón de reloj showWaypoints se agranda a 1.4x; para usuarios normales es del mismo tamaño que las demás paradas)
+              const size = (showWaypoints && isControlPoint) ? Math.round(stopIconSize * 1.4) : stopIconSize;
               
               // Determinar zIndexOffset
               const zIndex = isControlPoint ? 1000 : 0;
@@ -4721,8 +4721,10 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               let markerIcon;
               if (showStopSequences) {
                 markerIcon = createStopSequenceIcon(stop.color, seq, size);
-              } else if (isControlPoint) {
+              } else if (showWaypoints && isControlPoint) {
                 markerIcon = createWaypointCircleDotIcon('#f59e0b', size);
+              } else if (isControlPoint) {
+                markerIcon = createStopIcon('#f59e0b', stop.direction, size);
               } else {
                 markerIcon = createStopIcon(stop.color, stop.direction, size);
               }
