@@ -4699,8 +4699,8 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
               );
               
-              // Determinar tamaño (al activar el botón de reloj showWaypoints se duplica el tamaño del icono de los puntos de control)
-              const size = isWaypoint ? Math.round(stopIconSize * 2.0) : stopIconSize;
+              // Determinar tamaño (un poco más grande que las paradas normales: 1.4x)
+              const size = isWaypoint ? Math.round(stopIconSize * 1.4) : stopIconSize;
               
               // Determinar zIndexOffset
               const zIndex = isWaypoint ? 1000 : 0;
