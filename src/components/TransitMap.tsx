@@ -174,12 +174,12 @@ const createStopSequenceIcon = (color: string, sequence: number | string, size: 
   return L.divIcon({ className: 'custom-stop-sequence', html: html, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
 };
 
-const createWaypointCircleDotIcon = (color: string, size: number) => {
+const createWaypointCircleDotIcon = (color: string = '#f59e0b', size: number) => {
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}">
-      <circle cx="12" cy="12" r="10" fill="${color}" stroke="#ffffff" stroke-width="2" />
-      <circle cx="12" cy="12" r="5" fill="none" stroke="#ffffff" stroke-width="1.5" />
-      <polyline points="12,8 12,12 14,14" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="${size}" height="${size}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));">
+      <circle cx="12" cy="12" r="10" fill="${color}" stroke="#ffffff" stroke-width="2.2" />
+      <circle cx="12" cy="12" r="5" fill="none" stroke="#ffffff" stroke-width="1.8" />
+      <polyline points="12,7.5 12,12 14.5,14.5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
     </svg>
   `;
   return L.divIcon({ className: 'custom-stop-waypoint', html: svg, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
@@ -4713,7 +4713,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               if (showStopSequences) {
                 markerIcon = createStopSequenceIcon(stop.color, seq, size);
               } else if (isWaypoint) {
-                markerIcon = createWaypointCircleDotIcon('#3b82f6', size);
+                markerIcon = createWaypointCircleDotIcon('#f59e0b', size);
               } else {
                 markerIcon = createStopIcon(stop.color, stop.direction, size);
               }
