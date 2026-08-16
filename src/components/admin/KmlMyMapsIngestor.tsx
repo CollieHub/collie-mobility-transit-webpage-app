@@ -415,14 +415,15 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* LEFT CONTROL SIDEBAR */}
         <div style={{
-          width: '380px',
+          width: '450px',
           backgroundColor: '#0f172a',
           borderRight: '1px solid rgba(255, 255, 255, 0.08)',
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
           padding: '1rem',
-          gap: '1rem'
+          gap: '1rem',
+          flexShrink: 0
         }}>
           {/* INPUT FORM */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
@@ -560,14 +561,14 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
                         Capa: {line.folderName || 'General'} | {line.coordinates.length} puntos de geoposicionamiento
                       </div>
 
-                      <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', marginTop: '0.2rem' }}>
                         <select
                           value={assign.branchId}
                           onChange={e => setLineAssignments(prev => ({
                             ...prev,
                             [line.id]: { ...assign, branchId: e.target.value }
                           }))}
-                          style={{ flex: 1, backgroundColor: '#1e293b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '0.35rem', fontSize: '0.75rem', outline: 'none' }}
+                          style={{ width: '100%', backgroundColor: '#1e293b', color: '#ffffff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '0.45rem 0.6rem', fontSize: '0.78rem', outline: 'none' }}
                         >
                           <option value="">Seleccionar Ramal...</option>
                           {branchesList.map(b => (
@@ -577,24 +578,55 @@ export const KmlMyMapsIngestor: React.FC<KmlMyMapsIngestorProps> = ({
                           ))}
                         </select>
 
-                        <button
-                          onClick={() => setLineAssignments(prev => ({
-                            ...prev,
-                            [line.id]: { ...assign, direction: assign.direction === 'ida' ? 'vuelta' : 'ida' }
-                          }))}
-                          style={{ padding: '0.35rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.12)', backgroundColor: '#1e293b', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
-                        >
-                          {assign.direction === 'ida' ? 'IDA' : 'VUELTA'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'space-between' }}>
+                          <button
+                            onClick={() => setLineAssignments(prev => ({
+                              ...prev,
+                              [line.id]: { ...assign, direction: assign.direction === 'ida' ? 'vuelta' : 'ida' }
+                            }))}
+                            style={{
+                              flex: 1,
+                              padding: '0.4rem 0.6rem',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(56, 189, 248, 0.3)',
+                              backgroundColor: assign.direction === 'ida' ? 'rgba(56, 189, 248, 0.12)' : 'rgba(192, 132, 252, 0.12)',
+                              color: assign.direction === 'ida' ? '#38bdf8' : '#c084fc',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.3rem'
+                            }}
+                          >
+                            {assign.direction === 'ida' ? 'SENTIDO: IDA ➔' : 'SENTIDO: ↩ VUELTA'}
+                          </button>
 
-                        <button
-                          onClick={() => handleIntegrateSingle(line)}
-                          disabled={isIntegrated || !assign.branchId}
-                          className="btn-animated btn-animated-success"
-                          style={{ padding: '0.35rem 0.65rem', borderRadius: '6px', border: 'none', backgroundColor: isIntegrated ? '#334155' : (assign.branchId ? '#10b981' : '#1e293b'), color: '#ffffff', fontSize: '0.72rem', fontWeight: 700, cursor: isIntegrated || !assign.branchId ? 'not-allowed' : 'pointer', opacity: isIntegrated ? 0.6 : 1 }}
-                        >
-                          {isIntegrated ? '✓ Integrado' : 'Integrar'}
-                        </button>
+                          <button
+                            onClick={() => handleIntegrateSingle(line)}
+                            disabled={isIntegrated || !assign.branchId}
+                            className="btn-animated btn-animated-success"
+                            style={{
+                              flex: 1,
+                              padding: '0.4rem 0.6rem',
+                              borderRadius: '6px',
+                              border: 'none',
+                              backgroundColor: isIntegrated ? '#334155' : (assign.branchId ? '#10b981' : '#1e293b'),
+                              color: '#ffffff',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: isIntegrated || !assign.branchId ? 'not-allowed' : 'pointer',
+                              opacity: isIntegrated ? 0.6 : 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.3rem'
+                            }}
+                          >
+                            {isIntegrated ? '✓ Integrado' : 'Integrar Trazado'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
