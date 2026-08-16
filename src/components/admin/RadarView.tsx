@@ -168,11 +168,11 @@ function projectPointOnPolyline(pt: [number, number], path: [number, number][]):
   return bestPt;
 }
 
-// Offset a coordinate point 2.5 meters to the RIGHT-HAND SIDE of the route travel direction
+// Offset a coordinate point 4 meters to the RIGHT-HAND SIDE of the route travel direction
 function offsetPointToRightOfPolyline(
   pt: [number, number],
   polyline: [number, number][],
-  offsetMeters: number = 2.5
+  offsetMeters: number = 4
 ): [number, number] {
   if (!polyline || polyline.length < 2) return pt;
 
@@ -1160,7 +1160,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       const proj = projectPointOnPolyline(newPt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
-      markerPt = offsetPointToRightOfPolyline(newPt, displayPolylinePath, 2.5);
+      markerPt = offsetPointToRightOfPolyline(newPt, displayPolylinePath, 4);
     }
     setStops(prev => prev.map(st => st.id === stopId ? { ...st, lat: markerPt[0], lng: markerPt[1], proj_lat: projLat, proj_lng: projLng } : st));
     showNotification?.('success', 'Parada posicionada a la derecha del sentido de circulación');
@@ -1286,7 +1286,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       const proj = projectPointOnPolyline(pt, displayPolylinePath);
       projLat = proj[0];
       projLng = proj[1];
-      markerPt = offsetPointToRightOfPolyline(pt, displayPolylinePath, 2.5);
+      markerPt = offsetPointToRightOfPolyline(pt, displayPolylinePath, 4);
     }
 
     const newOrder = stops.length + 1;
@@ -1537,7 +1537,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     });
 
     const finalOffsetStops = newStopsList.map(st => {
-      const rightPt = offsetPointToRightOfPolyline([st.lat, st.lng], displayPolylinePath, 2.5);
+      const rightPt = offsetPointToRightOfPolyline([st.lat, st.lng], displayPolylinePath, 4);
       return {
         ...st,
         lat: rightPt[0],
@@ -3005,7 +3005,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
               ¿Deseas proyectar las <strong>{stops.length} paradas</strong> en el sentido <strong>{direction.toUpperCase()}</strong> sobre el trazado?
               <br />
               <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block' }}>
-                Se encajarán automáticamente sobre la calle desplazadas 2.5m a la derecha según el avance del colectivo.
+                Se encajarán automáticamente sobre la calle desplazadas 4m a la derecha según el avance del colectivo.
               </span>
             </p>
 
