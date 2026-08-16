@@ -1425,7 +1425,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     showNotification?.('success', 'Todas las paradas eliminadas');
   };
 
-  // 1. Tool Assistant: Replicar Paradas hacia otro Ramal
   const handleExecuteReplicateStops = async () => {
     if (!replicateTargetBranchId) {
       showNotification?.('error', 'Selecciona el ramal destino');
@@ -1436,30 +1435,42 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       return;
     }
 
+    const newStopsToReplicate: StopItem[] = stops.map((st, idx) => ({
+      id: `stp_${replicateTargetBranchId}_${replicateTargetDirection}_${Date.now()}_${idx + 1}_${Math.random().toString(36).substring(2, 6)}`,
+      branch_id: replicateTargetBranchId,
+      direction: replicateTargetDirection,
+      stop_order: idx + 1,
+      name: st.name,
+      lat: st.lat,
+      lng: st.lng,
+      proj_lat: st.proj_lat || st.lat,
+      proj_lng: st.proj_lng || st.lng
+    }));
+
     try {
-      for (const st of stops) {
-        const payload = {
-          id: `stp_${replicateTargetBranchId}_${replicateTargetDirection}_${Date.now()}_${st.stop_order}`,
+      const res = await fetch('/v1/admin/stops/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           branch_id: replicateTargetBranchId,
           direction: replicateTargetDirection,
-          stop_order: st.stop_order,
-          name: st.name,
-          lat: st.lat,
-          lng: st.lng,
-          proj_lat: st.proj_lat || st.lat,
-          proj_lng: st.proj_lng || st.lng
-        };
+          stops: newStopsToReplicate
+        })
+      });
 
-        await fetch('/v1/admin/table/stops', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+      const data = await res.json();
+      if (data.success) {
+        if (replicateTargetBranchId === selectedBranchId) {
+          setAllBranchStops(prev => {
+            const others = prev.filter(s => s.direction !== replicateTargetDirection);
+            return [...others, ...newStopsToReplicate];
+          });
+        }
+        showNotification?.('success', `¡${stops.length} paradas replicadas exitosamente!`);
+        setShowReplicateModal(false);
+      } else {
+        throw new Error(data.error || 'Error al replicar paradas');
       }
-
-      await fetch('/v1/admin/cache/purge');
-      showNotification?.('success', `¡${stops.length} paradas replicadas exitosamente!`);
-      setShowReplicateModal(false);
     } catch (err: any) {
       showNotification?.('error', `Error al replicar paradas: ${err.message}`);
     }
