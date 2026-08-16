@@ -4732,13 +4732,39 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               // Calculate active times for checkpoint Tooltip
               const activeTimes: string[] = [];
               if (isControlPoint && Array.isArray(combinedBuses)) {
-                combinedBuses.forEach((bus: any) => {
-                  if (bus.dir !== direction) return;
-                  if (bus.routeId !== routeId) return;
+                const normStopName = normalizeStopName(stop.name);
+                const cleanStopName = normalizeStopName((stop.name || '').replace(/^\d+[\.\s\-]+\s*/, ''));
 
-                  const stopTimeObj = bus.stopTimes?.[stop.name] || bus.stopTimes?.[stop.id];
-                  if (stopTimeObj) {
-                    activeTimes.push(`#${stopTimeObj.dispatchOrder}: ${stopTimeObj.time}`);
+                combinedBuses.forEach((bus: any) => {
+                  const busDir = (bus.dir || '').toLowerCase();
+                  if (busDir && direction && busDir !== direction.toLowerCase()) return;
+
+                  const routeMatch = (
+                    bus.routeId === routeId ||
+                    bus.routeId === stop.routeId ||
+                    (bus.code && (bus.code === routeId || bus.code === stop.routeId || (stop.routeId || '').includes(bus.code))) ||
+                    (bus.color && stop.color && (bus.color || '').toUpperCase() === (stop.color || '').toUpperCase())
+                  );
+
+                  if (!routeMatch) return;
+
+                  let stopTimeObj = bus.stopTimes?.[stop.name] || bus.stopTimes?.[stop.id];
+
+                  if (!stopTimeObj && bus.stopTimes && typeof bus.stopTimes === 'object') {
+                    for (const stKey in bus.stopTimes) {
+                      const normKey = normalizeStopName(stKey);
+                      const cleanKey = normalizeStopName(stKey.replace(/^\d+[\.\s\-]+\s*/, ''));
+                      if (normKey === normStopName || normKey === cleanStopName || cleanKey === cleanStopName || cleanKey === normStopName) {
+                        stopTimeObj = bus.stopTimes[stKey];
+                        break;
+                      }
+                    }
+                  }
+
+                  if (stopTimeObj && stopTimeObj.time) {
+                    const lineCode = bus.code || (route ? route.code : 'SIT');
+                    const busLabel = `${lineCode} #${stopTimeObj.dispatchOrder || bus.dispatchOrder || 1}`;
+                    activeTimes.push(`${busLabel}: ${stopTimeObj.time}`);
                   }
                 });
               }
@@ -4812,7 +4838,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                         }
                       } : undefined}
                     >
-                      {(isControlPoint && (showWaypoints || hasTimes)) && (
+                      {isControlPoint && (
                         <Tooltip 
                           permanent 
                           direction="top" 
@@ -4824,10 +4850,9 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 {uniqueTimes.map((timeStr, idx) => (
                                   <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                    <span style={{ color: stop.color || (route ? route.color : '#3b82f6') }}>
-                                      {route ? (route.code || 'SIT') : 'SIT'}
+                                    <span style={{ color: '#38bdf8', fontWeight: 800 }}>
+                                      {timeStr}
                                     </span>
-                                    <span>{timeStr}</span>
                                   </div>
                                 ))}
                               </div>
