@@ -575,16 +575,31 @@ export default function RamalScheduleEditor({
 
     fetch(`/v1/admin/table/stops?branch_id=${encodeURIComponent(selectedBranchId)}&limit=2000`)
       .then(r => r.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.rows)) {
-          const filtered = data.rows
-            .filter((s: any) => !s.direction || s.direction.toLowerCase() === direction.toLowerCase())
-            .sort((a: any, b: any) => (a.stop_order || 0) - (b.stop_order || 0));
-          setBranchStops(filtered);
+      .then(async data => {
+        let rows = (data.success && Array.isArray(data.rows)) ? data.rows : [];
+        if (rows.length === 0 && branchesList.length > 0) {
+          const currentBranch = branchesList.find(b => b.id === selectedBranchId);
+          const baseCode = (currentBranch?.code || '').substring(0, 4);
+          if (baseCode) {
+            const sibling = branchesList.find(b => b.id !== selectedBranchId && (b.code || '').startsWith(baseCode));
+            if (sibling) {
+              try {
+                const sibRes = await fetch(`/v1/admin/table/stops?branch_id=${encodeURIComponent(sibling.id)}&limit=2000`);
+                const sibData = await sibRes.json();
+                if (sibData.success && Array.isArray(sibData.rows)) {
+                  rows = sibData.rows;
+                }
+              } catch (_) {}
+            }
+          }
         }
+        const filtered = rows
+          .filter((s: any) => !s.direction || s.direction.toLowerCase() === direction.toLowerCase())
+          .sort((a: any, b: any) => (a.stop_order || 0) - (b.stop_order || 0));
+        setBranchStops(filtered);
       })
       .catch(() => setBranchStops([]));
-  }, [selectedBranchId, direction]);
+  }, [selectedBranchId, direction, branchesList]);
 
   const handleAutoAssociateStops = () => {
     if (headers.length === 0) {
