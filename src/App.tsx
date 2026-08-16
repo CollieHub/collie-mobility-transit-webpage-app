@@ -1318,15 +1318,24 @@ function App() {
             });
             
             let schedulesData: any[] = [];
+            let rawSchedulesMap: any = {};
             if (resTimetable.ok) {
               const jsonTimetable = await resTimetable.json();
               if (jsonTimetable.success && jsonTimetable.data) {
+                if (Array.isArray(jsonTimetable.data)) {
+                  jsonTimetable.data.forEach((item: any) => {
+                    if (item.schedules) {
+                      rawSchedulesMap = { ...rawSchedulesMap, ...item.schedules };
+                    }
+                  });
+                }
                 schedulesData = buildSimulationSchedulesList(jsonTimetable.data);
               }
             }
 
             const consolidated = {
               ...routeData,
+              schedules: rawSchedulesMap,
               schedulesList: schedulesData
             };
 

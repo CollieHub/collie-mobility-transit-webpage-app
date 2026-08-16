@@ -78,6 +78,11 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
   for (const s of scheduleEntries) {
     if (!s || typeof s !== 'object') continue;
 
+    // Si la entrada contiene anidado s.schedules
+    if (s.schedules && typeof s.schedules === 'object') {
+      if (isStopInSchedule(stopId, stopName, stopDirection, s.schedules)) return true;
+    }
+
     // 1. Verificar si tiene stopMappings definidos
     if (s.stopMappings && typeof s.stopMappings === 'object') {
       for (const mapKey in s.stopMappings) {
@@ -4689,7 +4694,10 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
                 (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
               );
-              const isWaypoint = showWaypoints && route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules);
+              const isWaypoint = showWaypoints && (
+                (route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules)) ||
+                transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
+              );
               
               // Determinar tamaño (al activar el botón de reloj showWaypoints se duplica el tamaño del icono de los puntos de control)
               const size = isWaypoint ? Math.round(stopIconSize * 2.0) : stopIconSize;
