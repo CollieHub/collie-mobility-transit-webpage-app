@@ -937,7 +937,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     if (!selectedBranchId) return;
 
     try {
-      const res = await fetch('/v1/admin/table/route_shapes?limit=500');
+      const res = await fetch(`/v1/admin/table/route_shapes?branch_id=${encodeURIComponent(selectedBranchId)}&limit=1000`);
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
