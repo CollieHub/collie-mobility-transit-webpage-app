@@ -344,6 +344,7 @@ app.get('/v1/catalog/public/data', async (c) => {
         order: st.stop_order,
         color: branchColor,
         code: b.branch_code,
+        is_control_point: st.is_control_point === 1 ? 1 : 0,
         stop_group_id: st.stop_group_id || null
       }));
 
@@ -1059,10 +1060,11 @@ app.post('/v1/admin/kml/integrate', async (c) => {
         const stopId = `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
         const pLat = st.proj_lat !== undefined ? st.proj_lat : st.lat;
         const pLng = st.proj_lng !== undefined ? st.proj_lng : st.lng;
+        const isCtrl = st.is_control_point === 1 ? 1 : 0;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng)
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng, isCtrl)
         );
       });
     }
@@ -1103,10 +1105,11 @@ app.post('/v1/admin/stops/batch', async (c) => {
         const stopId = st.id || `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
         const pLat = st.proj_lat !== undefined ? st.proj_lat : st.lat;
         const pLng = st.proj_lng !== undefined ? st.proj_lng : st.lng;
+        const isCtrl = st.is_control_point === 1 ? 1 : 0;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng)
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng, isCtrl)
         );
       });
     }
@@ -1902,6 +1905,54 @@ app.post('/v1/admin/schedules/batch', async (c) => {
           );
         });
       }
+    }
+
+    // 3. Sincronizar columna is_control_point en la tabla stops para este ramal y sentido
+    let stopAddrs: string[] = [];
+    try {
+      if (typeof schedule.stop_addresses_json === 'string') {
+        stopAddrs = JSON.parse(schedule.stop_addresses_json || '[]');
+      } else if (Array.isArray(schedule.stop_addresses_json)) {
+        stopAddrs = schedule.stop_addresses_json;
+      }
+    } catch (_) {}
+
+    if (stopAddrs.length === 0 && schedule.headers_json) {
+      try {
+        if (typeof schedule.headers_json === 'string') {
+          stopAddrs = JSON.parse(schedule.headers_json || '[]');
+        } else if (Array.isArray(schedule.headers_json)) {
+          stopAddrs = schedule.headers_json;
+        }
+      } catch (_) {}
+    }
+
+    if (stopAddrs.length > 0) {
+      statements.push(
+        c.env.DB.prepare('UPDATE stops SET is_control_point = 0 WHERE branch_id = ? AND direction = ?').bind(schedule.branch_id, schedule.direction || 'ida')
+      );
+
+      stopAddrs.forEach(addr => {
+        if (!addr) return;
+        const cleanA = addr.replace(/^\d+[\.\s\-]+\s*/, '').trim();
+        statements.push(
+          c.env.DB.prepare(`
+            UPDATE stops 
+            SET is_control_point = 1 
+            WHERE branch_id = ? AND direction = ? AND (
+              name = ? OR id = ? OR name = ? OR name LIKE ? OR name LIKE ?
+            )
+          `).bind(
+            schedule.branch_id, 
+            schedule.direction || 'ida', 
+            addr, 
+            addr, 
+            cleanA, 
+            `%${cleanA}%`,
+            `%. ${cleanA}%`
+          )
+        );
+      });
     }
 
     // Ejecución masiva atómica en D1 (1 solo viaje de red)

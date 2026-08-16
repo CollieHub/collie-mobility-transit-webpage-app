@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS stops (
     lng REAL NOT NULL,
     proj_lat REAL NOT NULL,
     proj_lng REAL NOT NULL,
+    is_control_point INTEGER DEFAULT 0,
     stop_group_id TEXT,
     FOREIGN KEY (branch_id) REFERENCES branches(id) ON DELETE CASCADE,
     FOREIGN KEY (stop_group_id) REFERENCES stop_groups(id) ON DELETE SET NULL
