@@ -2081,11 +2081,13 @@ function App() {
     if (!route) return 0;
     
     const todayLabel = getTodayDayLabel(route, calendarExceptions);
-    let targetCode = 'lunes_a_viernes';
+    let targetCode = '';
     if (todayLabel === 'Lunes a Viernes') targetCode = 'lunes_a_viernes';
     else if (todayLabel === 'Sábado' || todayLabel === 'Sábados') targetCode = 'sabados';
     else if (todayLabel === 'Domingos y Feriados') targetCode = 'domingos_feriados';
-    else if (todayLabel.startsWith('Especial')) targetCode = 'especial';
+    else if (todayLabel && todayLabel.startsWith('Especial')) targetCode = 'especial';
+
+    if (!targetCode) return 0;
 
     const countForDir = (dir: 'ida' | 'vuelta') => {
       let dirCount = 0;
