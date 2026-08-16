@@ -63,7 +63,9 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
   if (!schedules || typeof schedules !== 'object') return false;
   
   const normalizedStop = normalizeStopName(stopName);
-  
+  const cleanStop = (stopName || '').replace(/^\d+[\.\s\-]+\s*/, '');
+  const normalizedCleanStop = normalizeStopName(cleanStop);
+
   for (const key in schedules) {
     const s = schedules[key];
     if (!s) continue;
@@ -80,28 +82,72 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
       }
     }
     
-    // Verificar si tiene stopMappings definidos y no vacíos
-    const hasMappings = s.stopMappings && typeof s.stopMappings === 'object' && Object.keys(s.stopMappings).length > 0;
-    
-    if (hasMappings) {
-      // Si se configuraron mappings en /schedules, se toman de ahí de forma estricta (por valor mapeado)
+    // 1. Verificar si tiene stopMappings definidos
+    if (s.stopMappings && typeof s.stopMappings === 'object') {
       for (const mapKey in s.stopMappings) {
         const mappedVal = s.stopMappings[mapKey];
         if (typeof mappedVal === 'string') {
-          // Comparación por ID o fallback por nombre normalizado
-          if ((stopId && mappedVal === stopId) || (normalizedStop && normalizeStopName(mappedVal) === normalizedStop)) {
+          const normMapped = normalizeStopName(mappedVal);
+          const cleanMapped = normalizeStopName(mappedVal.replace(/^\d+[\.\s\-]+\s*/, ''));
+          if ((stopId && mappedVal === stopId) || 
+              (normalizedStop && (normMapped === normalizedStop || normMapped === normalizedCleanStop)) ||
+              (normalizedCleanStop && (cleanMapped === normalizedCleanStop || cleanMapped === normalizedStop))) {
             return true;
           }
         }
       }
-    } else {
-      // Fallback por compatibilidad: si no hay mappings, comparar con los headers textuales
-      if (normalizedStop && Array.isArray(s.headers)) {
-        const matchInHeaders = s.headers.some((h: string) => normalizeStopName(h) === normalizedStop);
-        if (matchInHeaders) return true;
-      }
+    }
+
+    // 2. Verificar en stopAddresses / stop_addresses_json
+    let addrs: string[] = [];
+    try {
+      addrs = s.stopAddresses || (typeof s.stop_addresses_json === 'string' ? JSON.parse(s.stop_addresses_json || '[]') : s.stop_addresses_json) || [];
+    } catch (_) {}
+    if (Array.isArray(addrs) && addrs.length > 0) {
+      const matchAddr = addrs.some((a: string) => {
+        if (!a) return false;
+        const normA = normalizeStopName(a);
+        const cleanA = normalizeStopName(a.replace(/^\d+[\.\s\-]+\s*/, ''));
+        return (stopId && a === stopId) || 
+               (normalizedStop && (normA === normalizedStop || normA === normalizedCleanStop)) ||
+               (normalizedCleanStop && (cleanA === normalizedCleanStop || cleanA === normalizedStop));
+      });
+      if (matchAddr) return true;
+    }
+
+    // 3. Verificar en headers / headers_json
+    let hdrs: string[] = [];
+    try {
+      hdrs = s.headers || (typeof s.headers_json === 'string' ? JSON.parse(s.headers_json || '[]') : s.headers_json) || [];
+    } catch (_) {}
+    if (Array.isArray(hdrs) && hdrs.length > 0) {
+      const matchHdr = hdrs.some((h: string) => {
+        if (!h) return false;
+        const normH = normalizeStopName(h);
+        const cleanH = normalizeStopName(h.replace(/^\d+[\.\s\-]+\s*/, ''));
+        return (normalizedStop && (normH === normalizedStop || normH === normalizedCleanStop)) ||
+               (normalizedCleanStop && (cleanH === normalizedCleanStop || cleanH === normalizedStop));
+      });
+      if (matchHdr) return true;
+    }
+
+    // 4. Verificar en headerAliases / header_aliases_json
+    let aliases: string[] = [];
+    try {
+      aliases = s.headerAliases || (typeof s.header_aliases_json === 'string' ? JSON.parse(s.header_aliases_json || '[]') : s.header_aliases_json) || [];
+    } catch (_) {}
+    if (Array.isArray(aliases) && aliases.length > 0) {
+      const matchAlias = aliases.some((al: string) => {
+        if (!al) return false;
+        const normAl = normalizeStopName(al);
+        const cleanAl = normalizeStopName(al.replace(/^\d+[\.\s\-]+\s*/, ''));
+        return (normalizedStop && (normAl === normalizedStop || normAl === normalizedCleanStop)) ||
+               (normalizedCleanStop && (cleanAl === normalizedCleanStop || cleanAl === normalizedStop));
+      });
+      if (matchAlias) return true;
     }
   }
+
   return false;
 }
 
@@ -4613,10 +4659,18 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         {(() => {
           const sequenceCounters: Record<string, number> = {};
           
-          return (showStops !== false || showStopProjections) && currentZoom >= 13 && transitStops
+          return (showStops !== false || showStopProjections || showWaypoints) && (showWaypoints || currentZoom >= 13) && transitStops
             .filter((stop: any) => {
                 if (visibleRouteIds.size === 0) return false; // PERFORMANCE FIX: Do not render all stops by default
                 
+                const route = transitRoutes.find((r: any) => r.id === stop.routeId);
+                const isWaypoint = route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules);
+
+                // Si está activo el botón de reloj (showWaypoints), SOLO mostrar las paradas que son Puntos de Control
+                if (showWaypoints && !isWaypoint) {
+                  return false;
+                }
+
                 if (stop.routeId) {
                     if (!visibleRouteIds.has(stop.routeId)) return false;
                     const isStopsIdaOn = routeStopsIda[stop.routeId] ?? (routeShowIda[stop.routeId] ?? true);
