@@ -1856,11 +1856,14 @@ export default function RamalScheduleEditor({
                     title="Seleccionar Parada Física / Punto de Control"
                   >
                     <option value="">-- Sin asignar --</option>
-                    {branchStops.map((st: any, sIdx: number) => (
-                      <option key={st.id || sIdx} value={st.name}>
-                        {sIdx + 1}. {st.name}
-                      </option>
-                    ))}
+                    {branchStops.map((st: any, sIdx: number) => {
+                      const cleanName = (st.name || '').replace(/^\d+[\.\s\-]+\s*/, '');
+                      return (
+                        <option key={st.id || sIdx} value={st.name}>
+                          {sIdx + 1}. {cleanName}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 

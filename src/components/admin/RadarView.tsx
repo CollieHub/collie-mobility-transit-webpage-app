@@ -2278,7 +2278,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                      {displayNum}. {st.name}
+                      {displayNum}. {(st.name || '').replace(/^\d+[\.\s\-]+\s*/, '')}
                       <br />
                       <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
                     </div>
