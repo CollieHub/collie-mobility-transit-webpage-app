@@ -60,28 +60,24 @@ function normalizeStopName(name: string): string {
 
 // Verifica si la parada está configurada en la grilla de horarios de alguno de los ramales activos para la dirección dada
 function isStopInSchedule(stopId: string, stopName: string, stopDirection: string, schedules: any): boolean {
-  if (!schedules || typeof schedules !== 'object') return false;
+  if (!schedules) return false;
   
   const normalizedStop = normalizeStopName(stopName);
   const cleanStop = (stopName || '').replace(/^\d+[\.\s\-]+\s*/, '');
   const normalizedCleanStop = normalizeStopName(cleanStop);
 
-  for (const key in schedules) {
-    const s = schedules[key];
-    if (!s) continue;
-    
-    // Filtrar por dirección si está disponible
-    if (stopDirection) {
-      const lowerKey = key.toLowerCase();
-      const hasDirectionInKey = lowerKey.endsWith('_ida') || lowerKey.endsWith('_vuelta');
-      if (hasDirectionInKey) {
-        const expectedSuffix = `_${stopDirection.toLowerCase()}`;
-        if (!lowerKey.endsWith(expectedSuffix)) {
-          continue;
-        }
-      }
-    }
-    
+  let scheduleEntries: any[] = [];
+  if (Array.isArray(schedules)) {
+    scheduleEntries = schedules;
+  } else if (typeof schedules === 'object') {
+    scheduleEntries = Object.values(schedules);
+  }
+
+  if (scheduleEntries.length === 0) return false;
+
+  for (const s of scheduleEntries) {
+    if (!s || typeof s !== 'object') continue;
+
     // 1. Verificar si tiene stopMappings definidos
     if (s.stopMappings && typeof s.stopMappings === 'object') {
       for (const mapKey in s.stopMappings) {
@@ -101,7 +97,7 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
     // 2. Verificar en stopAddresses / stop_addresses_json
     let addrs: string[] = [];
     try {
-      addrs = s.stopAddresses || (typeof s.stop_addresses_json === 'string' ? JSON.parse(s.stop_addresses_json || '[]') : s.stop_addresses_json) || [];
+      addrs = Array.isArray(s.stopAddresses) ? s.stopAddresses : (typeof s.stop_addresses_json === 'string' ? JSON.parse(s.stop_addresses_json || '[]') : s.stop_addresses_json) || [];
     } catch (_) {}
     if (Array.isArray(addrs) && addrs.length > 0) {
       const matchAddr = addrs.some((a: string) => {
@@ -118,7 +114,7 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
     // 3. Verificar en headers / headers_json
     let hdrs: string[] = [];
     try {
-      hdrs = s.headers || (typeof s.headers_json === 'string' ? JSON.parse(s.headers_json || '[]') : s.headers_json) || [];
+      hdrs = Array.isArray(s.headers) ? s.headers : (typeof s.headers_json === 'string' ? JSON.parse(s.headers_json || '[]') : s.headers_json) || [];
     } catch (_) {}
     if (Array.isArray(hdrs) && hdrs.length > 0) {
       const matchHdr = hdrs.some((h: string) => {
@@ -134,7 +130,7 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
     // 4. Verificar en headerAliases / header_aliases_json
     let aliases: string[] = [];
     try {
-      aliases = s.headerAliases || (typeof s.header_aliases_json === 'string' ? JSON.parse(s.header_aliases_json || '[]') : s.header_aliases_json) || [];
+      aliases = Array.isArray(s.headerAliases) ? s.headerAliases : (typeof s.header_aliases_json === 'string' ? JSON.parse(s.header_aliases_json || '[]') : s.header_aliases_json) || [];
     } catch (_) {}
     if (Array.isArray(aliases) && aliases.length > 0) {
       const matchAlias = aliases.some((al: string) => {
@@ -4687,8 +4683,13 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                 });
             })
             .map((stop: any) => {
-              const route = transitRoutes.find((r: any) => r.id === stop.routeId);
-              const isWaypoint = showWaypoints && route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules);
+              const route = transitRoutes.find((r: any) => 
+                r.id === stop.routeId || 
+                r.id === stop.branch_id ||
+                (r.code && stop.routeId && (r.code === stop.routeId || stop.routeId.includes(r.code))) ||
+                (r.color && stop.color && (r.color || '').toUpperCase() === (stop.color || '').toUpperCase())
+              );
+              const isWaypoint = showWaypoints && route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules);
               
               // Determinar tamaño (al activar el botón de reloj showWaypoints se duplica el tamaño del icono de los puntos de control)
               const size = isWaypoint ? Math.round(stopIconSize * 2.0) : stopIconSize;
