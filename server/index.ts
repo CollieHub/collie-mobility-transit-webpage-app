@@ -1057,11 +1057,12 @@ app.post('/v1/admin/kml/integrate', async (c) => {
 
       stops.forEach((st: any, idx: number) => {
         const stopId = `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
-        const isControl = (idx === 0 || idx === stops.length - 1) ? 1 : 0;
+        const pLat = st.proj_lat !== undefined ? st.proj_lat : st.lat;
+        const pLng = st.proj_lng !== undefined ? st.proj_lng : st.lng;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, isControl)
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng)
         );
       });
     }
@@ -1100,11 +1101,12 @@ app.post('/v1/admin/stops/batch', async (c) => {
     if (Array.isArray(stops) && stops.length > 0) {
       stops.forEach((st: any, idx: number) => {
         const stopId = st.id || `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
-        const isControl = st.is_control_point !== undefined ? st.is_control_point : ((idx === 0 || idx === stops.length - 1) ? 1 : 0);
+        const pLat = st.proj_lat !== undefined ? st.proj_lat : st.lat;
+        const pLng = st.proj_lng !== undefined ? st.proj_lng : st.lng;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, isControl)
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng)
         );
       });
     }
