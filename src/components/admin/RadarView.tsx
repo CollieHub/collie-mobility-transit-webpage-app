@@ -723,6 +723,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     showNotification?.('success', `📍 Centrado en: ${name.split(',')[0]}`);
   }, [showNotification]);
   const [selectedWaypointIdx, setSelectedWaypointIdx] = useState<number | null>(null);
+  const [selectedStopId, setSelectedStopId] = useState<string | null>(null);
   const [showRightDock, setShowRightDock] = useState<boolean>(true);
   const [rightDockTab, setRightDockTab] = useState<'paradas' | 'recorrido'>('paradas');
   const [showMyMapsIngestorModal, setShowMyMapsIngestorModal] = useState<boolean>(false);
@@ -1310,8 +1311,36 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
       const remaining = prev.filter(s => s.id !== stopId);
       return remaining.map((s, idx) => ({ ...s, stop_order: idx + 1 }));
     });
+    if (selectedStopId === stopId) {
+      setSelectedStopId(null);
+    }
     showNotification?.('success', 'Parada eliminada');
   };
+
+  // Keyboard shortcut listener to delete selected stop on Delete / Backspace / Del key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT' || target.isContentEditable)) {
+        return;
+      }
+
+      if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Del') {
+        if (selectedStopId && isEditingEnabled) {
+          e.preventDefault();
+          const targetStop = stops.find(s => s.id === selectedStopId);
+          handleDeleteStop(selectedStopId);
+          setSelectedStopId(null);
+          if (targetStop) {
+            showNotification?.('success', `🗑️ Parada "${targetStop.name}" eliminada`);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedStopId, isEditingEnabled, stops, showNotification]);
 
   const handleReverseStops = () => {
     setStops(prev => {
@@ -2207,19 +2236,25 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             {/* Stop Draggable Markers: Paradas en mapa (atenuadas cuando se edita/ve la pestaña Recorrido) */}
             {stops.map((st, idx) => {
               const displayNum = idx + 1;
+              const isSelectedStop = selectedStopId === st.id;
+
               return (
                 <Marker
                   key={`stop_marker_${st.id}`}
                   position={[st.lat, st.lng]}
                   draggable={isEditingEnabled}
                   opacity={rightDockTab === 'recorrido' ? 0.35 : 1}
-                  zIndexOffset={rightDockTab === 'paradas' ? 2000 : 500}
+                  zIndexOffset={rightDockTab === 'paradas' ? (isSelectedStop ? 3500 : 2000) : 500}
                   icon={
                     stopIconMode === 'number'
-                      ? createStopIconWithNumber(displayNum, direction === 'ida' ? '#0284c7' : '#ea580c')
-                      : createStopIcon(direction === 'ida' ? '#ea580c' : '#d97706')
+                      ? createStopIconWithNumber(displayNum, isSelectedStop ? '#ec4899' : (direction === 'ida' ? '#0284c7' : '#ea580c'))
+                      : createStopIcon(isSelectedStop ? '#ec4899' : (direction === 'ida' ? '#ea580c' : '#d97706'))
                   }
                   eventHandlers={{
+                    click() {
+                      setSelectedStopId(st.id);
+                      setSelectedWaypointIdx(null);
+                    },
                     dragend(e: any) {
                       const newLat = e.target.getLatLng().lat;
                       const newLng = e.target.getLatLng().lng;
@@ -2466,53 +2501,73 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                       </button>
                     </div>
                   ) : (
-                    stops.map((st, idx) => (
-                      <div
-                        key={st.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          padding: '0.55rem 0.75rem',
-                          borderRadius: '8px',
-                          backgroundColor: '#131b2e',
-                          border: '1px solid rgba(255, 255, 255, 0.04)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
-                          <div style={{ color: '#475569', fontSize: '0.75rem', cursor: 'grab', userSelect: 'none' }}>::</div>
+                    stops.map((st, idx) => {
+                      const isSelectedStop = selectedStopId === st.id;
+                      return (
+                        <div
+                          key={st.id}
+                          onClick={() => {
+                            setSelectedStopId(st.id);
+                            setSelectedWaypointIdx(null);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '0.55rem 0.75rem',
+                            borderRadius: '8px',
+                            backgroundColor: isSelectedStop ? '#1e293b' : '#131b2e',
+                            border: isSelectedStop ? '1px solid #ec4899' : '1px solid rgba(255, 255, 255, 0.04)',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, overflow: 'hidden' }}>
+                            <div style={{ color: '#475569', fontSize: '0.75rem', cursor: 'grab', userSelect: 'none' }}>::</div>
 
-                          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#38bdf8', minWidth: '22px' }}>
-                            {idx + 1}.
-                          </span>
+                            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: isSelectedStop ? '#ec4899' : '#38bdf8', minWidth: '22px' }}>
+                              {idx + 1}.
+                            </span>
 
-                          <span
-                            onClick={() => setFocusCoords([st.lat, st.lng])}
-                            title="Centrar parada en el mapa"
-                            style={{ fontSize: '0.8rem', color: '#f1f5f9', fontWeight: 600, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}
-                          >
-                            {st.name}
-                          </span>
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedStopId(st.id);
+                                setFocusCoords([st.lat, st.lng]);
+                              }}
+                              title="Centrar parada en el mapa"
+                              style={{ fontSize: '0.8rem', color: isSelectedStop ? '#f472b6' : '#f1f5f9', fontWeight: 600, cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}
+                            >
+                              {st.name}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedStopId(st.id);
+                                setFocusCoords([st.lat, st.lng]);
+                              }}
+                              title="Centrar en mapa"
+                              style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
+                            >
+                              <Search size={13} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteStop(st.id);
+                              }}
+                              title="Eliminar parada"
+                              style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
                         </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <button
-                            onClick={() => setFocusCoords([st.lat, st.lng])}
-                            title="Centrar en mapa"
-                            style={{ backgroundColor: 'transparent', border: 'none', color: '#38bdf8', cursor: 'pointer', padding: '2px' }}
-                          >
-                            <Search size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStop(st.id)}
-                            title="Eliminar parada"
-                            style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               ) : (
