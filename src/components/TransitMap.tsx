@@ -99,7 +99,7 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
       }
     }
 
-    // 2. Verificar en stopAddresses / stop_addresses_json
+    // 2. Verificar en stopAddresses / stop_addresses_json (consultados directo de la base de datos)
     let addrs: string[] = [];
     try {
       addrs = Array.isArray(s.stopAddresses) ? s.stopAddresses : (typeof s.stop_addresses_json === 'string' ? JSON.parse(s.stop_addresses_json || '[]') : s.stop_addresses_json) || [];
@@ -114,38 +114,6 @@ function isStopInSchedule(stopId: string, stopName: string, stopDirection: strin
                (normalizedCleanStop && (cleanA === normalizedCleanStop || cleanA === normalizedStop));
       });
       if (matchAddr) return true;
-    }
-
-    // 3. Verificar en headers / headers_json
-    let hdrs: string[] = [];
-    try {
-      hdrs = Array.isArray(s.headers) ? s.headers : (typeof s.headers_json === 'string' ? JSON.parse(s.headers_json || '[]') : s.headers_json) || [];
-    } catch (_) {}
-    if (Array.isArray(hdrs) && hdrs.length > 0) {
-      const matchHdr = hdrs.some((h: string) => {
-        if (!h) return false;
-        const normH = normalizeStopName(h);
-        const cleanH = normalizeStopName(h.replace(/^\d+[\.\s\-]+\s*/, ''));
-        return (normalizedStop && (normH === normalizedStop || normH === normalizedCleanStop)) ||
-               (normalizedCleanStop && (cleanH === normalizedCleanStop || cleanH === normalizedStop));
-      });
-      if (matchHdr) return true;
-    }
-
-    // 4. Verificar en headerAliases / header_aliases_json
-    let aliases: string[] = [];
-    try {
-      aliases = Array.isArray(s.headerAliases) ? s.headerAliases : (typeof s.header_aliases_json === 'string' ? JSON.parse(s.header_aliases_json || '[]') : s.header_aliases_json) || [];
-    } catch (_) {}
-    if (Array.isArray(aliases) && aliases.length > 0) {
-      const matchAlias = aliases.some((al: string) => {
-        if (!al) return false;
-        const normAl = normalizeStopName(al);
-        const cleanAl = normalizeStopName(al.replace(/^\d+[\.\s\-]+\s*/, ''));
-        return (normalizedStop && (normAl === normalizedStop || normAl === normalizedCleanStop)) ||
-               (normalizedCleanStop && (cleanAl === normalizedCleanStop || cleanAl === normalizedStop));
-      });
-      if (matchAlias) return true;
     }
   }
 
@@ -4696,7 +4664,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
               );
               const isControlPoint = (
                 (route && isStopInSchedule(stop.id, stop.name, stop.direction, route.schedules || route.schedulesList || route.rawSchedules)) ||
-                transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
+                transitRoutes.some((r: any) => visibleRouteIds.has(r.id) && (r.id === stop.routeId || r.id === stop.branch_id) && isStopInSchedule(stop.id, stop.name, stop.direction, r.schedules || r.schedulesList || r.rawSchedules))
               );
               
               // Determinar tamaño (al activar el botón de reloj showWaypoints se agranda a 1.4x; para usuarios normales es del mismo tamaño que las demás paradas)
