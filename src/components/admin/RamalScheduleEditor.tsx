@@ -167,10 +167,11 @@ export default function RamalScheduleEditor({
   const [rowToDeleteIdx, setRowToDeleteIdx] = useState<number | null>(null);
   const [colToDeleteIdx, setColToDeleteIdx] = useState<number | null>(null);
 
-  // Modal y Estado de Copiar Paradas a otros Días
+  // Modal y Estado de Copiar Paradas y Horarios a otros Días
   const [isCopyStopsModalOpen, setIsCopyStopsModalOpen] = useState<boolean>(false);
   const [selectedCopyDestDays, setSelectedCopyDestDays] = useState<string[]>([]);
   const [isCopyingStops, setIsCopyingStops] = useState<boolean>(false);
+  const [copyGridWithStops, setCopyGridWithStops] = useState<boolean>(true);
 
   // Modal y Estado de Procesar Imagen (OCR)
   const [isImageProcessModalOpen, setIsImageProcessModalOpen] = useState<boolean>(false);
@@ -981,13 +982,15 @@ export default function RamalScheduleEditor({
           return sDayId === targetDayTypeId.toLowerCase() || sDayId === destCode.toLowerCase();
         });
 
-        const itemsToCopy = matrixRows.map((r, i) => ({
-          departure_time: r[0] || '00:00',
-          dispatch_order: i + 1,
-          trip_times_json: JSON.stringify(r)
-        }));
+        const itemsToCopy = copyGridWithStops
+          ? matrixRows.map((r, i) => ({
+              departure_time: r[0] || '00:00',
+              dispatch_order: i + 1,
+              trip_times_json: JSON.stringify(r)
+            }))
+          : undefined;
 
-        const payload = {
+        const payload: any = {
           schedule: {
             id: existingSched?.id || null,
             branch_id: selectedBranchId,
@@ -997,9 +1000,12 @@ export default function RamalScheduleEditor({
             headers_json: JSON.stringify(headers),
             header_aliases_json: JSON.stringify(headerAliases),
             stop_addresses_json: JSON.stringify(stopAddresses)
-          },
-          items: itemsToCopy
+          }
         };
+
+        if (copyGridWithStops) {
+          payload.items = itemsToCopy;
+        }
 
         await fetch('/v1/admin/schedules/batch', {
           method: 'POST',
@@ -1013,7 +1019,11 @@ export default function RamalScheduleEditor({
         return match ? match.name : id;
       }).join(', ');
 
-      showNotification('success', `Paradas y puntos de referencia copiados a: ${friendlyNames} (➔ ${direction === 'ida' ? idaLabel : vueltaLabel})`);
+      const contentMsg = copyGridWithStops
+        ? `Paradas, puntos de control y grilla de horarios (${matrixRows.length} filas)`
+        : `Paradas y puntos de control`;
+
+      showNotification('success', `${contentMsg} copiados exitosamente a: ${friendlyNames} (➔ ${direction === 'ida' ? idaLabel : vueltaLabel})`);
       setIsCopyStopsModalOpen(false);
       setSelectedCopyDestDays([]);
       if (onRefreshData) onRefreshData();
@@ -2695,8 +2705,27 @@ export default function RamalScheduleEditor({
             </div>
 
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.45 }}>
-              Copiá los puntos de referencia, paradas y asociaciones de encabezados actuales ({headers.length} paradas) a otros tipos de días de este mismo ramal en el sentido actual.
+              Copiá la configuración de paradas y la grilla de horarios actual a otros tipos de días de este mismo ramal en el sentido actual.
             </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', backgroundColor: '#0b0f19', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                ¿QUÉ ELEMENTOS DESEAS COPIAR?:
+              </span>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#ffffff', fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer' }}>
+                <input type="checkbox" checked={true} disabled style={{ width: '18px', height: '18px', accentColor: '#0284c7' }} />
+                <span>📍 Encabezados y Paradas (Puntos de Control - {headers.length} columnas)</span>
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#ffffff', fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={copyGridWithStops}
+                  onChange={(e) => setCopyGridWithStops(e.target.checked)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#0284c7' }}
+                />
+                <span>🚌 Grilla Completa de Horarios ({matrixRows.length} filas de horas y despachos)</span>
+              </label>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', backgroundColor: '#0b0f19', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
