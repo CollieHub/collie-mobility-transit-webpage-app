@@ -2558,16 +2558,25 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </div>
               )}
 
-              {/* BOTTOM TOOLBAR GRID (6 BOTONES ÚNICOS Y PROTEGIDOS) */}
+              {/* BOTTOM TOOLBAR GRID (7 BOTONES ÚNICOS Y PROTEGIDOS) */}
               {rightDockTab === 'paradas' ? (
                 <div style={{
                   padding: '0.6rem 0.75rem',
                   backgroundColor: '#070d19',
                   borderTop: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(6, 1fr)',
+                  gridTemplateColumns: 'repeat(7, 1fr)',
                   gap: '0.35rem'
                 }}>
+                  <button
+                    onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
+                    disabled={!isEditingEnabled}
+                    title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde archivo KML / Google Earth'}
+                    className="btn-animated btn-animated-primary"
+                    style={{ padding: '0.45rem', borderRadius: '6px', border: 'none', backgroundColor: isEditingEnabled ? '#0284c7' : '#1e293b', color: isEditingEnabled ? 'white' : '#64748b', opacity: isEditingEnabled ? 1 : 0.4, cursor: isEditingEnabled ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <FileCode size={14} />
+                  </button>
                   <button
                     onClick={() => executeIfEditing(() => setShowProjectStopsModal(true))}
                     disabled={!isEditingEnabled}
