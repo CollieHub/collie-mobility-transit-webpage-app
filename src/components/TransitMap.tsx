@@ -4838,7 +4838,7 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
                         }
                       } : undefined}
                     >
-                      {isControlPoint && (
+                      {(isControlPoint && showWaypoints) && (
                         <Tooltip 
                           permanent 
                           direction="top" 

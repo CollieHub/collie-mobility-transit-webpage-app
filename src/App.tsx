@@ -3902,6 +3902,20 @@ function App() {
               )}
 
 
+              <button 
+                onClick={() => setShowWaypoints(!showWaypoints)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: '22px', height: '22px', border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer', transition: 'all 0.2s', padding: 0,
+                  opacity: showWaypoints ? 1 : 0.5
+                }}
+                title={showWaypoints ? 'Ocultar etiquetas de puntos de control' : 'Mostrar etiquetas de puntos de control'}
+              >
+                <img src="/assets/images/clock.svg" style={{ width: '16px', height: '16px', display: 'block' }} alt="Puntos de Control" />
+              </button>
+
               {isAdmin && (
                 <>
                   <span style={{ color: 'var(--border)', alignSelf: 'center', pointerEvents: 'none', userSelect: 'none' }}>|</span>
@@ -3930,19 +3944,6 @@ function App() {
                     title={selectBothDirections ? 'Selección individual de ramales' : 'Seleccionar Ida y Vuelta juntos'}
                   >
                     <img src={selectBothDirections ? "/assets/images/link.svg" : "/assets/images/unlink.svg"} style={{ width: '16px', height: '16px', display: 'block' }} alt="Link" />
-                  </button>
-                  <button 
-                    onClick={() => setShowWaypoints(!showWaypoints)}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      width: '22px', height: '22px', border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer', transition: 'all 0.2s', padding: 0,
-                      opacity: showWaypoints ? 1 : 0.5
-                    }}
-                    title={showWaypoints ? 'Ocultar paradas de horarios' : 'Mostrar paradas de horarios'}
-                  >
-                    <img src="/assets/images/clock.svg" style={{ width: '16px', height: '16px', display: 'block' }} alt="Timetables" />
                   </button>
                 </>
               )}
@@ -4640,6 +4641,21 @@ function App() {
           )}
 
 
+          <button 
+            onClick={() => setShowWaypoints(!showWaypoints)}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '22px', height: '22px', border: 'none',
+              background: 'transparent',
+              cursor: 'pointer', transition: 'all 0.2s', padding: 0,
+              opacity: showWaypoints ? 1 : 0.5,
+              color: showWaypoints ? 'var(--accent)' : 'var(--text-muted)'
+            }}
+            title={showWaypoints ? 'Ocultar etiquetas de puntos de control' : 'Mostrar etiquetas de puntos de control'}
+          >
+            <Clock size={16} />
+          </button>
+
           {isAdmin && (
             <>
               <span style={{ color: 'var(--border)', alignSelf: 'center', pointerEvents: 'none', userSelect: 'none' }}>|</span>
@@ -4670,20 +4686,6 @@ function App() {
                 title={selectBothDirections ? 'Selección individual de ramales' : 'Seleccionar Ida y Vuelta juntos'}
               >
                 {selectBothDirections ? <Link size={16} /> : <Unlink size={16} />}
-              </button>
-              <button 
-                onClick={() => setShowWaypoints(!showWaypoints)}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '22px', height: '22px', border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer', transition: 'all 0.2s', padding: 0,
-                  opacity: showWaypoints ? 1 : 0.5,
-                  color: showWaypoints ? 'var(--accent)' : 'var(--text-muted)'
-                }}
-                title={showWaypoints ? 'Ocultar paradas de horarios' : 'Mostrar paradas de horarios'}
-              >
-                <Clock size={16} />
               </button>
             </>
           )}
