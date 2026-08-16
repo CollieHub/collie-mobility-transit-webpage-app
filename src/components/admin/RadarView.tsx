@@ -1002,12 +1002,11 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
     }
 
     try {
-      const res = await fetch('/v1/admin/table/stops?limit=500');
+      const res = await fetch(`/v1/admin/table/stops?branch_id=${encodeURIComponent(selectedBranchId)}&limit=1000`);
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
-        const filtered = rows.filter((s: any) => s.branch_id === selectedBranchId);
-        setAllBranchStops(filtered);
+        setAllBranchStops(rows);
       }
     } catch (_) {
       setAllBranchStops([]);
@@ -1582,25 +1581,19 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         setExistingShapeId(shapeId);
       }
 
-      for (let idx = 0; idx < stops.length; idx++) {
-        const stop = stops[idx];
-        const stopPayload = {
-          id: stop.id,
-          branch_id: stop.branch_id,
-          direction: stop.direction,
-          stop_order: idx + 1,
-          name: stop.name,
-          lat: stop.lat,
-          lng: stop.lng,
-          proj_lat: stop.proj_lat || stop.lat,
-          proj_lng: stop.proj_lng || stop.lng
-        };
+      const stopRes = await fetch('/v1/admin/stops/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          branch_id: selectedBranchId,
+          direction: direction,
+          stops: stops
+        })
+      });
 
-        await fetch('/v1/admin/table/stops', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(stopPayload)
-        });
+      const stopData = await stopRes.json();
+      if (!stopData.success) {
+        throw new Error(stopData.error || 'Error al guardar paradas');
       }
 
       await fetch('/v1/admin/cache/purge');

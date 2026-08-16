@@ -1081,6 +1081,47 @@ app.post('/v1/admin/kml/integrate', async (c) => {
   }
 });
 
+// 3.4.3 Guardado Atómico Batch de Paradas por Ramal y Sentido
+app.post('/v1/admin/stops/batch', async (c) => {
+  try {
+    const { branch_id, direction, stops } = await c.req.json();
+    if (!branch_id || !direction) {
+      return c.json({ success: false, error: 'Ramal y sentido son requeridos' }, 400);
+    }
+
+    const statements: any[] = [];
+
+    // 1. Eliminar paradas existentes de esa rama y sentido
+    statements.push(
+      c.env.DB.prepare('DELETE FROM stops WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
+    );
+
+    // 2. Insertar paradas actualizadas
+    if (Array.isArray(stops) && stops.length > 0) {
+      stops.forEach((st: any, idx: number) => {
+        const stopId = st.id || `stop-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`;
+        const isControl = st.is_control_point !== undefined ? st.is_control_point : ((idx === 0 || idx === stops.length - 1) ? 1 : 0);
+        statements.push(
+          c.env.DB.prepare(
+            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+          ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, isControl)
+        );
+      });
+    }
+
+    await c.env.DB.batch(statements);
+    await triggerKVAutoPurge(c.env);
+
+    return c.json({
+      success: true,
+      message: `Se guardaron ${Array.isArray(stops) ? stops.length : 0} paradas correctamente`,
+      count: Array.isArray(stops) ? stops.length : 0
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
 // 3.5 OCR Processing con AWS Textract (con fallback a Cloudflare Workers AI Vision)
 app.post('/v1/admin/ocr', async (c) => {
   try {
