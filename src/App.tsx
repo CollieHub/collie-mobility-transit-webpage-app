@@ -30,6 +30,7 @@ import TransitMap from './components/TransitMap';
 import { getApiBaseUrl } from './lib/api/envConfig';
 import TimetableModal, { getTodayDayLabel, formatSpecialLabel } from './components/TimetableModal';
 import MercadoLibreAdBanner from './components/MercadoLibreAdBanner';
+import MercadoLibreProductStrip from './components/MercadoLibreProductStrip';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
 import { StopIcon } from './components/icons/StopIcon';
@@ -452,6 +453,7 @@ function App() {
   const [nearbyStop, setNearbyStop] = useState<any>(null);
   const [toggleNearbyTrigger, setToggleNearbyTrigger] = useState<number>(0);
   const [viewingSchedule, setViewingSchedule] = useState<string | null>(null);
+  const [showProductModal, setShowProductModal] = useState<boolean>(false);
   const handleViewSchedule = useCallback((routeCode: string) => {
     setViewingSchedule(routeCode);
   }, []);
@@ -3216,6 +3218,9 @@ function App() {
           })()}
         </div>
       )}
+
+      {/* Tira de productos de Mercado Libre */}
+      <MercadoLibreProductStrip style={{ marginTop: '12px' }} />
     </div>
   );
 
@@ -3587,7 +3592,7 @@ function App() {
         {/* Mercado Libre Banner on Mobile */}
         {!isPWA && (
           <div style={{ position: 'absolute', top: '16px', left: '16px', right: '16px', height: '88px', zIndex: 1000, pointerEvents: 'auto' }}>
-            <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" />
+            <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" onOpenStrip={() => setShowProductModal(true)} />
           </div>
         )}
 
@@ -4760,7 +4765,7 @@ function App() {
           pointerEvents: 'auto', 
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
-          <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" />
+          <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" onOpenStrip={() => setShowProductModal(true)} />
         </div>
       )}
       
@@ -4881,6 +4886,36 @@ function App() {
               onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
             >
               <X size={22} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mercado Libre Random Product Showcase Modal */}
+      {showProductModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          zIndex: 99999, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '16px', animation: 'fadeIn 0.2s ease', cursor: 'zoom-out'
+        }} onClick={() => setShowProductModal(false)}>
+          <div style={{
+            width: '100%', maxWidth: '960px',
+            position: 'relative', cursor: 'default'
+          }} onClick={e => e.stopPropagation()}>
+            <MercadoLibreProductStrip />
+            <button
+              onClick={() => setShowProductModal(false)}
+              style={{
+                position: 'absolute', top: '14px', right: '14px',
+                background: '#f1f5f9', border: 'none', borderRadius: '50%',
+                width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#1e293b', cursor: 'pointer', transition: 'all 0.2s', zIndex: 10
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = '#e2e8f0'}
+              onMouseOut={(e) => e.currentTarget.style.background = '#f1f5f9'}
+            >
+              <X size={18} />
             </button>
           </div>
         </div>

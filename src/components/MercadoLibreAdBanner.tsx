@@ -1,18 +1,29 @@
 import React from 'react';
-import { ExternalLink, Zap, ShieldCheck } from 'lucide-react';
+import { ExternalLink, Zap, ShieldCheck, ShoppingBag } from 'lucide-react';
 
 interface MercadoLibreAdBannerProps {
   affiliateUrl?: string;
+  onOpenStrip?: () => void;
   className?: string;
   style?: React.CSSProperties;
 }
 
 export default function MercadoLibreAdBanner({
   affiliateUrl = 'https://meli.la/1fwfx2Y',
+  onOpenStrip,
   className = '',
   style = {}
 }: MercadoLibreAdBannerProps) {
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onOpenStrip) {
+      onOpenStrip();
+    } else {
+      window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleCtaClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     window.open(affiliateUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -47,6 +58,7 @@ export default function MercadoLibreAdBanner({
         e.currentTarget.style.transform = 'translateY(0) scale(1)';
         e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.18)';
       }}
+      title="Hacé clic para ver el catálogo de ofertas recomendadas"
     >
       {/* Background Decorative Pattern */}
       <div style={{
@@ -127,9 +139,41 @@ export default function MercadoLibreAdBanner({
         </div>
       </div>
 
-      {/* Right Section: Call To Action Button */}
-      <div style={{ zIndex: 1, flexShrink: 0 }}>
+      {/* Right Section: Call To Action Buttons */}
+      <div style={{ zIndex: 1, flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {onOpenStrip && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenStrip();
+            }}
+            style={{
+              background: '#ffffff',
+              color: '#2D3277',
+              border: '1.5px solid #2D3277',
+              borderRadius: '12px',
+              padding: '9px 12px',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+            onMouseOut={(e) => e.currentTarget.style.background = '#ffffff'}
+            title="Ver catálogo de productos"
+          >
+            <ShoppingBag size={14} />
+            <span>Productos</span>
+          </button>
+        )}
+
         <button
+          onClick={handleCtaClick}
           style={{
             background: '#2D3277',
             color: '#ffffff',
@@ -147,12 +191,10 @@ export default function MercadoLibreAdBanner({
             whiteSpace: 'nowrap'
           }}
           onMouseOver={(e) => {
-            e.stopPropagation();
             e.currentTarget.style.background = '#1e2358';
             e.currentTarget.style.transform = 'scale(1.05)';
           }}
           onMouseOut={(e) => {
-            e.stopPropagation();
             e.currentTarget.style.background = '#2D3277';
             e.currentTarget.style.transform = 'scale(1)';
           }}

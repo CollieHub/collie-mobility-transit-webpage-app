@@ -43,7 +43,7 @@ app.get('/v1/transit/ads', async (c) => {
     }
 
     const res = await c.env.DB.prepare(
-      'SELECT id, title, subtitle, image_url, redirect_url, color, border, text_color, display_order FROM ads WHERE is_active = 1 ORDER BY display_order ASC'
+      'SELECT id, title, subtitle, image_url, redirect_url, color, border, text_color, display_order, price, original_price, discount, badge, installments FROM ads WHERE is_active = 1 ORDER BY display_order ASC'
     ).all();
 
     const ads = (res.results || []).map((row: any) => ({
@@ -55,7 +55,12 @@ app.get('/v1/transit/ads', async (c) => {
       color: row.color || '#FFE600',
       border: row.border || '#E6CF00',
       text: row.text_color || '#2D3277',
-      order: row.display_order
+      order: row.display_order,
+      price: row.price || undefined,
+      originalPrice: row.original_price || undefined,
+      discount: row.discount || undefined,
+      badge: row.badge || undefined,
+      installments: row.installments || undefined
     }));
 
     const payload = { success: true, ads };
@@ -71,6 +76,32 @@ app.get('/v1/transit/ads', async (c) => {
     return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, ads: [], error: err.message });
+  }
+});
+
+// Endpoint de Tira de Productos al Azar de Mercado Libre
+app.get('/v1/transit/meli/products', async (c) => {
+  try {
+    const res = await c.env.DB.prepare(
+      'SELECT id, title, subtitle, image_url, redirect_url, price, original_price, discount, badge, installments FROM ads WHERE is_active = 1 AND price IS NOT NULL ORDER BY RANDOM() LIMIT 8'
+    ).all();
+
+    const products = (res.results || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      subtitle: row.subtitle || '',
+      imageUrl: row.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_709590-MLA74797686561_022024-F.webp',
+      redirectUrl: row.redirect_url || 'https://meli.la/1fwfx2Y',
+      price: row.price || '',
+      originalPrice: row.original_price || '',
+      discount: row.discount || '',
+      badge: row.badge || 'MÁS VENDIDO',
+      installments: row.installments || 'Envío en el día'
+    }));
+
+    return c.json({ success: true, count: products.length, products });
+  } catch (err: any) {
+    return c.json({ success: false, products: [], error: err.message });
   }
 });
 
