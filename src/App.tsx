@@ -4351,38 +4351,7 @@ function App() {
           </div>
         )}
         
-        {/* Banners Mercado Libre / Publicidades en Escritorio */}
-        {!isMobile && (dynamicBanners[0] && dynamicBanners[0].length > 0) && (
-          <div style={{ 
-            position: 'absolute', 
-            top: '16px', 
-            right: '16px', 
-            zIndex: 1000, 
-            width: isTablet ? '260px' : '320px', 
-            height: '110px',
-            display: 'flex', 
-            flexDirection: 'column', 
-            justifyContent: 'flex-start', 
-            pointerEvents: 'auto', 
-            transition: 'all 0.3s',
-            overflow: 'hidden'
-          }}>
-            <DraggableBannerCarousel 
-              key="desktop-banner"
-              slotIndex={0}
-              activeBanner={bannerStates[0]}
-              banners={dynamicBanners[0] || []}
-              onBannerChange={(newIdx) => {
-                setBannerStates(prev => {
-                  const next = [...prev];
-                  next[0] = newIdx;
-                  return next;
-                });
-              }}
-              onBannerDoubleClick={(bannerIdx) => setExpandedBanner({ slot: 0, banner: bannerIdx })}
-            />
-          </div>
-        )}
+
 
 
         <div style={{ position: 'absolute', bottom: '36px', right: '16px', zIndex: 1000, pointerEvents: 'auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', userSelect: 'none', WebkitUserSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -4791,59 +4760,136 @@ function App() {
           onClose={() => setViewingSchedule(null)} 
         />
       )}
+
+      {/* Banners Mercado Libre / Publicidades en Escritorio */}
+      {!isMobile && (dynamicBanners[0] && dynamicBanners[0].length > 0) && (
+        <div style={{ 
+          position: 'absolute', 
+          top: '24px', 
+          right: '24px', 
+          zIndex: 1000, 
+          width: isTablet ? '380px' : '480px', 
+          height: '160px',
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'flex-start', 
+          pointerEvents: 'auto', 
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          overflow: 'hidden',
+          borderRadius: '20px',
+          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.25)'
+        }}>
+          <DraggableBannerCarousel 
+            key="desktop-banner"
+            slotIndex={0}
+            activeBanner={bannerStates[0]}
+            banners={dynamicBanners[0] || []}
+            onBannerChange={(newIdx) => {
+              setBannerStates(prev => {
+                const next = [...prev];
+                next[0] = newIdx;
+                return next;
+              });
+            }}
+            onBannerDoubleClick={(bannerIdx) => setExpandedBanner({ slot: 0, banner: bannerIdx })}
+          />
+        </div>
+      )}
       
       {/* Expanded Banner Modal */}
       {expandedBanner && (
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          zIndex: 9999, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+          zIndex: 9999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           animation: 'fadeIn 0.2s ease', cursor: 'zoom-out'
         }} onClick={() => setExpandedBanner(null)}>
           <div style={{
-            background: dynamicBanners[expandedBanner.slot][expandedBanner.banner].color || '#fff', 
-            border: `4px solid ${dynamicBanners[expandedBanner.slot][expandedBanner.banner].border || '#ccc'}`,
+            background: dynamicBanners[expandedBanner.slot][expandedBanner.banner].color || '#FFE600', 
+            border: `4px solid ${dynamicBanners[expandedBanner.slot][expandedBanner.banner].border || '#E6CF00'}`,
             borderRadius: '24px', padding: '40px',
-            width: '80%', maxWidth: '800px', aspectRatio: '16/9',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            width: '85%', maxWidth: '850px', minHeight: '400px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', overflow: 'hidden', cursor: 'default', position: 'relative'
           }} onClick={e => e.stopPropagation()}>
             {dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl ? (
-              <div 
-                style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl ? 'pointer' : 'default' }}
-                onClick={() => {
-                  if (dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl) {
-                    window.open(dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl, '_blank', 'noopener,noreferrer');
-                  }
-                }}
-              >
-                <img src={dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="Ad Expanded" draggable={false} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '40px', width: '100%' }}>
+                <div style={{ 
+                  width: '45%', 
+                  height: '300px', 
+                  background: '#ffffff', 
+                  borderRadius: '24px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  padding: '24px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+                }}>
+                  <img src={dynamicBanners[expandedBanner.slot][expandedBanner.banner].imageUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="Ad Expanded" draggable={false} />
+                </div>
+                <div style={{ width: '55%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <span style={{ background: '#2D3277', color: '#FFE600', fontSize: '0.75rem', fontWeight: 900, padding: '4px 10px', borderRadius: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      Mercado Libre
+                    </span>
+                  </div>
+                  <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 16px 0', lineHeight: 1.1 }}>
+                    {dynamicBanners[expandedBanner.slot][expandedBanner.banner].title}
+                  </h2>
+                  <p style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1e293b', opacity: 0.9, margin: '0 0 32px 0', lineHeight: 1.4 }}>
+                    {dynamicBanners[expandedBanner.slot][expandedBanner.banner].subtitle}
+                  </p>
+                  {dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl && (
+                    <button
+                      onClick={() => window.open(dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl, '_blank', 'noopener,noreferrer')}
+                      style={{
+                        background: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '16px',
+                        padding: '16px 32px',
+                        fontSize: '1.25rem',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                      onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      <ExternalLink size={20} />
+                      <span>Ver oferta en Mercado Libre</span>
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              <>
-                <span style={{ fontSize: '3.5rem', fontWeight: 900, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text, textTransform: 'uppercase', letterSpacing: '2px', textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <span style={{ fontSize: '3.2rem', fontWeight: 900, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>
                   {dynamicBanners[expandedBanner.slot][expandedBanner.banner].title}
                 </span>
-                <span style={{ fontSize: '1.8rem', fontWeight: 600, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text, opacity: 0.8, textAlign: 'center' }}>
+                <span style={{ fontSize: '1.7rem', fontWeight: 600, color: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277', opacity: 0.9, maxWidth: '700px', marginBottom: '32px' }}>
                   {dynamicBanners[expandedBanner.slot][expandedBanner.banner].subtitle}
                 </span>
                 {dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl && (
                   <button
                     onClick={() => window.open(dynamicBanners[expandedBanner.slot][expandedBanner.banner].redirectUrl, '_blank', 'noopener,noreferrer')}
                     style={{
-                      marginTop: '28px',
                       background: dynamicBanners[expandedBanner.slot][expandedBanner.banner].text || '#2D3277',
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '16px',
-                      padding: '14px 32px',
-                      fontSize: '1.2rem',
+                      padding: '16px 32px',
+                      fontSize: '1.25rem',
                       fontWeight: 800,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '10px',
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                      gap: '12px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
                       transition: 'all 0.2s'
                     }}
                     onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
@@ -4853,20 +4899,20 @@ function App() {
                     <span>Ver oferta en Mercado Libre</span>
                   </button>
                 )}
-              </>
+              </div>
             )}
             <button 
               onClick={() => setExpandedBanner(null)}
               style={{
                 position: 'absolute', top: '24px', right: '24px',
-                background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%',
+                background: 'rgba(0,0,0,0.06)', border: 'none', borderRadius: '50%',
                 width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#475569', cursor: 'pointer', transition: 'all 0.2s'
+                color: '#1e293b', cursor: 'pointer', transition: 'all 0.2s'
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.1)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.05)'}
+              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.12)'}
+              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
             >
-              <X size={24} />
+              <X size={22} />
             </button>
           </div>
         </div>
