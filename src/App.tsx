@@ -31,6 +31,7 @@ import { getApiBaseUrl } from './lib/api/envConfig';
 import TimetableModal, { getTodayDayLabel, formatSpecialLabel } from './components/TimetableModal';
 import MercadoLibreAdBanner from './components/MercadoLibreAdBanner';
 import MercadoLibreProductStrip from './components/MercadoLibreProductStrip';
+import MercadoLibreColumn from './components/MercadoLibreColumn';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
 import { StopIcon } from './components/icons/StopIcon';
@@ -4346,12 +4347,12 @@ function App() {
 
 
 
-        <div style={{ position: 'absolute', bottom: '36px', right: '16px', zIndex: 1000, pointerEvents: 'auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', userSelect: 'none', WebkitUserSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <a href="https://www.instagram.com/pordondeviene/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><InstagramIcon size={20} color="#334155" /></a>
-            <a href="#" style={{ display: 'flex' }}><FacebookIcon size={20} color="#334155" /></a>
-            <a href="https://x.com/pordondeviene" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><XIconSocial size={20} color="#334155" /></a>
-            <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><WhatsAppIcon size={20} color="#334155" /></a>
+        <div style={{ position: 'absolute', bottom: '36px', right: isMobile ? '16px' : '348px', zIndex: 900, pointerEvents: 'auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', userSelect: 'none', WebkitUserSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', transition: 'right 0.3s' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.85)', padding: '6px 12px', borderRadius: '20px', backdropFilter: 'blur(4px)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <a href="https://www.instagram.com/pordondeviene/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><InstagramIcon size={18} color="#334155" /></a>
+            <a href="#" style={{ display: 'flex' }}><FacebookIcon size={18} color="#334155" /></a>
+            <a href="https://x.com/pordondeviene" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><XIconSocial size={18} color="#334155" /></a>
+            <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><WhatsAppIcon size={18} color="#334155" /></a>
           </div>
         </div>
       </div>
@@ -4753,20 +4754,9 @@ function App() {
         />
       )}
 
-      {/* Mercado Libre Banner on Desktop */}
+      {/* Mercado Libre Column on Desktop (Columna Completa a la Derecha) */}
       {!isMobile && (
-        <div style={{ 
-          position: 'absolute', 
-          top: '20px', 
-          right: '20px', 
-          zIndex: 1000, 
-          width: isTablet ? '360px' : '440px', 
-          height: '96px',
-          pointerEvents: 'auto', 
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}>
-          <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" onOpenStrip={() => setShowProductModal(true)} />
-        </div>
+        <MercadoLibreColumn affiliateUrl="https://meli.la/1fwfx2Y" />
       )}
       
       {/* Expanded Banner Modal */}
