@@ -228,7 +228,7 @@ export default function AdvertiseHereColumn({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#059669', fontSize: '0.7rem', fontWeight: 700 }}>
                     <MapPin size={12} /> 100% Local
                   </div>
-                  <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Zárate y alrededores</div>
+                  <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Tu localidad y alrededores</div>
                 </div>
               </div>
             </div>
