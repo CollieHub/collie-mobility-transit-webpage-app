@@ -8,6 +8,8 @@ type Bindings = {
   AWS_ACCESS_KEY_ID?: string;
   AWS_SECRET_ACCESS_KEY?: string;
   AWS_REGION?: string;
+  MELI_APP_ID?: string;
+  MELI_CLIENT_SECRET?: string;
   ASSETS?: { fetch: (req: Request) => Promise<Response> };
 };
 
@@ -79,8 +81,114 @@ app.get('/v1/transit/ads', async (c) => {
   }
 });
 
-// Endpoint de Tira de Productos al Azar de Mercado Libre
+// Helper para obtener token de Mercado Libre con Client Credentials
+async function getMeliAccessToken(env: Bindings): Promise<string | null> {
+  const appId = env.MELI_APP_ID;
+  const clientSecret = env.MELI_CLIENT_SECRET;
+  if (!appId || !clientSecret) return null;
+
+  const cacheKey = 'meli_oauth_token';
+  if (env.FLEET_KV) {
+    try {
+      const cached = await env.FLEET_KV.get(cacheKey);
+      if (cached) return cached;
+    } catch (_) {}
+  }
+
+  try {
+    const res = await fetch('https://api.mercadolibre.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: appId,
+        client_secret: clientSecret
+      })
+    });
+    if (!res.ok) return null;
+    const data: any = await res.json();
+    if (data.access_token) {
+      if (env.FLEET_KV) {
+        try {
+          await env.FLEET_KV.put(cacheKey, data.access_token, { expirationTtl: 18000 });
+        } catch (_) {}
+      }
+      return data.access_token;
+    }
+  } catch (_) {}
+  return null;
+}
+
+// Endpoint de Tira de Productos al Azar de Mercado Libre (En Vivo vía API Oficial con fallback D1)
 app.get('/v1/transit/meli/products', async (c) => {
+  const queries = [
+    'ofertas tecnologia',
+    'auriculares bluetooth',
+    'smartwatch',
+    'cargador portatil power bank',
+    'mochila impermeable',
+    'termo mate',
+    'soporte celular auto'
+  ];
+  const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+
+  try {
+    const token = await getMeliAccessToken(c.env);
+    if (token) {
+      const searchRes = await fetch(
+        `https://api.mercadolibre.com/sites/MLA/search?q=${encodeURIComponent(randomQuery)}&limit=30`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (searchRes.ok) {
+        const searchData: any = await searchRes.json();
+        const results = searchData.results || [];
+        if (results.length > 0) {
+          // Mezclar al azar y seleccionar hasta 8 productos
+          const shuffled = results.sort(() => 0.5 - Math.random()).slice(0, 8);
+          const liveProducts = shuffled.map((item: any) => {
+            const price = typeof item.price === 'number' ? `$ ${item.price.toLocaleString('es-AR')}` : '';
+            const originalPrice = item.original_price && item.original_price > item.price
+              ? `$ ${item.original_price.toLocaleString('es-AR')}`
+              : '';
+            const discount = (item.original_price && item.original_price > item.price)
+              ? `${Math.round((1 - item.price / item.original_price) * 100)}% OFF`
+              : '';
+            const imageUrl = item.thumbnail
+              ? item.thumbnail.replace('http://', 'https://').replace('-I.jpg', '-O.jpg').replace('-I.webp', '-O.webp')
+              : 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&q=80';
+            const badge = item.official_store_name ? 'OFICIAL' : (item.shipping?.free_shipping ? '⚡ LLEGA HOY' : 'MÁS VENDIDO');
+            const installments = item.installments?.quantity
+              ? `${item.installments.quantity} cuotas ${item.installments.rate === 0 ? 'sin interés' : 'fijas'}`
+              : (item.shipping?.free_shipping ? 'Envío gratis' : 'Envío en el día');
+
+            return {
+              id: item.id || `meli-${Math.random().toString(36).substr(2, 9)}`,
+              title: item.title,
+              subtitle: item.domain_id || item.category_id || '',
+              imageUrl,
+              redirectUrl: item.permalink || 'https://meli.la/1fwfx2Y',
+              price,
+              originalPrice,
+              discount,
+              badge,
+              installments
+            };
+          });
+
+          return c.json({ success: true, count: liveProducts.length, source: 'meli-api-live', products: liveProducts });
+        }
+      }
+    }
+  } catch (apiErr: any) {
+    console.error('Error fetching live Mercado Libre API:', apiErr);
+  }
+
+  // Fallback transparente a D1 si la API externa no está disponible
   try {
     const res = await c.env.DB.prepare(
       'SELECT id, title, subtitle, image_url, redirect_url, price, original_price, discount, badge, installments FROM ads WHERE is_active = 1 AND price IS NOT NULL ORDER BY RANDOM() LIMIT 8'
@@ -90,7 +198,7 @@ app.get('/v1/transit/meli/products', async (c) => {
       id: row.id,
       title: row.title,
       subtitle: row.subtitle || '',
-      imageUrl: row.image_url || 'https://http2.mlstatic.com/D_NQ_NP_2X_709590-MLA74797686561_022024-F.webp',
+      imageUrl: row.image_url || 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400&q=80',
       redirectUrl: row.redirect_url || 'https://meli.la/1fwfx2Y',
       price: row.price || '',
       originalPrice: row.original_price || '',
@@ -99,7 +207,7 @@ app.get('/v1/transit/meli/products', async (c) => {
       installments: row.installments || 'Envío en el día'
     }));
 
-    return c.json({ success: true, count: products.length, products });
+    return c.json({ success: true, count: products.length, source: 'd1-fallback', products });
   } catch (err: any) {
     return c.json({ success: false, products: [], error: err.message });
   }
