@@ -1002,18 +1002,10 @@ const createBusIconTopDown = (color: string, bearing: number, labelLine1: string
       <div class="bus-sonar-pulse" style="border-color: ${auraColor}; background: ${auraBg}; box-shadow: ${auraGlow};"></div>
   ` : '';
 
-  const stopBadgeHtml = !isMoving ? `
-      <!-- Cartelito de STOP a la derecha con animación de pulso -->
-      <div style="position: absolute; left: 24px; top: 12px; background: #dc2626; border: 1.5px solid #ffffff; color: #ffffff; font-family: 'Inter', -apple-system, sans-serif; font-size: 9px; font-weight: 900; padding: 2px 7px; border-radius: 4px; pointer-events: auto; text-align: center; white-space: nowrap; z-index: 4000; display: flex; align-items: center; justify-content: center; letter-spacing: 0.5px; animation: stopPulse 1.2s infinite alternate; height: 16px;">
-        STOP
-      </div>
-  ` : '';
-
   const htmlCode = `
     <div style="position: relative; width: 18px; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
       ${labelHtml}
       ${sonarHtml}
-      ${stopBadgeHtml}
       <!-- Icono del bus con rotacion (el frente del bus se ancla en la línea del recorrido desplazado 1/4 hacia atrás) -->
       <div class="topdown-bus-vehicle" style="transform: rotate(${bearing}deg); transform-origin: 50% 37.5%; width: 18px; height: 40px; display: flex; align-items: center; justify-content: center; z-index: 2000;">
         ${createBusTopDownSvg(color)}
