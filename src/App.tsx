@@ -3219,9 +3219,6 @@ function App() {
           })()}
         </div>
       )}
-
-      {/* Tira de productos de Mercado Libre */}
-      <MercadoLibreProductStrip style={{ marginTop: '12px' }} />
     </div>
   );
 
