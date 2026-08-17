@@ -1949,6 +1949,54 @@ const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; 
     primaryKey: 'id',
     orderBy: 'display_order ASC, created_at DESC',
     fields: ['id', 'title', 'subtitle', 'image_url', 'redirect_url', 'color', 'border', 'text_color', 'display_order', 'is_active', 'created_at']
+  },
+  'redsube.caba.lines': {
+    label: 'Líneas (RedSUBE)',
+    primaryKey: 'linea_code',
+    orderBy: 'linea_code ASC',
+    fields: ['linea_code', 'display_name', 'agency_name', 'agency_id', 'color', 'last_updated']
+  },
+  'redsube.caba.branches': {
+    label: 'Ramales (RedSUBE)',
+    primaryKey: 'ramal_code',
+    orderBy: 'linea_code ASC, ramal_code ASC',
+    fields: ['ramal_code', 'linea_code', 'route_id', 'nombre_largo', 'headsign_ida', 'headsign_vuelta', 'shape_id_ida', 'shape_id_vuelta', 'color', 'last_updated']
+  },
+  'redsube.caba.agencies': {
+    label: 'Empresas (RedSUBE)',
+    primaryKey: 'empresa_id',
+    orderBy: 'empresa_id ASC',
+    fields: ['empresa_id', 'nombre', 'nombre_corto', 'marquesina_fallback', 'all_lines', 'all_ramales', 'last_updated']
+  },
+  'redsube.caba.gtfs_transit_unidad_recorrido': {
+    label: 'Telemetría Unidades (RedSUBE)',
+    primaryKey: 'vehicle_id',
+    orderBy: 'last_updated DESC',
+    fields: ['vehicle_id', 'linea_code', 'ramal_code', 'empresa_id', 'interno', 'patente', 'trip_id', 'route_id', 'shape_id', 'headsign', 'source', 'lat', 'lng', 'speed_kmh', 'bearing', 'last_updated']
+  },
+  'redsube.gtfs.routes': {
+    label: 'Rutas GTFS (RedSUBE)',
+    primaryKey: 'route_id',
+    orderBy: 'route_id ASC',
+    fields: ['route_id', 'agency_id', 'route_short_name', 'route_long_name', 'route_desc', 'route_type', 'route_color', 'route_text_color']
+  },
+  'redsube.gtfs.trips': {
+    label: 'Viajes GTFS (RedSUBE)',
+    primaryKey: 'trip_id',
+    orderBy: 'trip_id ASC',
+    fields: ['trip_id', 'route_id', 'service_id', 'trip_headsign', 'direction_id', 'shape_id']
+  },
+  'redsube.gtfs.stops': {
+    label: 'Paradas GTFS (RedSUBE)',
+    primaryKey: 'stop_id',
+    orderBy: 'stop_name ASC',
+    fields: ['stop_id', 'stop_name', 'stop_desc', 'stop_lat', 'stop_lon', 'zone_id']
+  },
+  'redsube.gtfs.shapes': {
+    label: 'Trazados / Shapes GTFS (RedSUBE)',
+    primaryKey: 'shape_id',
+    orderBy: 'shape_id ASC, shape_pt_sequence ASC',
+    fields: ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']
   }
 };
 
@@ -1986,8 +2034,8 @@ app.get('/v1/admin/table/:tableName', async (c) => {
   const search = (c.req.query('q') || '').trim().toLowerCase();
 
   try {
-    let countSql = `SELECT COUNT(*) as total FROM ${tableName}`;
-    let dataSql = `SELECT * FROM ${tableName}`;
+    let countSql = `SELECT COUNT(*) as total FROM "${tableName}"`;
+    let dataSql = `SELECT * FROM "${tableName}"`;
     const params: any[] = [];
     const whereConditions: string[] = [];
 
@@ -2040,146 +2088,75 @@ app.get('/v1/admin/table/:tableName', async (c) => {
 // POST /v1/admin/schedules/batch -> Guardado atómico ultrarrápido de grilla de horarios e ítems
 app.post('/v1/admin/schedules/batch', async (c) => {
   try {
-    const { schedule, items } = await c.req.json();
-    if (!schedule || !schedule.branch_id) {
-      return c.json({ success: false, error: 'Metadatos de horario inválidos' }, 400);
+    const body = await c.req.json();
+    const { schedules, items } = body;
+
+    if (!Array.isArray(schedules) || schedules.length === 0) {
+      return c.json({ success: false, error: 'Array de schedules requerido' }, 400);
     }
 
-    let scheduleId = schedule.id;
-    const activeDayTypeId = schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a';
+    const stmts: any[] = [];
 
-    if (!scheduleId && schedule.branch_id) {
-      const existing = await c.env.DB.prepare(
-        `SELECT id FROM schedules WHERE branch_id = ? AND direction = ? AND (day_types_id = ? OR day_types_id = ?)`
-      ).bind(schedule.branch_id, schedule.direction || 'ida', activeDayTypeId, schedule.day_types_id).all();
-      if (existing.results && existing.results.length > 0) {
-        scheduleId = (existing.results[0] as any).id;
+    for (const sch of schedules) {
+      if (!sch.id || !sch.branch_id || !sch.direction || !sch.day_types_id) {
+        return c.json({ success: false, error: 'Campos requeridos faltantes en schedule' }, 400);
       }
-    }
 
-    const statements: any[] = [];
-
-    // 1. Guardar o actualizar schedule maestro
-    if (scheduleId) {
-      statements.push(
+      stmts.push(
         c.env.DB.prepare(`
-          UPDATE schedules 
-          SET branch_id = ?, direction = ?, day_types_id = ?, name = ?, headers_json = ?, header_aliases_json = ?, stop_addresses_json = ? 
-          WHERE id = ?
-        `).bind(
-          schedule.branch_id,
-          schedule.direction || 'ida',
-          activeDayTypeId,
-          schedule.name || 'Grilla',
-          schedule.headers_json || '[]',
-          schedule.header_aliases_json || '[]',
-          schedule.stop_addresses_json || '[]',
-          scheduleId
-        )
-      );
-    } else {
-      scheduleId = `sched-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      statements.push(
-        c.env.DB.prepare(`
-          INSERT INTO schedules (id, branch_id, direction, day_types_id, name, headers_json, header_aliases_json, stop_addresses_json) 
+          INSERT INTO schedules (id, branch_id, direction, day_types_id, name, headers_json, header_aliases_json, stop_addresses_json)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(id) DO UPDATE SET
+            branch_id = excluded.branch_id,
+            direction = excluded.direction,
+            day_types_id = excluded.day_types_id,
+            name = excluded.name,
+            headers_json = excluded.headers_json,
+            header_aliases_json = excluded.header_aliases_json,
+            stop_addresses_json = excluded.stop_addresses_json
         `).bind(
-          scheduleId,
-          schedule.branch_id,
-          schedule.direction || 'ida',
-          schedule.day_types_id || '88f18fc3-ba8e-521a-a093-07db0825cf3a',
-          schedule.name || 'Grilla',
-          schedule.headers_json || '[]',
-          schedule.header_aliases_json || '[]',
-          schedule.stop_addresses_json || '[]'
+          sch.id,
+          sch.branch_id,
+          sch.direction,
+          sch.day_types_id,
+          sch.name || '',
+          typeof sch.headers_json === 'string' ? sch.headers_json : JSON.stringify(sch.headers_json || []),
+          typeof sch.header_aliases_json === 'string' ? sch.header_aliases_json : JSON.stringify(sch.header_aliases_json || {}),
+          typeof sch.stop_addresses_json === 'string' ? sch.stop_addresses_json : JSON.stringify(sch.stop_addresses_json || {})
         )
       );
-    }
 
-    // 2. Limpiar e insertar ítems solo si 'items' fue enviado explícitamente en el cuerpo del request
-    if (Array.isArray(items)) {
-      statements.push(
-        c.env.DB.prepare('DELETE FROM schedule_items WHERE schedule_id = ?').bind(scheduleId)
+      stmts.push(
+        c.env.DB.prepare(`DELETE FROM schedule_items WHERE schedule_id = ?`).bind(sch.id)
       );
-
-      if (items.length > 0) {
-        items.forEach((item: any, idx: number) => {
-          const itemId = `sitem-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`;
-          statements.push(
-            c.env.DB.prepare(`
-              INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
-              VALUES (?, ?, ?, ?, ?)
-            `).bind(
-              itemId,
-              scheduleId,
-              item.departure_time || '00:00',
-              item.dispatch_order || (idx + 1),
-              typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || [])
-            )
-          );
-        });
-      }
     }
 
-    // 3. Sincronizar columna is_control_point en la tabla stops para este ramal y sentido
-    let stopAddrs: string[] = [];
-    try {
-      if (typeof schedule.stop_addresses_json === 'string') {
-        stopAddrs = JSON.parse(schedule.stop_addresses_json || '[]');
-      } else if (Array.isArray(schedule.stop_addresses_json)) {
-        stopAddrs = schedule.stop_addresses_json;
-      }
-    } catch (_) {}
-
-    if (stopAddrs.length === 0 && schedule.headers_json) {
-      try {
-        if (typeof schedule.headers_json === 'string') {
-          stopAddrs = JSON.parse(schedule.headers_json || '[]');
-        } else if (Array.isArray(schedule.headers_json)) {
-          stopAddrs = schedule.headers_json;
-        }
-      } catch (_) {}
-    }
-
-    if (stopAddrs.length > 0) {
-      statements.push(
-        c.env.DB.prepare('UPDATE stops SET is_control_point = 0 WHERE branch_id = ? AND direction = ?').bind(schedule.branch_id, schedule.direction || 'ida')
-      );
-
-      stopAddrs.forEach(addr => {
-        if (!addr) return;
-        const cleanA = addr.replace(/^\d+[\.\s\-]+\s*/, '').trim();
-        statements.push(
+    if (Array.isArray(items) && items.length > 0) {
+      for (const item of items) {
+        const itemId = item.id || `item-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        stmts.push(
           c.env.DB.prepare(`
-            UPDATE stops 
-            SET is_control_point = 1 
-            WHERE branch_id = ? AND direction = ? AND (
-              name = ? OR id = ? OR name = ? OR name LIKE ? OR name LIKE ?
-            )
+            INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
+            VALUES (?, ?, ?, ?, ?)
           `).bind(
-            schedule.branch_id, 
-            schedule.direction || 'ida', 
-            addr, 
-            addr, 
-            cleanA, 
-            `%${cleanA}%`,
-            `%. ${cleanA}%`
+            itemId,
+            item.schedule_id,
+            item.departure_time || '',
+            item.dispatch_order || 0,
+            typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || {})
           )
         );
-      });
+      }
     }
 
-    // Ejecución masiva atómica en D1 (1 solo viaje de red)
-    await c.env.DB.batch(statements);
-
-    // Purgar caché KV una única vez al finalizar
-    await triggerKVAutoPurge(c.env);
+    const batchRes = await c.env.DB.batch(stmts);
+    const cachePurged = await triggerKVAutoPurge(c.env);
 
     return c.json({
       success: true,
-      scheduleId,
-      itemsCount: items ? items.length : 0,
-      message: 'Grilla de horarios guardada exitosamente en una sola operación atómica'
+      message: `Batch guardado exitosamente: ${schedules.length} plantillas y ${items?.length || 0} salidas/despachos`,
+      executed_statements: batchRes.length,
+      cache_purged: cachePurged
     });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
@@ -2221,7 +2198,7 @@ app.post('/v1/admin/table/:tableName', async (c) => {
       return c.json({ success: false, error: 'No se enviaron datos para insertar' }, 400);
     }
 
-    const insertSql = `INSERT INTO ${tableName} (${colsToInsert.join(', ')}) VALUES (${valPlaceholders.join(', ')})`;
+    const insertSql = `INSERT INTO "${tableName}" (${colsToInsert.join(', ')}) VALUES (${valPlaceholders.join(', ')})`;
     await c.env.DB.prepare(insertSql).bind(...values).run();
 
     const cachePurged = await triggerKVAutoPurge(c.env);
@@ -2267,7 +2244,7 @@ app.put('/v1/admin/table/:tableName/:id', async (c) => {
     }
 
     values.push(recordId);
-    const updateSql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE ${tableConfig.primaryKey} = ?`;
+    const updateSql = `UPDATE "${tableName}" SET ${setClauses.join(', ')} WHERE ${tableConfig.primaryKey} = ?`;
     const res = await c.env.DB.prepare(updateSql).bind(...values).run();
 
     if (res.meta.changes === 0) {
@@ -2296,7 +2273,7 @@ app.delete('/v1/admin/table/:tableName/:id', async (c) => {
   }
 
   try {
-    const deleteSql = `DELETE FROM ${tableName} WHERE ${tableConfig.primaryKey} = ?`;
+    const deleteSql = `DELETE FROM "${tableName}" WHERE ${tableConfig.primaryKey} = ?`;
     const res = await c.env.DB.prepare(deleteSql).bind(recordId).run();
 
     if (res.meta.changes === 0) {

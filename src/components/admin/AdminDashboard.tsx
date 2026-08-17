@@ -72,6 +72,19 @@ const NAVIGATION_GROUPS = [
       { key: 'route_shapes', label: 'Trazados (Shapes)', icon: RouteIcon },
       { key: 'ads', label: 'Anuncios & Alertas', icon: MegaphoneIcon },
     ]
+  },
+  {
+    title: 'RedSUBE (Nacional / CABA)',
+    items: [
+      { key: 'redsube.caba.lines', label: 'Líneas RedSUBE', icon: BusIcon },
+      { key: 'redsube.caba.branches', label: 'Ramales RedSUBE', icon: BranchIcon },
+      { key: 'redsube.caba.agencies', label: 'Empresas RedSUBE', icon: BuildingIcon },
+      { key: 'redsube.caba.gtfs_transit_unidad_recorrido', label: 'Telemetría / GPS RedSUBE', icon: ActivityIcon },
+      { key: 'redsube.gtfs.routes', label: 'Rutas GTFS', icon: RouteIcon },
+      { key: 'redsube.gtfs.trips', label: 'Viajes GTFS', icon: ClockIcon },
+      { key: 'redsube.gtfs.shapes', label: 'Trazados Shapes GTFS', icon: RouteIcon },
+      { key: 'redsube.gtfs.stops', label: 'Paradas GTFS', icon: MapPinIcon },
+    ]
   }
 ];
 
