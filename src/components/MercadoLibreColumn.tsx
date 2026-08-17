@@ -27,7 +27,7 @@ export default function MercadoLibreColumn({
         position: 'absolute',
         top: '64px',
         right: '16px',
-        bottom: '96px',
+        bottom: '80px',
         width: isCollapsed ? '48px' : '320px',
         zIndex: 1000,
         background: '#ffffff',

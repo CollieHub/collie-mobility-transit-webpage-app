@@ -4346,13 +4346,12 @@ function App() {
 
         <div style={{
           position: 'absolute',
-          bottom: '38px',
+          bottom: '35px',
           right: '16px',
-          width: isMobile ? 'auto' : '320px',
           zIndex: 1000,
           pointerEvents: 'auto',
           display: 'flex',
-          justifyContent: isMobile ? 'flex-end' : 'center',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           userSelect: 'none',
           WebkitUserSelect: 'none'
@@ -4360,9 +4359,9 @@ function App() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '14px',
+            gap: '12px',
             background: 'rgba(255, 255, 255, 0.95)',
-            padding: '6px 18px',
+            padding: '5px 14px',
             borderRadius: '20px',
             backdropFilter: 'blur(8px)',
             boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
