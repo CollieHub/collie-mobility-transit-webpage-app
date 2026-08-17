@@ -4346,9 +4346,9 @@ function App() {
 
         <div style={{
           position: 'absolute',
-          bottom: '35px',
+          bottom: '44px',
           right: '16px',
-          zIndex: 1000,
+          zIndex: 1100,
           pointerEvents: 'auto',
           display: 'flex',
           justifyContent: 'flex-end',
