@@ -473,6 +473,15 @@ function App() {
   const [availableLines, setAvailableLines] = useState<string[]>(['SIT']);
   const [calendarExceptions, setCalendarExceptions] = useState<any[]>([]);
 
+  // ⏱️ Auto-refresco en tiempo real (Heartbeat): actualiza contadores de servicios activos cada 5s automáticamente
+  const [clockTick, setClockTick] = useState<number>(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setClockTick(Date.now());
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   const [showDebugConsole, setShowDebugConsole] = useState(false);
   const [simulationLogs, setSimulationLogs] = useState<string[]>([]);
   const [logFilter, setLogFilter] = useState<'all' | 'delayed' | 'ontime'>('all');
@@ -2218,17 +2227,17 @@ function App() {
 
   const getRouteActiveUnitsCount = (route: any, direction?: 'ida' | 'vuelta') => {
     if (!route) return 0;
-    const serverVal = direction 
-      ? (direction === 'ida' ? route.active_units_ida : route.active_units_vuelta) 
-      : route.active_units_count;
+    const isRealGps = (bus: any) => bus && (bus.isGps === true || bus.is_gps === true) && !bus.isSimulated && !bus.is_simulated && !String(bus.id || '').startsWith('sim-');
+    
     if (direction) {
-      const gpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isBusMatchingDirection(bus, direction)).length;
+      const realGpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isBusMatchingDirection(bus, direction) && isRealGps(bus)).length;
       const schCount = getScheduleActiveCount(route, direction);
-      return Math.max(gpsCount, schCount, serverVal || 0);
+      return realGpsCount > 0 ? realGpsCount : schCount;
     }
-    const gpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route)).length;
+    
+    const realGpsCount = liveBuses.filter((bus: any) => isBusMatchingRoute(bus, route) && isRealGps(bus)).length;
     const schCount = getScheduleActiveCount(route);
-    return Math.max(gpsCount, schCount, serverVal || 0);
+    return realGpsCount > 0 ? realGpsCount : schCount;
   };
 
   const renderRouteCard = (route: any, idx: number) => {
