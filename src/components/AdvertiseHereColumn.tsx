@@ -16,7 +16,7 @@ export default function AdvertiseHereColumn({
   className = '',
   style = {}
 }: AdvertiseHereColumnProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
     <div
