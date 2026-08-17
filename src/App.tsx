@@ -29,7 +29,7 @@ const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/ejemplo-canal-configu
 import TransitMap from './components/TransitMap';
 import { getApiBaseUrl } from './lib/api/envConfig';
 import TimetableModal, { getTodayDayLabel, formatSpecialLabel } from './components/TimetableModal';
-import DraggableBannerCarousel from './components/DraggableBannerCarousel';
+import MercadoLibreAdBanner from './components/MercadoLibreAdBanner';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
 import { StopIcon } from './components/icons/StopIcon';
@@ -3584,23 +3584,10 @@ function App() {
           </div>
         )}
 
-        {/* Banners on Mobile */}
-        {((config.banners_webpage_enabled || config.banners_enabled || config.banners_mobile_enabled) || (dynamicBanners[0] && dynamicBanners[0].length > 0)) && !isPWA && (
-          <div style={{ position: 'absolute', top: '20px', left: '16px', right: '16px', height: '100px', zIndex: 1000, pointerEvents: 'none' }}>
-            <DraggableBannerCarousel 
-              key="mobile-banner"
-              slotIndex={0}
-              activeBanner={bannerStates[0]}
-              banners={dynamicBanners[0] || []}
-              onBannerChange={(newIdx) => {
-                setBannerStates(prev => {
-                  const next = [...prev];
-                  next[0] = newIdx;
-                  return next;
-                });
-              }}
-              onBannerDoubleClick={(bannerIdx) => setExpandedBanner({ slot: 0, banner: bannerIdx })}
-            />
+        {/* Mercado Libre Banner on Mobile */}
+        {!isPWA && (
+          <div style={{ position: 'absolute', top: '16px', left: '16px', right: '16px', height: '88px', zIndex: 1000, pointerEvents: 'auto' }}>
+            <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" />
           </div>
         )}
 
@@ -4761,38 +4748,19 @@ function App() {
         />
       )}
 
-      {/* Banners Mercado Libre / Publicidades en Escritorio */}
-      {!isMobile && (dynamicBanners[0] && dynamicBanners[0].length > 0) && (
+      {/* Mercado Libre Banner on Desktop */}
+      {!isMobile && (
         <div style={{ 
           position: 'absolute', 
-          top: '24px', 
-          right: '24px', 
+          top: '20px', 
+          right: '20px', 
           zIndex: 1000, 
-          width: isTablet ? '380px' : '480px', 
-          height: '160px',
-          display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'flex-start', 
+          width: isTablet ? '360px' : '440px', 
+          height: '96px',
           pointerEvents: 'auto', 
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden',
-          borderRadius: '20px',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.25)'
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
-          <DraggableBannerCarousel 
-            key="desktop-banner"
-            slotIndex={0}
-            activeBanner={bannerStates[0]}
-            banners={dynamicBanners[0] || []}
-            onBannerChange={(newIdx) => {
-              setBannerStates(prev => {
-                const next = [...prev];
-                next[0] = newIdx;
-                return next;
-              });
-            }}
-            onBannerDoubleClick={(bannerIdx) => setExpandedBanner({ slot: 0, banner: bannerIdx })}
-          />
+          <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" />
         </div>
       )}
       
