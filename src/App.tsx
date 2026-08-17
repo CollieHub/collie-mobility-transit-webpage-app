@@ -3587,8 +3587,8 @@ function App() {
           </div>
         )}
 
-        {/* Mercado Libre Banner on Mobile */}
-        {!isPWA && (
+        {/* Mercado Libre Banner on Mobile (Solo visible si el usuario está logueado) */}
+        {!isPWA && isAdmin && (
           <div style={{ position: 'absolute', top: '16px', left: '16px', right: '16px', height: '88px', zIndex: 1000, pointerEvents: 'auto' }}>
             <MercadoLibreAdBanner affiliateUrl="https://meli.la/1fwfx2Y" onOpenStrip={() => setShowProductModal(true)} />
           </div>
@@ -4772,8 +4772,8 @@ function App() {
         />
       )}
 
-      {/* Mercado Libre Column on Desktop (Columna Completa a la Derecha) */}
-      {!isMobile && (
+      {/* Mercado Libre Column on Desktop (Solo visible si el usuario está logueado) */}
+      {!isMobile && isAdmin && (
         <MercadoLibreColumn affiliateUrl="https://meli.la/1fwfx2Y" />
       )}
       
