@@ -1225,12 +1225,12 @@ app.post('/v1/admin/kml/integrate', async (c) => {
 
       if (existingShape && (existingShape as any).id) {
         statements.push(
-          c.env.DB.prepare('UPDATE route_shapes SET coordinates_json = ? WHERE id = ?').bind(shapeJson, (existingShape as any).id)
+          c.env.DB.prepare('UPDATE "arg.core.route_shapes" SET coordinates_json = ? WHERE id = ?').bind(shapeJson, (existingShape as any).id)
         );
       } else {
         const newShapeId = `shape-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
         statements.push(
-          c.env.DB.prepare('INSERT INTO route_shapes (id, branch_id, direction, coordinates_json) VALUES (?, ?, ?, ?)').bind(newShapeId, branch_id, direction, shapeJson)
+          c.env.DB.prepare('INSERT INTO "arg.core.route_shapes" (id, branch_id, direction, coordinates_json) VALUES (?, ?, ?, ?)').bind(newShapeId, branch_id, direction, shapeJson)
         );
       }
     }
@@ -1238,7 +1238,7 @@ app.post('/v1/admin/kml/integrate', async (c) => {
     // 2. Guardar Paradas si import_stops es verdadero
     if (import_stops && Array.isArray(stops) && stops.length > 0) {
       statements.push(
-        c.env.DB.prepare('DELETE FROM stops WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
+        c.env.DB.prepare('DELETE FROM "arg.core.stops" WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
       );
 
       stops.forEach((st: any, idx: number) => {
@@ -1248,7 +1248,7 @@ app.post('/v1/admin/kml/integrate', async (c) => {
         const isCtrl = st.is_control_point === 1 ? 1 : 0;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO "arg.core.stops" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
           ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng, isCtrl)
         );
       });
@@ -1281,7 +1281,7 @@ app.post('/v1/admin/stops/batch', async (c) => {
 
     // 1. Eliminar paradas existentes de esa rama y sentido
     statements.push(
-      c.env.DB.prepare('DELETE FROM stops WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
+      c.env.DB.prepare('DELETE FROM "arg.core.stops" WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
     );
 
     // 2. Insertar paradas actualizadas
@@ -1293,7 +1293,7 @@ app.post('/v1/admin/stops/batch', async (c) => {
         const isCtrl = st.is_control_point === 1 ? 1 : 0;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO stops (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO "arg.core.stops" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
           ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng, isCtrl)
         );
       });
@@ -2087,6 +2087,13 @@ app.get('/v1/admin/table/:tableName', async (c) => {
   }
 });
 
+// Helper para mapear vistas de compatibilidad SQLite a sus tablas físicas subyacentes
+function getPhysicalTableName(tableName: string): string {
+  if (tableName.includes('.')) return tableName;
+  if (tableName === 'ads') return 'ads';
+  return `arg.core.${tableName}`;
+}
+
 // POST /v1/admin/schedules/batch -> Guardado atómico ultrarrápido de grilla de horarios e ítems
 app.post('/v1/admin/schedules/batch', async (c) => {
   try {
@@ -2116,7 +2123,7 @@ app.post('/v1/admin/schedules/batch', async (c) => {
 
       stmts.push(
         c.env.DB.prepare(`
-          INSERT INTO schedules (id, branch_id, direction, day_types_id, name, headers_json, header_aliases_json, stop_addresses_json)
+          INSERT INTO "arg.core.schedules" (id, branch_id, direction, day_types_id, name, headers_json, header_aliases_json, stop_addresses_json)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(id) DO UPDATE SET
             branch_id = excluded.branch_id,
@@ -2139,7 +2146,7 @@ app.post('/v1/admin/schedules/batch', async (c) => {
       );
 
       stmts.push(
-        c.env.DB.prepare(`DELETE FROM schedule_items WHERE schedule_id = ?`).bind(schId)
+        c.env.DB.prepare(`DELETE FROM "arg.core.schedule_items" WHERE schedule_id = ?`).bind(schId)
       );
     }
 
@@ -2150,7 +2157,7 @@ app.post('/v1/admin/schedules/batch', async (c) => {
         const targetScheduleId = item.schedule_id || primaryScheduleId;
         stmts.push(
           c.env.DB.prepare(`
-            INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
+            INSERT INTO "arg.core.schedule_items" (id, schedule_id, departure_time, dispatch_order, trip_times_json)
             VALUES (?, ?, ?, ?, ?)
           `).bind(
             itemId,
@@ -2214,7 +2221,8 @@ app.post('/v1/admin/table/:tableName', async (c) => {
       return c.json({ success: false, error: 'No se enviaron datos para insertar' }, 400);
     }
 
-    const insertSql = `INSERT INTO "${tableName}" (${colsToInsert.join(', ')}) VALUES (${valPlaceholders.join(', ')})`;
+    const physicalTable = getPhysicalTableName(tableName);
+    const insertSql = `INSERT INTO "${physicalTable}" (${colsToInsert.join(', ')}) VALUES (${valPlaceholders.join(', ')})`;
     await c.env.DB.prepare(insertSql).bind(...values).run();
 
     const cachePurged = await triggerKVAutoPurge(c.env);
@@ -2260,7 +2268,8 @@ app.put('/v1/admin/table/:tableName/:id', async (c) => {
     }
 
     values.push(recordId);
-    const updateSql = `UPDATE "${tableName}" SET ${setClauses.join(', ')} WHERE ${tableConfig.primaryKey} = ?`;
+    const physicalTable = getPhysicalTableName(tableName);
+    const updateSql = `UPDATE "${physicalTable}" SET ${setClauses.join(', ')} WHERE ${tableConfig.primaryKey} = ?`;
     const res = await c.env.DB.prepare(updateSql).bind(...values).run();
 
     if (res.meta.changes === 0) {
@@ -2289,11 +2298,12 @@ app.delete('/v1/admin/table/:tableName/:id', async (c) => {
   }
 
   try {
-    const deleteSql = `DELETE FROM "${tableName}" WHERE ${tableConfig.primaryKey} = ?`;
+    const physicalTable = getPhysicalTableName(tableName);
+    const deleteSql = `DELETE FROM "${physicalTable}" WHERE ${tableConfig.primaryKey} = ?`;
     const res = await c.env.DB.prepare(deleteSql).bind(recordId).run();
 
     if (res.meta.changes === 0) {
-      return c.json({ success: false, error: `No se encontró el registro '${recordId}' en '${tableName}'` }, 404);
+      return c.json({ success: false, error: `No se encontró registro con ID '${recordId}' en '${tableName}'` }, 404);
     }
 
     const cachePurged = await triggerKVAutoPurge(c.env);
