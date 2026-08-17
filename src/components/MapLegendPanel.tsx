@@ -23,7 +23,7 @@ export default function MapLegendPanel({
         className={`map-legend-pill ${className}`}
         style={{
           position: 'absolute',
-          bottom: '26px',
+          bottom: '48px',
           left: sidebarOpen ? (isTablet ? '336px' : '406px') : '16px',
           zIndex: 1100,
           background: 'rgba(255, 255, 255, 0.95)',
@@ -57,7 +57,7 @@ export default function MapLegendPanel({
       className={`map-legend-panel ${className}`}
       style={{
         position: 'absolute',
-        bottom: '26px',
+        bottom: '48px',
         left: sidebarOpen ? (isTablet ? '336px' : '406px') : '16px',
         zIndex: 1100,
         width: '320px',
