@@ -1825,20 +1825,19 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
       
       // Determinar el dayType base y el dayType de excepción
       let baseDayType = 'weekday';
-      if (dayLabel === 'sunday_holiday') {
-        baseDayType = 'sunday';
-      } else if (dayLabel === 'saturday') {
+      if (dayLabel === 'sunday_holiday' || dayLabel === 'sunday' || dayLabel === 'domingos_feriados') {
+        baseDayType = 'sunday_holiday';
+      } else if (dayLabel === 'saturday' || dayLabel === 'sabados') {
         baseDayType = 'saturday';
-      } else if (dayLabel !== 'weekday') {
+      } else if (dayLabel !== 'weekday' && dayLabel !== 'lunes_a_viernes') {
         // Es un dayType especial de excepción (ej: special_lunes_a_viernes_invierno)
-        // Determinar el base subyacente
         const lower = dayLabel.toLowerCase();
         if (lower.includes('lunes') || lower.includes('weekday') || lower.includes('invierno')) {
           baseDayType = 'weekday';
         } else if (lower.includes('sabado') || lower.includes('saturday')) {
           baseDayType = 'saturday';
         } else if (lower.includes('domingo') || lower.includes('sunday') || lower.includes('feriado') || lower.includes('holiday')) {
-          baseDayType = 'sunday';
+          baseDayType = 'sunday_holiday';
         }
       }
     
@@ -1853,15 +1852,14 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         const validStops = route.stops?.filter((s: any) => s.direction === dirKey) || [];
         const trips = sch.trips || [];
         
-        // Primero intentar con el dayType exacto de la excepción (ej: special_lunes_a_viernes_invierno)
-        let activeTrips = dayLabel !== baseDayType 
-          ? trips.filter((t: any) => t.service_type === dayLabel)
-          : [];
-        
-        // No utilizar fallbacks cruzados entre días distintos
-        if (dayLabel !== baseDayType && activeTrips.length === 0) {
-          // No simular viajes de otro tipo de día si no hay horarios cargados para este día especial
-        }
+        // Filtrar viajes activos para el tipo de día actual
+        let activeTrips = trips.filter((t: any) => 
+          t.service_type === dayLabel || 
+          t.service_type === baseDayType ||
+          (baseDayType === 'sunday_holiday' && (t.service_type === 'domingos_feriados' || t.service_type === 'sunday' || t.service_type === 'holiday')) ||
+          (baseDayType === 'weekday' && (t.service_type === 'lunes_a_viernes' || t.service_type === 'weekday')) ||
+          (baseDayType === 'saturday' && (t.service_type === 'sabados' || t.service_type === 'saturday'))
+        );
         
         if (validStops.length < 2) {
           return;
