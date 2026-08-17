@@ -4898,7 +4898,10 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
         {visibleBuses.map((bus, i) => {
           const route = transitRoutes.find((r: any) => r.id === bus.routeId);
           const direction = route?.directions?.find((d: any) => d.direction === bus.dir);
-          const shapeCoords = direction?.coordinates || null;
+          const rawCoords = direction?.coordinates || null;
+          const shapeCoords: [number, number][] | null = Array.isArray(rawCoords) && rawCoords.length >= 2
+            ? rawCoords.map((c: any) => Array.isArray(c) ? [c[0], c[1]] : [c.lat, c.lng])
+            : null;
           
           let totalTrips;
           let startTime = bus.startTime;
