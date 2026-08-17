@@ -3747,9 +3747,9 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
           };
         },
         (error) => {
-          console.warn("Error obtaining geolocation: ", error);
+          // kCLErrorLocationUnknown / TIMEOUT en navegadores de escritorio sin GPS
         },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 10000 }
       );
       return () => navigator.geolocation.clearWatch(watchId);
     }
