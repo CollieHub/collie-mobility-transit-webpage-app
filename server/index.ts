@@ -2091,18 +2091,28 @@ app.get('/v1/admin/table/:tableName', async (c) => {
 app.post('/v1/admin/schedules/batch', async (c) => {
   try {
     const body = await c.req.json();
-    const { schedules, items } = body;
+    const rawSchedules = Array.isArray(body.schedules)
+      ? body.schedules
+      : body.schedule
+        ? [body.schedule]
+        : [];
+    const items = Array.isArray(body.items) ? body.items : [];
 
-    if (!Array.isArray(schedules) || schedules.length === 0) {
-      return c.json({ success: false, error: 'Array de schedules requerido' }, 400);
+    if (rawSchedules.length === 0) {
+      return c.json({ success: false, error: 'Array de schedules o schedule requerido' }, 400);
     }
 
     const stmts: any[] = [];
+    const savedScheduleIds: string[] = [];
 
-    for (const sch of schedules) {
-      if (!sch.id || !sch.branch_id || !sch.direction || !sch.day_types_id) {
-        return c.json({ success: false, error: 'Campos requeridos faltantes en schedule' }, 400);
+    for (const sch of rawSchedules) {
+      if (!sch.branch_id || !sch.direction || !sch.day_types_id) {
+        return c.json({ success: false, error: 'Campos requeridos faltantes en schedule (branch_id, direction, day_types_id)' }, 400);
       }
+
+      const schId = sch.id || `sch-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      sch.id = schId;
+      savedScheduleIds.push(schId);
 
       stmts.push(
         c.env.DB.prepare(`
@@ -2117,7 +2127,7 @@ app.post('/v1/admin/schedules/batch', async (c) => {
             header_aliases_json = excluded.header_aliases_json,
             stop_addresses_json = excluded.stop_addresses_json
         `).bind(
-          sch.id,
+          schId,
           sch.branch_id,
           sch.direction,
           sch.day_types_id,
@@ -2129,20 +2139,22 @@ app.post('/v1/admin/schedules/batch', async (c) => {
       );
 
       stmts.push(
-        c.env.DB.prepare(`DELETE FROM schedule_items WHERE schedule_id = ?`).bind(sch.id)
+        c.env.DB.prepare(`DELETE FROM schedule_items WHERE schedule_id = ?`).bind(schId)
       );
     }
 
-    if (Array.isArray(items) && items.length > 0) {
+    if (items.length > 0) {
+      const primaryScheduleId = savedScheduleIds[0];
       for (const item of items) {
         const itemId = item.id || `item-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        const targetScheduleId = item.schedule_id || primaryScheduleId;
         stmts.push(
           c.env.DB.prepare(`
             INSERT INTO schedule_items (id, schedule_id, departure_time, dispatch_order, trip_times_json)
             VALUES (?, ?, ?, ?, ?)
           `).bind(
             itemId,
-            item.schedule_id,
+            targetScheduleId,
             item.departure_time || '',
             item.dispatch_order || 0,
             typeof item.trip_times_json === 'string' ? item.trip_times_json : JSON.stringify(item.trip_times_json || {})
@@ -2156,7 +2168,9 @@ app.post('/v1/admin/schedules/batch', async (c) => {
 
     return c.json({
       success: true,
-      message: `Batch guardado exitosamente: ${schedules.length} plantillas y ${items?.length || 0} salidas/despachos`,
+      message: `Batch guardado exitosamente: ${rawSchedules.length} plantillas y ${items.length} salidas/despachos`,
+      scheduleId: savedScheduleIds[0],
+      scheduleIds: savedScheduleIds,
       executed_statements: batchRes.length,
       cache_purged: cachePurged
     });
