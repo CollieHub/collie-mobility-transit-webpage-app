@@ -94,6 +94,37 @@ export default function AdvertiseHereColumn({
           {isCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </button>
 
+        {/* Marca de Agua Diagonal "PRÓXIMAMENTE" */}
+        {!isCollapsed && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '48%',
+              left: '-30%',
+              right: '-30%',
+              transform: 'translateY(-50%) rotate(-24deg)',
+              background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.88) 0%, rgba(190, 18, 60, 0.94) 100%)',
+              color: '#ffffff',
+              textAlign: 'center',
+              fontWeight: 900,
+              fontSize: '1.25rem',
+              letterSpacing: '5px',
+              padding: '10px 0',
+              textTransform: 'uppercase',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35)',
+              borderTop: '2px solid rgba(255, 255, 255, 0.6)',
+              borderBottom: '2px solid rgba(255, 255, 255, 0.6)',
+              zIndex: 60,
+              pointerEvents: 'none',
+              userSelect: 'none',
+              backdropFilter: 'blur(3px)',
+              textShadow: '0 2px 6px rgba(0,0,0,0.5)'
+            }}
+          >
+            PRÓXIMAMENTE
+          </div>
+        )}
+
         {/* Collapsed State: Vertical Strip */}
         {isCollapsed ? (
           <div
