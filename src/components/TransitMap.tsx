@@ -2468,12 +2468,17 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     }
 
     const currentRoutes = routesRef.current || [];
-    const ramalesMap: Record<string, { path?: any[]; stops?: any[] }> = {};
+    const ramalesMap: Record<string, { path?: any[]; stops?: any[]; idaPath?: any[]; vueltaPath?: any[] }> = {};
 
     currentRoutes.forEach((r: any) => {
       if (r.id) {
         const idaPath = routePathData[r.id]?.ida?.coordinates?.map((c: any) => ({ lat: c[0], lng: c[1] })) || [];
-        ramalesMap[r.id] = { path: idaPath };
+        const vueltaPath = routePathData[r.id]?.vuelta?.coordinates?.map((c: any) => ({ lat: c[0], lng: c[1] })) || [];
+        ramalesMap[r.id] = { 
+          path: idaPath,
+          idaPath,
+          vueltaPath
+        };
       }
     });
 
@@ -2531,8 +2536,25 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
     const smoothScheduledVehicles = matchResult.matchedScheduledVehicles.map((v: any) => {
       const matchedRoute = findMatchedRoute(v);
       const routeColor = matchedRoute?.color || v.color || '#800080';
+
+      // Si es un colectivo simulado por horario sin acoplamiento de GPS real, mantener intacta la posición exacta calculada por el simulador
+      if (!v.hasRealGpsMatch) {
+        const lat = v.pos?.[0] || v.lat || v.latitude || 0;
+        const lng = v.pos?.[1] || v.lng || v.longitude || 0;
+        return {
+          ...v,
+          color: routeColor,
+          lat,
+          lng,
+          latitude: lat,
+          longitude: lng,
+          pos: [lat, lng]
+        };
+      }
+
       const tripId = v.trip_id || v.routeId;
-      const path = tripId ? ramalesMap[tripId]?.path || [] : [];
+      const ramal = tripId ? ramalesMap[tripId] : null;
+      const path = v.dir === 'vuelta' ? (ramal?.vueltaPath || ramal?.path || []) : (ramal?.idaPath || ramal?.path || []);
 
       if (path && path.length > 1) {
         const rawPos: [number, number] = [v.latitude || v.lat || 0, v.longitude || v.lng || 0];
@@ -2559,7 +2581,10 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
 
       return {
         ...v,
-        color: routeColor
+        color: routeColor,
+        lat: v.latitude || v.lat || 0,
+        lng: v.longitude || v.lng || 0,
+        pos: [v.latitude || v.lat || 0, v.longitude || v.lng || 0]
       };
     });
 
@@ -4886,34 +4911,35 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
 
             if (!scheduleForBus) {
               const lowerDay = (todayType || '').toLowerCase();
-              let specialPrefixes: string[] = [];
-              if (lowerDay.includes('weekday') || lowerDay.includes('lunes_a_viernes') || lowerDay.includes('invierno')) {
-                specialPrefixes = ['special_lunes_a_viernes_invierno', 'special_weekday_invierno', 'special_lunes_a_viernes', 'special_weekday'];
+              let candidateKeys: string[] = [];
+              if (lowerDay.includes('sunday') || lowerDay.includes('domingo') || lowerDay.includes('feriado')) {
+                candidateKeys = [`domingos_feriados${dirSuffix}`, `domingo_feriado${dirSuffix}`, `sunday_holiday${dirSuffix}`, `sunday${dirSuffix}`, `holiday${dirSuffix}`];
               } else if (lowerDay.includes('saturday') || lowerDay.includes('sabado')) {
-                specialPrefixes = ['special_sabado_invierno', 'special_sabado', 'special_saturday'];
-              } else if (lowerDay.includes('sunday') || lowerDay.includes('domingo') || lowerDay.includes('sunday_holiday')) {
-                specialPrefixes = ['special_domingo_invierno', 'special_domingo', 'special_sunday'];
-              } else if (lowerDay.includes('holiday') || lowerDay.includes('feriado')) {
-                specialPrefixes = ['special_feriado_invierno', 'special_feriado', 'special_holiday'];
+                candidateKeys = [`sabados${dirSuffix}`, `sabado${dirSuffix}`, `saturday${dirSuffix}`];
+              } else {
+                candidateKeys = [`lunes_a_viernes${dirSuffix}`, `weekday${dirSuffix}`, `lunes_viernes${dirSuffix}`];
               }
 
-              for (const prefix of specialPrefixes) {
+              for (const k of candidateKeys) {
+                if (route.schedules[k]) {
+                  scheduleForBus = route.schedules[k];
+                  break;
+                }
+              }
+
+              if (!scheduleForBus) {
+                const specialPrefixes = ['special_', 'especial_'];
                 for (const key of Object.keys(route.schedules)) {
-                  if (key.startsWith(prefix) && key.endsWith(dirSuffix)) {
+                  if (specialPrefixes.some(p => key.startsWith(p)) && key.endsWith(dirSuffix)) {
                     scheduleForBus = route.schedules[key];
                     break;
                   }
                 }
-                if (scheduleForBus) break;
               }
             }
 
-            if (!scheduleForBus && todayType === 'sunday_holiday') {
-              scheduleForBus = route.schedules[`sunday_${bus.dir}`] || route.schedules[`holiday_${bus.dir}`];
-            }
-            
             if (!scheduleForBus) {
-              scheduleForBus = route.schedules[`weekday_${bus.dir}`];
+              scheduleForBus = route.schedules[`domingos_feriados${dirSuffix}`] || route.schedules[`lunes_a_viernes${dirSuffix}`] || route.schedules[`weekday${dirSuffix}`];
             }
             
             if (scheduleForBus && scheduleForBus.matrix && scheduleForBus.matrix.length > 0) {
