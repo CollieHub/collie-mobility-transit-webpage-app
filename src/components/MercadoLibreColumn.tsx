@@ -27,7 +27,7 @@ export default function MercadoLibreColumn({
         position: 'absolute',
         top: '16px',
         right: '16px',
-        bottom: '48px',
+        bottom: '84px',
         width: isCollapsed ? '48px' : '320px',
         zIndex: 1000,
         background: '#ffffff',
@@ -228,6 +228,7 @@ export default function MercadoLibreColumn({
                     <img
                       src={product.imageUrl}
                       alt={product.title}
+                      referrerPolicy="no-referrer"
                       style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                       draggable={false}
                     />

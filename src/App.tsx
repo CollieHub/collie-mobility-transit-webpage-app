@@ -4347,8 +4347,30 @@ function App() {
 
 
 
-        <div style={{ position: 'absolute', bottom: '36px', right: isMobile ? '16px' : '348px', zIndex: 900, pointerEvents: 'auto', opacity: 0.85, fontFamily: 'Inter, sans-serif', userSelect: 'none', WebkitUserSelect: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', transition: 'right 0.3s' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.85)', padding: '6px 12px', borderRadius: '20px', backdropFilter: 'blur(4px)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        <div style={{
+          position: 'absolute',
+          bottom: '38px',
+          right: '16px',
+          width: isMobile ? 'auto' : '320px',
+          zIndex: 1000,
+          pointerEvents: 'auto',
+          display: 'flex',
+          justifyContent: isMobile ? 'flex-end' : 'center',
+          alignItems: 'center',
+          userSelect: 'none',
+          WebkitUserSelect: 'none'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '14px',
+            background: 'rgba(255, 255, 255, 0.95)',
+            padding: '6px 18px',
+            borderRadius: '20px',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+            border: '1.5px solid #FFE600'
+          }}>
             <a href="https://www.instagram.com/pordondeviene/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><InstagramIcon size={18} color="#334155" /></a>
             <a href="#" style={{ display: 'flex' }}><FacebookIcon size={18} color="#334155" /></a>
             <a href="https://x.com/pordondeviene" target="_blank" rel="noopener noreferrer" style={{ display: 'flex' }}><XIconSocial size={18} color="#334155" /></a>
