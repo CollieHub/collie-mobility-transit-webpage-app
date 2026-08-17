@@ -678,10 +678,11 @@ interface StopItem {
 interface RadarViewProps {
   linesList?: any[];
   branchesList?: any[];
+  selectedSource?: string;
   showNotification?: (type: 'success' | 'error', message: string) => void;
 }
 
-export default function RadarView({ linesList = [], branchesList = [], showNotification }: RadarViewProps) {
+export default function RadarView({ linesList = [], branchesList = [], selectedSource: propSelectedSource, showNotification }: RadarViewProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
   const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(false);
@@ -692,7 +693,16 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
-  const [selectedSource, setSelectedSource] = useState<'core' | 'redsube'>('core');
+  const [selectedSource, setSelectedSource] = useState<'core' | 'redsube'>(() => {
+    return propSelectedSource === 'redsube' ? 'redsube' : 'core';
+  });
+
+  useEffect(() => {
+    if (propSelectedSource) {
+      setSelectedSource(propSelectedSource === 'redsube' ? 'redsube' : 'core');
+    }
+  }, [propSelectedSource]);
+
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
@@ -2110,67 +2120,6 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
           {/* Map Editing Tools & Assistants */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {/* Selector de Servicio (Core vs RedSUBE) a la izquierda de Deshacer */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: '#111827',
-                padding: '2px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.12)'
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedSource('core');
-                  showNotification?.('success', 'Modo CORE activo: Visualizando líneas y recorridos locales');
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: selectedSource === 'core' ? '#0284c7' : 'transparent',
-                  color: selectedSource === 'core' ? '#ffffff' : '#94a3b8',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title="Líneas y ramales locales (Core Zárate / SIT)"
-              >
-                <span>🚍 Core</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedSource('redsube');
-                  showNotification?.('success', 'Modo REDSUBE activo: Visualizando líneas y trazados metropolitanos / nacionales');
-                }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.3rem',
-                  padding: '0.4rem 0.75rem',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: selectedSource === 'redsube' ? '#059669' : 'transparent',
-                  color: selectedSource === 'redsube' ? '#ffffff' : '#94a3b8',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-                title="Líneas y ramales de RedSUBE (CABA / Nacional)"
-              >
-                <span>🌐 RedSUBE</span>
-              </button>
-            </div>
-
             {/* Botón Deshacer en Cabecera (a la izquierda de Ruteo Calles) */}
             <button
               onClick={() => executeIfEditing(handleUndoWaypoint)}

@@ -870,6 +870,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
             <RadarView
               linesList={linesList}
               branchesList={branchesList}
+              selectedSource={selectedSourceProvider}
               showNotification={showNotification}
             />
           ) : activeTable === 'schedules' ? (
