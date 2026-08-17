@@ -105,19 +105,29 @@ export default function AdvertiseHereColumn({
           style={{
             flex: 1,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '16px',
             cursor: 'pointer',
-            paddingTop: '36px',
-            background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)'
+            background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
+            paddingTop: '20px'
           }}
         >
-          <div style={{ transform: 'rotate(90deg)', whiteSpace: 'nowrap', fontWeight: 900, fontSize: '0.85rem', color: '#38bdf8', letterSpacing: '2px' }}>
-            ANUNCIE AQUÍ
+          <div
+            style={{
+              transform: 'rotate(90deg)',
+              whiteSpace: 'nowrap',
+              fontWeight: 900,
+              fontSize: '0.85rem',
+              color: '#38bdf8',
+              letterSpacing: '2px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            <Megaphone size={18} color="#38bdf8" />
+            <span>ANUNCIE AQUÍ</span>
           </div>
-          <Megaphone size={20} color="#38bdf8" />
         </div>
       ) : (
         <>
