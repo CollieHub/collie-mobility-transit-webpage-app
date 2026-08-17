@@ -4346,7 +4346,7 @@ function App() {
 
         <div style={{
           position: 'absolute',
-          bottom: '12px',
+          bottom: '26px',
           right: '16px',
           zIndex: 1100,
           pointerEvents: 'auto',
