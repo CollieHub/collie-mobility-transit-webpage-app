@@ -34,7 +34,7 @@ export function useTransitAds() {
         });
         if (res.ok) {
           const data = await res.json();
-          const adsList = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+          const adsList = Array.isArray(data) ? data : (Array.isArray(data.ads) ? data.ads : (Array.isArray(data.data) ? data.data : []));
           if (mounted) {
             setAds(adsList);
           }
