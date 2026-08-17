@@ -3585,7 +3585,7 @@ function App() {
         )}
 
         {/* Banners on Mobile */}
-        {config.banners_webpage_enabled && !isPWA && (
+        {((config.banners_webpage_enabled || config.banners_enabled || config.banners_mobile_enabled) || (dynamicBanners[0] && dynamicBanners[0].length > 0)) && !isPWA && (
           <div style={{ position: 'absolute', top: '20px', left: '16px', right: '16px', height: '100px', zIndex: 1000, pointerEvents: 'none' }}>
             <DraggableBannerCarousel 
               key="mobile-banner"
@@ -4351,24 +4351,36 @@ function App() {
           </div>
         )}
         
-        {/* Google Ads Adicionales en Escritorio (Browser) */}
-        {!isPWA && !isMobile && config.google_ads_enabled && !isLoadingConfig && (
+        {/* Banners Mercado Libre / Publicidades en Escritorio */}
+        {!isMobile && (dynamicBanners[0] && dynamicBanners[0].length > 0) && (
           <div style={{ 
             position: 'absolute', 
             top: '16px', 
             right: '16px', 
             zIndex: 1000, 
-            width: isTablet ? '220px' : '300px', 
+            width: isTablet ? '260px' : '320px', 
+            height: '110px',
             display: 'flex', 
             flexDirection: 'column', 
-            gap: '16px', 
             justifyContent: 'flex-start', 
             pointerEvents: 'auto', 
-            transition: 'width 0.3s',
-            overflow: 'hidden',
-            paddingRight: '4px'
+            transition: 'all 0.3s',
+            overflow: 'hidden'
           }}>
-            <GoogleAd adSlot={config.google_ad_slot_sidebar || '9343844412'} style={{ height: '250px', width: '100%', flexShrink: 0 }} />
+            <DraggableBannerCarousel 
+              key="desktop-banner"
+              slotIndex={0}
+              activeBanner={bannerStates[0]}
+              banners={dynamicBanners[0] || []}
+              onBannerChange={(newIdx) => {
+                setBannerStates(prev => {
+                  const next = [...prev];
+                  next[0] = newIdx;
+                  return next;
+                });
+              }}
+              onBannerDoubleClick={(bannerIdx) => setExpandedBanner({ slot: 0, banner: bannerIdx })}
+            />
           </div>
         )}
 
