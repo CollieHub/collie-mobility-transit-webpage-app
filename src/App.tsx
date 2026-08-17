@@ -1597,10 +1597,32 @@ function App() {
 
   const selectRoute = (routeId: string) => {
     setLastSelectedRouteId(routeId);
+
+    const isCurrentlyActive = selectedRouteIds.has(routeId) && visibleRouteIds.has(routeId);
+
+    if (isCurrentlyActive) {
+      // Si ya está seleccionado y visible: cerrar el panel del ramal y ocultar el recorrido en el mapa
+      setSelectedRouteIds(prev => {
+        const next = new Set(prev);
+        next.delete(routeId);
+        return next;
+      });
+      setVisibleRouteIds(prev => {
+        const next = new Set(prev);
+        next.delete(routeId);
+        return next;
+      });
+      if (expandedRouteId === routeId) {
+        setExpandedRouteId(null);
+      }
+      return;
+    }
+
+    // Si NO estaba activo: seleccionarlo, mostrarlo en el mapa y expandir el panel
     if (!isAdmin && !config?.anonymous_selection_enabled) {
       setSelectedRouteIds(new Set([routeId]));
       setVisibleRouteIds(new Set([routeId]));
-      setExpandedRouteId(routeId); // Expandir al seleccionar
+      setExpandedRouteId(routeId);
       if (!selectBothDirections && !config?.anonymous_selection_enabled) {
         setRouteShowIda({[routeId]: true});
         setRouteShowVuelta({[routeId]: false});
@@ -1619,55 +1641,35 @@ function App() {
       return;
     }
 
-    const isSelected = selectedRouteIds.has(routeId);
-    if (!isSelected) {
-      if (selectedRouteIds.size >= MAX_SELECTED_RAMALES) {
-        setLimitAlert(true);
-        return;
-      }
-      setSelectedRouteIds(prev => {
-        const next = new Set(prev);
-        next.add(routeId);
-        return next;
-      });
-      setVisibleRouteIds(prev => {
-        const next = new Set(prev);
-        next.add(routeId);
-        return next;
-      });
-      const route = transitRoutes.find((r: any) => r.id === routeId);
-      if (!selectBothDirections && !config?.anonymous_selection_enabled) {
-        setRouteShowIda(prev => ({...prev, [routeId]: true}));
-        setRouteShowVuelta(prev => ({...prev, [routeId]: false}));
-        setRouteStopsIda(prev => ({...prev, [routeId]: true}));
-        setRouteStopsVuelta(prev => ({...prev, [routeId]: false}));
-        setRouteBusesIda(prev => ({...prev, [routeId]: true}));
-        setRouteBusesVuelta(prev => ({...prev, [routeId]: false}));
-      } else {
-        setRouteShowIda(prev => ({...prev, [routeId]: true}));
-        setRouteShowVuelta(prev => ({...prev, [routeId]: true}));
-        setRouteStopsIda(prev => ({...prev, [routeId]: true}));
-        setRouteStopsVuelta(prev => ({...prev, [routeId]: true}));
-        setRouteBusesIda(prev => ({...prev, [routeId]: true}));
-        setRouteBusesVuelta(prev => ({...prev, [routeId]: true}));
-      }
+    if (selectedRouteIds.size >= MAX_SELECTED_RAMALES) {
+      setLimitAlert(true);
+      return;
+    }
+    setSelectedRouteIds(prev => {
+      const next = new Set(prev);
+      next.add(routeId);
+      return next;
+    });
+    setVisibleRouteIds(prev => {
+      const next = new Set(prev);
+      next.add(routeId);
+      return next;
+    });
+    setExpandedRouteId(routeId);
+    if (!selectBothDirections && !config?.anonymous_selection_enabled) {
+      setRouteShowIda(prev => ({...prev, [routeId]: true}));
+      setRouteShowVuelta(prev => ({...prev, [routeId]: false}));
+      setRouteStopsIda(prev => ({...prev, [routeId]: true}));
+      setRouteStopsVuelta(prev => ({...prev, [routeId]: false}));
+      setRouteBusesIda(prev => ({...prev, [routeId]: true}));
+      setRouteBusesVuelta(prev => ({...prev, [routeId]: false}));
     } else {
-      if (!isAdmin && !config?.anonymous_selection_enabled) {
-        // Si ya está seleccionado, permitir colapsar/expandir el acordeón en la barra lateral
-        setExpandedRouteId(prev => prev === routeId ? null : routeId);
-      } else {
-        // Si la selección múltiple está activa (para admin o anónimo habilitado) y ya está seleccionado, deseleccionar
-        setSelectedRouteIds(prev => {
-          const next = new Set(prev);
-          next.delete(routeId);
-          return next;
-        });
-        setVisibleRouteIds(prev => {
-          const next = new Set(prev);
-          next.delete(routeId);
-          return next;
-        });
-      }
+      setRouteShowIda(prev => ({...prev, [routeId]: true}));
+      setRouteShowVuelta(prev => ({...prev, [routeId]: true}));
+      setRouteStopsIda(prev => ({...prev, [routeId]: true}));
+      setRouteStopsVuelta(prev => ({...prev, [routeId]: true}));
+      setRouteBusesIda(prev => ({...prev, [routeId]: true}));
+      setRouteBusesVuelta(prev => ({...prev, [routeId]: true}));
     }
   };
 
@@ -2294,11 +2296,7 @@ function App() {
           <button
             onClick={(e) => { 
               e.stopPropagation(); 
-              if (isAdmin || config?.anonymous_selection_enabled) {
-                toggleVisibility(route.id);
-              } else {
-                selectRoute(route.id);
-              }
+              selectRoute(route.id);
             }}
             style={{
               width: '18px', height: '18px', borderRadius: '4px',
