@@ -33,6 +33,7 @@ import MercadoLibreAdBanner from './components/MercadoLibreAdBanner';
 import MercadoLibreProductStrip from './components/MercadoLibreProductStrip';
 import MercadoLibreColumn from './components/MercadoLibreColumn';
 import AdvertiseHereColumn from './components/AdvertiseHereColumn';
+import MapLegendPanel from './components/MapLegendPanel';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
 import { StopIcon } from './components/icons/StopIcon';
@@ -4759,6 +4760,11 @@ function App() {
       >
         <ChevronRight size={20} style={{ transform: sidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
       </button>
+
+      {/* Panel de Referencias del Mapa (abajo a la derecha del panel principal) */}
+      {!isMobile && (
+        <MapLegendPanel sidebarOpen={sidebarOpen} isTablet={isTablet} />
+      )}
 
 
       {/* Timetable Modal (Desktop) */}
