@@ -36,6 +36,15 @@ interface AdminDashboardProps {
   onBackToApp: () => void;
 }
 
+export type SourceProvider = 'core' | 'redsube' | 'rosario' | 'uruguay';
+
+export const SOURCE_PROVIDERS: { key: SourceProvider; label: string; icon: string; title: string }[] = [
+  { key: 'core', label: 'Core', icon: '🚍', title: 'Servicio Core (Zárate / Local)' },
+  { key: 'redsube', label: 'RedSUBE', icon: '🌐', title: 'Servicio RedSUBE (CABA / Nacional)' },
+  { key: 'rosario', label: 'Rosario GPS', icon: '🚌', title: 'Servicio Rosario GPS' },
+  { key: 'uruguay', label: 'Uruguay (Montevideo)', icon: '🇺🇾', title: 'Servicio Uruguay (Montevideo)' },
+];
+
 const NAVIGATION_GROUPS = [
   {
     title: 'Monitoreo & Trazados',
@@ -118,6 +127,22 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       } catch (_) {}
     }
   }, [activeTable]);
+
+  const [selectedSourceProvider, setSelectedSourceProvider] = useState<SourceProvider>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('collie_admin_source_provider') as SourceProvider;
+        if (saved && ['core', 'redsube', 'rosario', 'uruguay'].includes(saved)) return saved;
+      }
+    } catch (_) {}
+    return 'core';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('collie_admin_source_provider', selectedSourceProvider);
+    } catch (_) {}
+  }, [selectedSourceProvider]);
   const [rows, setRows] = useState<any[]>([]);
   const [linesList, setLinesList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
@@ -743,6 +768,57 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {/* Selector Segmentado de Fuente / Proveedor (Core, RedSUBE, Rosario GPS, Uruguay) */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#1f2937',
+                padding: '3px',
+                borderRadius: '10px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                gap: '2px'
+              }}
+            >
+              {SOURCE_PROVIDERS.map((prov) => {
+                const isActive = selectedSourceProvider === prov.key;
+                return (
+                  <button
+                    key={prov.key}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSourceProvider(prov.key);
+                      showNotification?.('success', `Fuente cambiada a: ${prov.label}`);
+                    }}
+                    title={prov.title}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      padding: '0.4rem 0.75rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: isActive ? '#0284c7' : 'transparent',
+                      color: isActive ? '#ffffff' : '#9ca3af',
+                      fontSize: '0.8rem',
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <span style={{ fontSize: '0.9rem' }}>{prov.icon}</span>
+                    <span>{prov.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <button
               type="button"
               onClick={handlePurgeKV}
