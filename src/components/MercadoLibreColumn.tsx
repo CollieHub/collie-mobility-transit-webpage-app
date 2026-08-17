@@ -25,9 +25,9 @@ export default function MercadoLibreColumn({
       className={`meli-right-column ${className}`}
       style={{
         position: 'absolute',
-        top: '16px',
+        top: '64px',
         right: '16px',
-        bottom: '84px',
+        bottom: '96px',
         width: isCollapsed ? '48px' : '320px',
         zIndex: 1000,
         background: '#ffffff',
