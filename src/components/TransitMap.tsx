@@ -1809,6 +1809,10 @@ export default function TransitMap({ showRouteArrows, showStartEndMarkers = true
       }
     }
 
+    if (isHoliday(now)) {
+      return 'sunday_holiday';
+    }
+
     const day = now.getDay();
     if (day === 0) return 'sunday_holiday';
     if (day === 6) return 'saturday';

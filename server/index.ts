@@ -1561,10 +1561,41 @@ const isRowActiveAtServerTime = (row: string[], currentMinutes: number) => {
   return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
 };
 
-const getServerDayTypeCode = () => {
+const ARGENTINA_HOLIDAYS_LIST = [
+  '2026-01-01', '2026-02-16', '2026-02-17', '2026-03-23', '2026-03-24',
+  '2026-04-02', '2026-04-03', '2026-05-01', '2026-05-25', '2026-06-15',
+  '2026-06-20', '2026-07-09', '2026-07-10', '2026-08-17', '2026-10-12',
+  '2026-11-23', '2026-12-07', '2026-12-08', '2026-12-25'
+];
+
+const getServerDayTypeCode = async (db?: any) => {
   const now = new Date();
   const argTimeStr = now.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' });
   const argDate = new Date(argTimeStr);
+  const y = argDate.getFullYear();
+  const m = String(argDate.getMonth() + 1).padStart(2, '0');
+  const d = String(argDate.getDate()).padStart(2, '0');
+  const dateStr = `${y}-${m}-${d}`;
+
+  if (db) {
+    try {
+      const excRes: any = await db.prepare('SELECT override_day_type FROM calendar_exceptions WHERE date = ? LIMIT 1').bind(dateStr).first();
+      if (excRes && excRes.override_day_type) {
+        const override = excRes.override_day_type;
+        if (override === 'weekday' || override === 'lunes_a_viernes') return 'lunes_a_viernes';
+        if (override === 'saturday' || override === 'sabados') return 'sabados';
+        if (override === 'sunday' || override === 'domingos_feriados' || override === 'sunday_holiday') return 'domingos_feriados';
+        return override;
+      }
+      const holRes: any = await db.prepare('SELECT id FROM holidays WHERE date = ? LIMIT 1').bind(dateStr).first();
+      if (holRes) return 'domingos_feriados';
+    } catch (_) {}
+  }
+
+  if (ARGENTINA_HOLIDAYS_LIST.includes(dateStr)) {
+    return 'domingos_feriados';
+  }
+
   const day = argDate.getDay();
   if (day === 0) return 'domingos_feriados';
   if (day === 6) return 'sabados';
@@ -1588,7 +1619,7 @@ async function getOrComputeActiveUnitsSummary(env: any) {
     } catch (_) {}
   }
 
-  const dayTypeCode = getServerDayTypeCode();
+  const dayTypeCode = await getServerDayTypeCode(env.DB);
   const currentMinutes = getServerCurrentMinutes();
 
   let liveBuses: any[] = [];
