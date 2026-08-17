@@ -32,6 +32,7 @@ import TimetableModal, { getTodayDayLabel, formatSpecialLabel } from './componen
 import MercadoLibreAdBanner from './components/MercadoLibreAdBanner';
 import MercadoLibreProductStrip from './components/MercadoLibreProductStrip';
 import MercadoLibreColumn from './components/MercadoLibreColumn';
+import AdvertiseHereColumn from './components/AdvertiseHereColumn';
 import { isHoliday } from './lib/holidays';
 import { getPublicToken } from './lib/api/publicToken';
 import { StopIcon } from './components/icons/StopIcon';
@@ -4772,9 +4773,13 @@ function App() {
         />
       )}
 
-      {/* Mercado Libre Column on Desktop (Solo visible si el usuario está logueado) */}
-      {!isMobile && isAdmin && (
-        <MercadoLibreColumn affiliateUrl="https://meli.la/1fwfx2Y" />
+      {/* Columna Derecha en Desktop: Mercado Libre si está logueado como admin, o Anuncie Aquí si es usuario público */}
+      {!isMobile && (
+        isAdmin ? (
+          <MercadoLibreColumn affiliateUrl="https://meli.la/1fwfx2Y" />
+        ) : (
+          <AdvertiseHereColumn />
+        )
       )}
       
       {/* Expanded Banner Modal */}
