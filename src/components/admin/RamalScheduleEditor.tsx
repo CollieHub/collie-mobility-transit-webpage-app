@@ -895,6 +895,100 @@ export default function RamalScheduleEditor({
     showNotification('success', 'Secuencia de horarios autocompletada correctamente.');
   };
 
+  // 🪄 HANDLER: Autocompletar Secuencia de Horarios en TODA la grilla tomando como referencia al primer horario
+  const handleAutocompleteAllSchedules = () => {
+    if (matrixRows.length === 0) {
+      showNotification('error', 'No hay filas en la grilla para autocompletar');
+      return;
+    }
+
+    const firstRow = matrixRows[0];
+    if (!firstRow || !firstRow[0] || !/^\d{1,2}:\d{2}/.test(firstRow[0])) {
+      showNotification('error', 'La primera fila debe tener al menos el horario inicial (ej: 04:40) para usarla como referencia');
+      return;
+    }
+
+    const colCount = headers.length;
+    if (colCount <= 1) {
+      showNotification('error', 'Se requieren al menos 2 columnas para calcular la secuencia de horarios');
+      return;
+    }
+
+    const timeToMinutes = (timeStr: string): number | null => {
+      if (!timeStr || !timeStr.includes(':')) return null;
+      const [h, m] = timeStr.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return null;
+      return h * 60 + m;
+    };
+
+    // 1. Obtener los intervalos entre columnas de la primera fila
+    const delays: number[] = new Array(colCount).fill(0);
+    for (let col = 1; col < colCount; col++) {
+      const prevTime = timeToMinutes(firstRow[col - 1]);
+      const currTime = timeToMinutes(firstRow[col]);
+      if (prevTime !== null && currTime !== null) {
+        let diff = currTime - prevTime;
+        if (diff < 0) diff += 1440;
+        delays[col] = diff;
+      } else {
+        // Fallback si la primera fila no tiene cargada esa columna
+        let fallbackDiff = 10;
+        for (let rIdx = 1; rIdx < matrixRows.length; rIdx++) {
+          const p = timeToMinutes(matrixRows[rIdx][col - 1]);
+          const c = timeToMinutes(matrixRows[rIdx][col]);
+          if (p !== null && c !== null) {
+            let d = c - p;
+            if (d < 0) d += 1440;
+            fallbackDiff = d;
+            break;
+          }
+        }
+        delays[col] = fallbackDiff;
+      }
+    }
+
+    // 2. Aplicar la secuencia de intervalos a todas las filas que tengan horario de salida
+    let completedCount = 0;
+    const newRows = matrixRows.map((row, idx) => {
+      if (idx === 0) {
+        // Completar columnas faltantes en la primera fila si hubiera alguna vacía
+        let currentMins = timeToMinutes(row[0]) || 0;
+        const updatedFirst = [...row];
+        for (let col = 1; col < colCount; col++) {
+          currentMins = (currentMins + delays[col]) % 1440;
+          if (!updatedFirst[col] || !/^\d{1,2}:\d{2}/.test(updatedFirst[col])) {
+            const h = Math.floor(currentMins / 60).toString().padStart(2, '0');
+            const m = (currentMins % 60).toString().padStart(2, '0');
+            updatedFirst[col] = `${h}:${m}`;
+          }
+        }
+        return updatedFirst;
+      }
+
+      const departureTimeStr = row[0];
+      if (!departureTimeStr || !/^\d{1,2}:\d{2}/.test(departureTimeStr)) {
+        return row;
+      }
+
+      let currentMins = timeToMinutes(departureTimeStr);
+      if (currentMins === null) return row;
+
+      const updatedRow = [...row];
+      for (let col = 1; col < colCount; col++) {
+        currentMins = (currentMins + delays[col]) % 1440;
+        const h = Math.floor(currentMins / 60).toString().padStart(2, '0');
+        const m = (currentMins % 60).toString().padStart(2, '0');
+        updatedRow[col] = `${h}:${m}`;
+      }
+      completedCount++;
+      return updatedRow;
+    });
+
+    setMatrixRows(newRows);
+    buildCsvFromState(headers, newRows);
+    showNotification('success', `Secuencia autocompletada en ${completedCount + 1} filas tomando como referencia al primer horario`);
+  };
+
   const handleAddColumn = (cIdx: number) => {
     const newHeaderName = `NUEVA PARADA ${headers.length + 1}`;
 
@@ -1580,6 +1674,29 @@ export default function RamalScheduleEditor({
             >
               <WandIcon size={14} />
               <span>Auto-asociar Paradas</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleAutocompleteAllSchedules}
+              disabled={matrixRows.length === 0 || headers.length <= 1}
+              style={{
+                padding: '0.4rem 0.85rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(168, 85, 247, 0.4)',
+                backgroundColor: 'rgba(168, 85, 247, 0.12)',
+                color: '#c084fc',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: (matrixRows.length === 0 || headers.length <= 1) ? 'not-allowed' : 'pointer',
+                opacity: (matrixRows.length === 0 || headers.length <= 1) ? 0.5 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem'
+              }}
+              title="Autocompletar secuencia de horarios en todas las filas tomando como referencia al primer horario"
+            >
+              <ClockIcon size={14} />
+              <span>Autocompletar secuencia de horarios</span>
             </button>
             <button
               type="button"
