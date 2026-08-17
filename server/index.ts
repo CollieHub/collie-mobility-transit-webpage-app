@@ -2309,9 +2309,14 @@ const V3_STATIC_COMPANIES = [
 
 const V3_ROUTES_DATA: Record<string, any[]> = {
   "228": [
-    { ramal: "228A", name: "Zárate ⇄ Campana x Colectora", headsignIda: "Campana", headsignVuelta: "Zárate", color: "#0284c7" },
-    { ramal: "228B", name: "Zárate ⇄ Luján x Los Cardales", headsignIda: "Luján", headsignVuelta: "Zárate", color: "#059669" },
-    { ramal: "228C", name: "Campana ⇄ Luján", headsignIda: "Luján", headsignVuelta: "Campana", color: "#d97706" }
+    { ramal: "228AC", name: "Pte. Saavedra ⇄ Zárate", headsignIda: "Pte. Saavedra", headsignVuelta: "Zárate", color: "#0284c7" },
+    { ramal: "228BA", name: "Escobar ⇄ Fonavi ⇄ Garín ⇄ Saavedra", headsignIda: "Escobar", headsignVuelta: "Saavedra", color: "#10b981" },
+    { ramal: "228CB", name: "Ariel del Plata ⇄ Zárate", headsignIda: "Ariel del Plata", headsignVuelta: "Zárate", color: "#f59e0b" },
+    { ramal: "228CC", name: "Lima ⇄ Zárate (Original)", headsignIda: "Lima", headsignVuelta: "Zárate", color: "#ec4899" },
+    { ramal: "228CD", name: "Luján ⇄ Zárate (x Cardales)", headsignIda: "Luján", headsignVuelta: "Zárate", color: "#8b5cf6" },
+    { ramal: "228EA", name: "Pque. Industrial Pilar ⇄ Est. Pilar", headsignIda: "Pque. Industrial Pilar", headsignVuelta: "Est. Pilar", color: "#06b6d4" },
+    { ramal: "228EB", name: "Benavídez ⇄ Bº Las Mascotas", headsignIda: "Benavídez", headsignVuelta: "Bº Las Mascotas", color: "#84cc16" },
+    { ramal: "228FA", name: "Pte. Saavedra ⇄ Del Viso Est. Toro", headsignIda: "Pte. Saavedra", headsignVuelta: "Del Viso", color: "#d946ef" }
   ],
   "194": [
     { ramal: "194-EXPRESS", name: "Zárate ⇄ Plaza Miserere (Once)", headsignIda: "Once", headsignVuelta: "Zárate", color: "#e65100" },
@@ -2321,6 +2326,10 @@ const V3_ROUTES_DATA: Record<string, any[]> = {
   "204": [
     { ramal: "204A", name: "Zárate ⇄ Campana x Colectora", headsignIda: "Campana", headsignVuelta: "Zárate", color: "#00acc1" },
     { ramal: "204B", name: "Saavedra ⇄ Escobar", headsignIda: "Escobar", headsignVuelta: "Saavedra", color: "#3949ab" }
+  ],
+  "314": [
+    { ramal: "314A", name: "Puente Saavedra ⇄ Villa Adelina", headsignIda: "Villa Adelina", headsignVuelta: "Pte. Saavedra", color: "#0284c7" },
+    { ramal: "314B", name: "Puente Saavedra ⇄ Boulogne", headsignIda: "Boulogne", headsignVuelta: "Pte. Saavedra", color: "#059669" }
   ],
   "SIT": [
     { ramal: "RZ01", name: "Burgar - Terminal NK", headsignIda: "Terminal NK", headsignVuelta: "Burgar", color: "#e65100" },

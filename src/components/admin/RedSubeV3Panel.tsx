@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bus, Search, CheckSquare, Square, Clock, Sparkles } from 'lucide-react';
 
 export interface V3Route {
@@ -41,6 +41,12 @@ export default function RedSubeV3Panel({
   const [correctedVersions, setCorrectedVersions] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const onRouteToggleRef = useRef(onRouteToggle);
+  onRouteToggleRef.current = onRouteToggle;
+
+  const onUnitsUpdateRef = useRef(onUnitsUpdate);
+  onUnitsUpdateRef.current = onUnitsUpdate;
+
   // Fetch Companies
   useEffect(() => {
     fetch('/v1/redsube/lines')
@@ -66,20 +72,23 @@ export default function RedSubeV3Panel({
           const firstRamal = data.routes[0].ramal;
           setSelectedRamales(new Set([firstRamal]));
           setExpandedDetails(new Set([firstRamal]));
-          onRouteToggle?.(firstRamal, true, data.routes[0]);
+          onRouteToggleRef.current?.(firstRamal, true, data.routes[0]);
+        } else {
+          setSelectedRamales(new Set());
+          setExpandedDetails(new Set());
         }
       }
     } catch (_) {
     } finally {
       setIsLoading(false);
     }
-  }, [onRouteToggle]);
+  }, []);
 
   // Fetch live telemetry vehicles
   const loadVehicles = useCallback(async (comp: string, limit: number) => {
     if (limit === 0) {
       setActiveUnitsCount(0);
-      onUnitsUpdate?.([]);
+      onUnitsUpdateRef.current?.([]);
       return;
     }
     try {
@@ -87,19 +96,22 @@ export default function RedSubeV3Panel({
       const data = await res.json();
       if (data.success && Array.isArray(data.vehicles)) {
         setActiveUnitsCount(data.total || data.vehicles.length);
-        onUnitsUpdate?.(data.vehicles);
+        onUnitsUpdateRef.current?.(data.vehicles);
       }
     } catch (_) {}
-  }, [onUnitsUpdate]);
+  }, []);
 
   useEffect(() => {
     loadRoutes(selectedCompany);
+  }, [selectedCompany, loadRoutes]);
+
+  useEffect(() => {
     loadVehicles(selectedCompany, unitsLimit);
     const interval = setInterval(() => {
       loadVehicles(selectedCompany, unitsLimit);
     }, 15000);
     return () => clearInterval(interval);
-  }, [selectedCompany, unitsLimit, loadRoutes, loadVehicles]);
+  }, [selectedCompany, unitsLimit, loadVehicles]);
 
   const handleToggleAll = (checked: boolean) => {
     if (checked) {
