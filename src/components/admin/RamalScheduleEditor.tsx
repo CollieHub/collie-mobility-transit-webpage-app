@@ -172,6 +172,9 @@ export default function RamalScheduleEditor({
   const [selectedCopyDestDays, setSelectedCopyDestDays] = useState<string[]>([]);
   const [isCopyingStops, setIsCopyingStops] = useState<boolean>(false);
 
+  // Modal de Confirmación para Autocompletar Secuencia de Horarios
+  const [isAutocompleteModalOpen, setIsAutocompleteModalOpen] = useState<boolean>(false);
+
   // Modal y Estado de Procesar Imagen (OCR)
   const [isImageProcessModalOpen, setIsImageProcessModalOpen] = useState<boolean>(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
@@ -1677,7 +1680,7 @@ export default function RamalScheduleEditor({
             </button>
             <button
               type="button"
-              onClick={handleAutocompleteAllSchedules}
+              onClick={() => setIsAutocompleteModalOpen(true)}
               disabled={matrixRows.length === 0 || headers.length <= 1}
               style={{
                 padding: '0.4rem 0.85rem',
@@ -2906,6 +2909,131 @@ export default function RamalScheduleEditor({
                 }}
               >
                 <span>{isCopyingStops ? 'Copiando...' : 'Confirmar y Copiar'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🪄 MODAL DE CONFIRMACIÓN AUTOCOMPLETAR SECUENCIA DE HORARIOS */}
+      {isAutocompleteModalOpen && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={() => setIsAutocompleteModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#111827',
+              border: '1px solid rgba(168, 85, 247, 0.35)',
+              borderRadius: '20px',
+              padding: '1.75rem',
+              maxWidth: '480px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.65)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{
+                  width: '38px', height: '38px', borderRadius: '10px',
+                  backgroundColor: 'rgba(168, 85, 247, 0.15)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#c084fc'
+                }}>
+                  <ClockIcon size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+                    Autocompletar Secuencia
+                  </h3>
+                  <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                    Calculador de horarios por diferencias relativas
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAutocompleteModalOpen(false)}
+                style={{ background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '1.1rem' }}
+              >
+                <XIcon size={18} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', backgroundColor: '#0b0f19', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+                <span style={{ color: '#9ca3af' }}>Horario de referencia (Fila 1):</span>
+                <strong style={{ color: '#38bdf8', fontSize: '0.9rem' }}>{matrixRows[0]?.[0] || 'Sin horario'}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+                <span style={{ color: '#9ca3af' }}>Paradas / Columnas a calcular:</span>
+                <strong style={{ color: '#ffffff' }}>{headers.length} paradas</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem' }}>
+                <span style={{ color: '#9ca3af' }}>Total de filas a procesar:</span>
+                <strong style={{ color: '#34d399' }}>{matrixRows.length} salidas</strong>
+              </div>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.45 }}>
+              Esta acción tomará los intervalos de minutos entre paradas de la <strong>primera fila</strong> y los aplicará a <strong>todas las filas de la grilla</strong> a partir de su horario inicial de salida.
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.25rem' }}>
+              <button
+                type="button"
+                onClick={() => setIsAutocompleteModalOpen(false)}
+                style={{
+                  flex: 1,
+                  padding: '0.65rem 1rem',
+                  backgroundColor: '#374151',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '10px',
+                  color: '#e5e7eb',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAutocompleteModalOpen(false);
+                  handleAutocompleteAllSchedules();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '0.65rem 1rem',
+                  backgroundColor: '#8b5cf6',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <ClockIcon size={16} />
+                <span>Confirmar y Autocompletar</span>
               </button>
             </div>
           </div>
