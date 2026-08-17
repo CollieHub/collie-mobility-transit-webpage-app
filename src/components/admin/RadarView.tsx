@@ -27,6 +27,8 @@ import {
   FileCode
 } from 'lucide-react';
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
+import RedSubeV3Panel from './RedSubeV3Panel';
+import type { V3Route } from './RedSubeV3Panel';
 
 // Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -37,6 +39,32 @@ L.Icon.Default.mergeOptions({
 });
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
+
+function createBusVehicleIcon(label: string, linea: string) {
+  return L.divIcon({
+    className: 'custom-vehicle-icon',
+    html: `<div style="
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #0284c7;
+      color: #ffffff;
+      padding: 2px 7px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      cursor: pointer;
+    ">
+      <span>🚍</span>
+      <span>${linea || label || 'SUBE'}</span>
+    </div>`,
+    iconSize: [60, 24],
+    iconAnchor: [30, 12]
+  });
+}
 
 function createWaypointIcon(orderNum: number, isStart: boolean, isEnd: boolean, isSelected: boolean = false, showNumbers: boolean = true) {
   const size = isSelected ? 30 : 26;
@@ -665,6 +693,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
 
   const [activeTool, setActiveTool] = useState<'none' | 'draw_route' | 'add_stop'>('none');
   const [selectedSource, setSelectedSource] = useState<'core' | 'redsube'>('core');
+  const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
   const [isRouting, setIsRouting] = useState<boolean>(false);
@@ -1634,7 +1663,7 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
   return (
     <div style={{ display: 'flex', gap: '1rem', height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
       
-      {/* 1. LEFT SIDEBAR PANEL: Tree Explorer */}
+      {/* 1. LEFT FLOATING CONTROL PANEL: LINES & BRANCHES SELECTOR OR REDSUBE V3 */}
       <div style={{
         width: '320px',
         backgroundColor: '#111827',
@@ -1645,23 +1674,43 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
       }}>
-        {/* Header */}
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
-            </h2>
-            <span style={{
-              fontSize: '0.65rem',
-              backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-              color: isEditingEnabled ? '#10b981' : '#f59e0b',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '6px',
-              fontWeight: 700
-            }}>
-              {isEditingEnabled ? 'EDICIÓN ACTIVA' : 'SOLO LECTURA'}
-            </span>
-          </div>
+        {selectedSource === 'redsube' ? (
+          <RedSubeV3Panel
+            showNotification={showNotification}
+            onUnitsUpdate={(units) => {
+              setTelemetryVehicles(units.map((u: any) => ({
+                id: u.id || u.vehicle_id || Math.random().toString(),
+                lat: u.latitude || u.lat || -34.0970,
+                lng: u.longitude || u.lng || -59.0300,
+                bearing: u.bearing || u.heading || 0,
+                speed: u.speed || 0,
+                intern: u.label || u.agency_name || 'RedSUBE',
+                linea: u.route_short_name || u.linea || '228',
+                delayMinutes: 0,
+                status: 'running',
+                timestamp: u.timestamp || Date.now()
+              })));
+            }}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
+                </h2>
+                <span style={{
+                  fontSize: '0.65rem',
+                  backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                  color: isEditingEnabled ? '#10b981' : '#f59e0b',
+                  padding: '0.15rem 0.5rem',
+                  borderRadius: '6px',
+                  fontWeight: 700
+                }}>
+                  {isEditingEnabled ? 'EDICIÓN ACTIVA' : 'SOLO LECTURA'}
+                </span>
+              </div>
 
           {/* Habilitar Edicion Toggle Button (Above Guardar) */}
           <button
@@ -2011,6 +2060,8 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
             );
           })}
         </div>
+          </>
+        )}
       </div>
 
       {/* 2. LEAFLET MAP CANVAS & TOOLBAR */}
@@ -2358,6 +2409,26 @@ export default function RadarView({ linesList = [], branchesList = [], showNotif
                 </Marker>
               );
             })}
+
+            {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría V3) */}
+            {telemetryVehicles.map((veh, idx) => (
+              <Marker
+                key={`telemetry_veh_${veh.id || idx}`}
+                position={[veh.lat, veh.lng]}
+                zIndexOffset={4000}
+                icon={createBusVehicleIcon(veh.intern, veh.linea)}
+              >
+                <Popup>
+                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
+                    🚍 <strong>Línea {veh.linea}</strong> — Interno: {veh.intern}
+                    <br />
+                    <span style={{ fontSize: '0.72rem', color: '#4b5563' }}>
+                      Velocidad: {Math.round(veh.speed)} km/h
+                    </span>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
 
           {/* 3. RIGHT FLOATING WIDGET DOCK (CONMUTADOR DE PESTAÑAS: PARADAS vs RECORRIDO) */}

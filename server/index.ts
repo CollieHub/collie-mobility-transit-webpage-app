@@ -5,6 +5,8 @@ type Bindings = {
   DB: D1Database;
   FLEET_KV: KVNamespace;
   AI?: any;
+  REDSUBE_CLIENT_ID?: string;
+  REDSUBE_CLIENT_SECRET?: string;
   AWS_ACCESS_KEY_ID?: string;
   AWS_SECRET_ACCESS_KEY?: string;
   AWS_REGION?: string;
@@ -2287,6 +2289,121 @@ app.delete('/v1/admin/table/:tableName/:id', async (c) => {
       message: `Registro '${recordId}' eliminado de '${tableName}'`,
       cache_purged: cachePurged
     });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// ==========================================
+// REDSUBE / CABA API Endpoints
+// ==========================================
+
+const V3_STATIC_COMPANIES = [
+  { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '228' },
+  { id: '194', name: 'Línea 194 (Metropol Zárate ⇄ Once)', lineCode: '194' },
+  { id: '204', name: 'Línea 204 (Zárate ⇄ Campana)', lineCode: '204' },
+  { id: 'SIT', name: 'SIT (Servicio Integral Zárate)', lineCode: 'SIT' },
+  { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)', lineCode: '314' },
+  { id: 'TODAS', name: '— Todas las Líneas Activas —', lineCode: 'TODAS' }
+];
+
+const V3_ROUTES_DATA: Record<string, any[]> = {
+  "228": [
+    { ramal: "228A", name: "Zárate ⇄ Campana x Colectora", headsignIda: "Campana", headsignVuelta: "Zárate", color: "#0284c7" },
+    { ramal: "228B", name: "Zárate ⇄ Luján x Los Cardales", headsignIda: "Luján", headsignVuelta: "Zárate", color: "#059669" },
+    { ramal: "228C", name: "Campana ⇄ Luján", headsignIda: "Luján", headsignVuelta: "Campana", color: "#d97706" }
+  ],
+  "194": [
+    { ramal: "194-EXPRESS", name: "Zárate ⇄ Plaza Miserere (Once)", headsignIda: "Once", headsignVuelta: "Zárate", color: "#e65100" },
+    { ramal: "194-DIRECTO", name: "Zárate ⇄ Escobar ⇄ Once", headsignIda: "Once", headsignVuelta: "Zárate", color: "#1e88e5" },
+    { ramal: "194-COMUN", name: "Zárate ⇄ Campana ⇄ Saavedra ⇄ Once", headsignIda: "Once", headsignVuelta: "Zárate", color: "#43a047" }
+  ],
+  "204": [
+    { ramal: "204A", name: "Zárate ⇄ Campana x Colectora", headsignIda: "Campana", headsignVuelta: "Zárate", color: "#00acc1" },
+    { ramal: "204B", name: "Saavedra ⇄ Escobar", headsignIda: "Escobar", headsignVuelta: "Saavedra", color: "#3949ab" }
+  ],
+  "SIT": [
+    { ramal: "RZ01", name: "Burgar - Terminal NK", headsignIda: "Terminal NK", headsignVuelta: "Burgar", color: "#e65100" },
+    { ramal: "RZ02", name: "Escalada - Los Ceibos", headsignIda: "Los Ceibos", headsignVuelta: "Escalada", color: "#e65100" },
+    { ramal: "RZ03", name: "Cementerio - Fonavi", headsignIda: "Fonavi", headsignVuelta: "Cementerio", color: "#9c27b0" },
+    { ramal: "RZ04", name: "Malvicino - Hospital", headsignIda: "Hospital", headsignVuelta: "Malvicino", color: "#00897b" },
+    { ramal: "RZ05A", name: "Bº Bosch - Cementerio (Refuerzo)", headsignIda: "Cementerio", headsignVuelta: "Bº Bosch", color: "#e65100" },
+    { ramal: "RZ05B", name: "Bº Bosch - Hospital (Refuerzo)", headsignIda: "Hospital", headsignVuelta: "Bº Bosch", color: "#e65100" },
+    { ramal: "RZ06A", name: "Los Ceibos - El Tatu", headsignIda: "El Tatu", headsignVuelta: "Los Ceibos", color: "#d81b60" },
+    { ramal: "RZ06B", name: "El Casco - El Tatu", headsignIda: "El Tatu", headsignVuelta: "El Casco", color: "#fb8c00" }
+  ]
+};
+
+app.get('/v1/redsube/lines', async (c) => {
+  return c.json({ success: true, companies: V3_STATIC_COMPANIES });
+});
+
+app.get('/v1/redsube/line-routes', async (c) => {
+  const company = c.req.query('company') || '228';
+  let routes = V3_ROUTES_DATA[company] || [];
+  if (company === 'TODAS') {
+    routes = [
+      ...(V3_ROUTES_DATA['228'] || []),
+      ...(V3_ROUTES_DATA['194'] || []),
+      ...(V3_ROUTES_DATA['204'] || []),
+      ...(V3_ROUTES_DATA['SIT'] || [])
+    ];
+  }
+  return c.json({ success: true, company, routes });
+});
+
+app.get('/v1/redsube/vehicles', async (c) => {
+  const company = c.req.query('company') || '';
+  const limit = parseInt(c.req.query('limit') || '50', 10);
+  const clientId = c.env.REDSUBE_CLIENT_ID || '';
+  const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '';
+
+  if (!clientId || !clientSecret) {
+    return c.json({ success: false, error: 'Credenciales de RedSUBE no configuradas' }, 500);
+  }
+
+  const cacheKey = `cache:redsube:vehicles:${company}:${limit}`;
+  if (c.env.FLEET_KV) {
+    try {
+      const cached = await c.env.FLEET_KV.get(cacheKey);
+      if (cached) {
+        c.header('Cache-Control', 'public, max-age=10, s-maxage=10');
+        c.header('X-Cache-Status', 'HIT-KV');
+        return c.json(JSON.parse(cached));
+      }
+    } catch (_) {}
+  }
+
+  try {
+    const url = `https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple?client_id=${clientId}&client_secret=${clientSecret}`;
+    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) {
+      return c.json({ success: false, error: `Error HTTP ${resp.status} de RedSUBE` }, resp.status as any);
+    }
+    const data: any = await resp.json();
+    let vehicles = Array.isArray(data) ? data : [];
+
+    if (company && company !== 'TODAS') {
+      vehicles = vehicles.filter((v: any) => {
+        const line = String(v.route_short_name || v.agency_name || v.linea || '').trim();
+        return line === company || line.startsWith(company);
+      });
+    }
+
+    const payload = {
+      success: true,
+      total: vehicles.length,
+      vehicles: vehicles.slice(0, limit)
+    };
+
+    if (c.env.FLEET_KV) {
+      try {
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 10 });
+      } catch (_) {}
+    }
+
+    c.header('Cache-Control', 'public, max-age=10, s-maxage=10');
+    return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
   }
