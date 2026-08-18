@@ -974,7 +974,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   }, [useStreetRouting]);
 
   const loadBranchData = useCallback(async () => {
-    if (!selectedBranchId) return;
+    if (!selectedBranchId) {
+      setWaypoints([]);
+      setFullPolylinePath([]);
+      setRouteDistanceKm(0);
+      setExistingShapeId(null);
+      setAllBranchStops([]);
+      setIdaWaypointsCount(0);
+      setVueltaWaypointsCount(0);
+      return;
+    }
 
     try {
       const res = await fetch(`/v1/admin/table/route_shapes?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
@@ -1903,26 +1912,57 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                         return (
                           <div
                             key={b.id}
-                            onClick={() => setSelectedBranchId(b.id)}
+                            onClick={() => setSelectedBranchId(prev => prev === b.id ? '' : b.id)}
                             style={{
                               padding: '0.65rem 0.75rem',
                               borderRadius: '10px',
                               backgroundColor: isSelected ? '#1e293b' : 'transparent',
-                              border: isSelected ? '1px solid #0284c7' : '1px solid transparent',
+                              border: isSelected ? '1px solid #0284c7' : '1px solid rgba(255, 255, 255, 0.04)',
                               cursor: 'pointer',
                               transition: 'all 0.15s ease',
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '0.4rem'
+                              gap: '0.35rem'
                             }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isSelected ? '#38bdf8' : '#6b7280' }} />
-                                <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#ffffff' : '#e5e7eb' }}>
-                                  {b.code ? `${b.code} - ${b.name}` : b.name}
-                                </span>
-                              </div>
+                            {/* Línea 1: Checkbox + Código y Nombre de Ramal */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedBranchId(prev => prev === b.id ? '' : b.id);
+                                }}
+                                style={{
+                                  width: '16px',
+                                  height: '16px',
+                                  cursor: 'pointer',
+                                  accentColor: '#0284c7',
+                                  borderRadius: '4px',
+                                  flexShrink: 0
+                                }}
+                              />
+                              <div style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor: isSelected ? '#38bdf8' : '#6b7280',
+                                flexShrink: 0
+                              }} />
+                              <span style={{
+                                fontWeight: 600,
+                                fontSize: '0.82rem',
+                                color: isSelected ? '#ffffff' : '#e5e7eb',
+                                lineHeight: '1.25',
+                                flex: 1
+                              }}>
+                                {b.code ? `${b.code} - ${b.name}` : b.name}
+                              </span>
+                            </div>
+
+                            {/* Línea 2: Indicador de Publicación */}
+                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '1.55rem' }}>
                               {(() => {
                                 const statusId = b.branch_publication_statuses_id;
                                 const isDraft = statusId === 'bpub_draft';
@@ -1935,7 +1975,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                                     fontSize: '0.65rem',
                                     backgroundColor: bg,
                                     color: color,
-                                    padding: '0.15rem 0.4rem',
+                                    padding: '0.12rem 0.45rem',
                                     borderRadius: '4px',
                                     fontWeight: 700
                                   }}>
@@ -1945,8 +1985,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                               })()}
                             </div>
 
+                            {/* Línea 3: Botones de Sentido cuando está seleccionado */}
                             {isSelected && (
-                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
+                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', paddingLeft: '1.55rem' }}>
                                 <button
                                   onClick={e => { e.stopPropagation(); setDirection('ida'); }}
                                   className="btn-animated btn-animated-primary"
