@@ -2061,6 +2061,60 @@ const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; 
     primaryKey: 'shape_id',
     orderBy: 'shape_id ASC, shape_pt_sequence ASC',
     fields: ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']
+  },
+  redsube_lines: {
+    label: 'Líneas (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'code', 'name', 'color', 'jurisdiction', 'agency_id', 'created_at']
+  },
+  redsube_branches: {
+    label: 'Ramales (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'line_id', 'code', 'name', 'agency_id', 'route_id', 'headsign_ida', 'headsign_vuelta', 'color', 'description', 'created_at']
+  },
+  redsube_agencies: {
+    label: 'Empresas / Agencias (RedSUBE)',
+    primaryKey: 'agency_id',
+    orderBy: 'agency_name ASC',
+    fields: ['agency_id', 'agency_name', 'agency_url', 'agency_timezone', 'agency_lang']
+  },
+  redsube_route_shapes: {
+    label: 'Trazados / Shapes de Ramal (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'direction ASC',
+    fields: ['id', 'branch_id', 'direction', 'coordinates_json', 'total_distance_km', 'created_at']
+  },
+  redsube_stops: {
+    label: 'Paradas (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'stop_order ASC',
+    fields: ['id', 'branch_id', 'direction', 'stop_order', 'name', 'lat', 'lng', 'proj_lat', 'proj_lng', 'stop_desc', 'created_at']
+  },
+  gtfs_routes: {
+    label: 'Rutas GTFS (RedSUBE)',
+    primaryKey: 'route_id',
+    orderBy: 'route_id ASC',
+    fields: ['route_id', 'agency_id', 'route_short_name', 'route_long_name', 'route_desc', 'route_type', 'route_color', 'route_text_color']
+  },
+  gtfs_trips: {
+    label: 'Viajes GTFS (RedSUBE)',
+    primaryKey: 'trip_id',
+    orderBy: 'trip_id ASC',
+    fields: ['trip_id', 'route_id', 'service_id', 'trip_headsign', 'direction_id', 'shape_id']
+  },
+  gtfs_stop_times: {
+    label: 'Horarios de Paradas GTFS (RedSUBE)',
+    primaryKey: 'trip_id',
+    orderBy: 'trip_id ASC, stop_sequence ASC',
+    fields: ['trip_id', 'arrival_time', 'departure_time', 'stop_id', 'stop_sequence']
+  },
+  gtfs_shapes: {
+    label: 'Puntos Shape GTFS (RedSUBE)',
+    primaryKey: 'shape_id',
+    orderBy: 'shape_id ASC, shape_pt_sequence ASC',
+    fields: ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']
   }
 };
 
@@ -2151,6 +2205,8 @@ app.get('/v1/admin/table/:tableName', async (c) => {
 
 // Helper para mapear vistas de compatibilidad SQLite a sus tablas físicas subyacentes
 function getPhysicalTableName(tableName: string): string {
+  if (tableName.startsWith('redsube_')) return `arg.redsube.${tableName.replace('redsube_', '')}`;
+  if (tableName.startsWith('gtfs_')) return `arg.redsube.${tableName.replace('gtfs_', '')}`;
   if (tableName.includes('.')) return tableName;
   if (tableName === 'ads') return 'ads';
   return `arg.core.${tableName}`;

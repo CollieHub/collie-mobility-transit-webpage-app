@@ -202,18 +202,18 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
   const getResolvedTableName = useCallback((tableName: string, source: SourceProvider = selectedSourceProvider): string => {
     if (source === 'redsube') {
-      if (tableName === 'lines') return 'arg.redsube.lines';
-      if (tableName === 'branches') return 'arg.redsube.branches';
-      if (tableName === 'companies') return 'arg.redsube.agencies';
-      if (tableName === 'stops') return 'arg.redsube.stops';
-      if (tableName === 'route_shapes') return 'arg.redsube.route_shapes';
+      if (tableName === 'lines') return 'redsube_lines';
+      if (tableName === 'branches') return 'redsube_branches';
+      if (tableName === 'companies') return 'redsube_agencies';
+      if (tableName === 'stops') return 'redsube_stops';
+      if (tableName === 'route_shapes') return 'redsube_route_shapes';
     }
     return tableName;
   }, [selectedSourceProvider]);
 
   const loadAuxiliaryData = useCallback(() => {
-    const targetLinesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.lines' : 'lines';
-    const targetBranchesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.branches' : 'branches';
+    const targetLinesTable = selectedSourceProvider === 'redsube' ? 'redsube_lines' : 'lines';
+    const targetBranchesTable = selectedSourceProvider === 'redsube' ? 'redsube_branches' : 'branches';
 
     fetch(`/v1/admin/table/${targetLinesTable}?limit=5000`)
       .then(res => res.json())
@@ -791,7 +791,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
               {activeTable === 'radar' ? 'Radar & Trazados' : activeTable === 'schedules' ? 'Horarios' : (currentMeta.label || activeTable)}
             </h1>
             <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-              {activeTable === 'radar' ? 'Monitoreo de Red y Creador de Recorridos' : `Tabla D1: ${activeTable}`}
+              {activeTable === 'radar' ? 'Monitoreo de Red y Creador de Recorridos' : `Tabla D1: ${resolvedActiveTable}`}
             </span>
           </div>
 
