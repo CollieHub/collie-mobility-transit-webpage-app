@@ -1147,30 +1147,33 @@ const LeafletVehicleMarker = React.memo(({ bus, shapeCoords, isSelected = false,
           const ahead = targetProj.segIdx > polylineStateRef.current.segIdx ||
             (targetProj.segIdx === polylineStateRef.current.segIdx && targetProj.t >= polylineStateRef.current.t);
 
-          // Velocidad base
-          const baseSpeed = target.speed || 0;
-          const pollingInterval = Math.max(0.5, pollingIntervalRef.current);
-          const targetSpeed = distToTarget / pollingInterval;
-          
-          if (ahead) {
-            if (distToTarget > 30.0) {
-              // Catch-up activo: permitimos velocidad más alta para alcanzar el target en vuelo de forma continua, limitada a 40 km/h (11.11 m/s)
-              const catchUpSpeed = distToTarget / pollingInterval;
-              currentSpeed = Math.min(11.11, catchUpSpeed);
-            } else {
-              // Cerca del target: convergencia suave acotada a la velocidad de la API
-              if (baseSpeed > 0) {
-                const minAllowedSpeed = baseSpeed * 0.75;
-                const maxAllowedSpeed = baseSpeed * 1.25;
-                currentSpeed = Math.min(maxAllowedSpeed, Math.max(minAllowedSpeed, targetSpeed));
-              } else {
-                currentSpeed = Math.min(5.0, targetSpeed);
-              }
-            }
+        const baseSpeed = target.speed || 0;
+        const isSimulated = (bus as any).isSimulated || (bus as any).is_simulated || String(bus.id || '').startsWith('sim-');
+        const pollingInterval = isSimulated ? 1.0 : Math.max(0.5, pollingIntervalRef.current);
+        const targetSpeed = distToTarget / pollingInterval;
+        
+        if (ahead) {
+          if (isSimulated) {
+            // En simulación local, seguir exactamente la distancia al target por segundo de forma continua y suave
+            currentSpeed = Math.min(25.0, Math.max(target.speed || 0, targetSpeed));
+          } else if (distToTarget > 30.0) {
+            // Catch-up activo: permitimos velocidad más alta para alcanzar el target en vuelo de forma continua, limitada a 40 km/h (11.11 m/s)
+            const catchUpSpeed = distToTarget / pollingInterval;
+            currentSpeed = Math.min(11.11, catchUpSpeed);
           } else {
-            // El target está atrás (desvío temporal). Desaceleramos suavemente para dejar que el target vuelva a alinearse
-            currentSpeed = Math.max(0, baseSpeed - (distToTarget / pollingInterval));
+            // Cerca del target: convergencia suave acotada a la velocidad de la API
+            if (baseSpeed > 0) {
+              const minAllowedSpeed = baseSpeed * 0.75;
+              const maxAllowedSpeed = baseSpeed * 1.25;
+              currentSpeed = Math.min(maxAllowedSpeed, Math.max(minAllowedSpeed, targetSpeed));
+            } else {
+              currentSpeed = Math.min(5.0, targetSpeed);
+            }
           }
+        } else {
+          // El target está atrás (desvío temporal). Desaceleramos suavemente para dejar que el target vuelva a alinearse
+          currentSpeed = Math.max(0, baseSpeed - (distToTarget / pollingInterval));
+        }
           
           // Limitar la velocidad máxima a 40 km/h (11.11 m/s) en calles y avenidas
           currentSpeed = Math.min(currentSpeed, 11.11);
@@ -1292,7 +1295,7 @@ const LeafletVehicleMarker = React.memo(({ bus, shapeCoords, isSelected = false,
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [bus.pos, bus.bearing, shapeCoords]);
+  }, [shapeCoords]);
 
   const color = isSelected ? '#10b981' : (bus.color || '#3b82f6');
 
