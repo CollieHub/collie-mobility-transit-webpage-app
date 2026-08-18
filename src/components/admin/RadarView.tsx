@@ -688,7 +688,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(false);
   const isPolylineClickRef = useRef<boolean>(false);
 
-  const [, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
+  const [activeSidebarTab, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
   const [selectedLineFilterId, setSelectedLineFilterId] = useState<string>('all');
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({ SIT: true, all: true });
 
@@ -1673,10 +1673,10 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   return (
     <div style={{ display: 'flex', gap: '1rem', height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
       
-      {/* 1. LEFT FLOATING CONTROL PANEL: LINES & BRANCHES SELECTOR OR REDSUBE V3 */}
+      {/* 2. SIDEBAR IZQUIERDO */}
       <div style={{
-        width: '320px',
-        backgroundColor: '#111827',
+        width: '340px',
+        backgroundColor: '#0f172a',
         border: '1px solid rgba(255, 255, 255, 0.08)',
         borderRadius: '16px',
         display: 'flex',
@@ -1684,45 +1684,25 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         overflow: 'hidden',
         boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
       }}>
-        {selectedSource === 'redsube' ? (
-          <RedSubeV3Panel
-            showNotification={showNotification}
-            onUnitsUpdate={(units) => {
-              setTelemetryVehicles(units.map((u: any) => ({
-                id: u.id || u.vehicle_id || Math.random().toString(),
-                lat: u.latitude || u.lat || -34.0970,
-                lng: u.longitude || u.lng || -59.0300,
-                bearing: u.bearing || u.heading || 0,
-                speed: u.speed || 0,
-                intern: u.label || u.agency_name || 'RedSUBE',
-                linea: u.route_short_name || u.linea || '228',
-                delayMinutes: 0,
-                status: 'running',
-                timestamp: u.timestamp || Date.now()
-              })));
-            }}
-          />
-        ) : (
-          <>
-            {/* Header */}
-            <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
-                </h2>
-                <span style={{
-                  fontSize: '0.65rem',
-                  backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                  color: isEditingEnabled ? '#10b981' : '#f59e0b',
-                  padding: '0.15rem 0.5rem',
-                  borderRadius: '6px',
-                  fontWeight: 700
-                }}>
-                  {isEditingEnabled ? 'EDICIÓN ACTIVA' : 'SOLO LECTURA'}
-                </span>
-              </div>
+        {/* Encabezado de Edición Unificado */}
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', backgroundColor: '#161e2e' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <RouteIcon size={18} style={{ color: '#38bdf8' }} /> Editor de Recorridos
+            </h2>
+            <span style={{
+              fontSize: '0.65rem',
+              backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              color: isEditingEnabled ? '#10b981' : '#f59e0b',
+              padding: '0.15rem 0.5rem',
+              borderRadius: '6px',
+              fontWeight: 700
+            }}>
+              {isEditingEnabled ? 'EDICIÓN ACTIVA' : 'SOLO LECTURA'}
+            </span>
+          </div>
 
-          {/* Habilitar Edicion Toggle Button (Above Guardar) */}
+          {/* Habilitar Edicion Toggle Button */}
           <button
             onClick={() => setIsEditingEnabled(!isEditingEnabled)}
             className={isEditingEnabled ? "btn-animated btn-animated-success" : "btn-animated btn-animated-dark"}
@@ -1746,101 +1726,6 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             {isEditingEnabled ? <Unlock size={14} /> : <Lock size={14} />}
             <span>{isEditingEnabled ? '✏️ Habilitar Edición: SÍ' : '🔒 Habilitar Edición: NO'}</span>
           </button>
-
-          {/* Quick Actions Bar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
-              <button
-                onClick={() => executeIfEditing(() => setShowMyMapsIngestorModal(true))}
-                disabled={!isEditingEnabled}
-                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar My Maps (Ingestador de Recorridos)'}
-                style={{
-                  backgroundColor: isEditingEnabled ? 'rgba(236, 72, 153, 0.14)' : '#1e293b',
-                  color: isEditingEnabled ? '#f472b6' : '#64748b',
-                  border: isEditingEnabled ? '1px solid rgba(236, 72, 153, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: '8px',
-                  padding: '0.45rem 0.5rem',
-                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.35rem',
-                  opacity: isEditingEnabled ? 1 : 0.4,
-                  transition: 'all 0.2s'
-                }}
-              >
-                <MapPin size={13} color={isEditingEnabled ? '#f472b6' : '#64748b'} /> Importar
-              </button>
-              <button
-                onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
-                disabled={!isEditingEnabled}
-                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde archivo KML'}
-                style={{
-                  backgroundColor: isEditingEnabled ? 'rgba(56, 189, 248, 0.12)' : '#1e293b',
-                  color: isEditingEnabled ? '#38bdf8' : '#64748b',
-                  border: isEditingEnabled ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: '8px',
-                  padding: '0.45rem 0.5rem',
-                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
-                  fontSize: '0.74rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.35rem',
-                  opacity: isEditingEnabled ? 1 : 0.4
-                }}
-              >
-                <FileCode size={13} /> Importar KML
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={handleSaveAll}
-                disabled={isSaving || !isEditingEnabled}
-                className="btn-animated btn-animated-success"
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
-                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.35rem'
-                }}
-              >
-                <Save size={14} /> Guardar
-              </button>
-              <button
-                onClick={() => executeIfEditing(loadBranchData)}
-                disabled={!isEditingEnabled}
-                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Descartar cambios no guardados'}
-                className="btn-animated btn-animated-danger"
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  backgroundColor: isEditingEnabled ? 'rgba(239, 68, 68, 0.15)' : '#1e293b',
-                  color: isEditingEnabled ? '#ef4444' : '#64748b',
-                  border: isEditingEnabled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
-                  opacity: isEditingEnabled ? 1 : 0.4,
-                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
-                }}
-              >
-                Descartar
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Navigation Tabs */}
@@ -1852,11 +1737,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               padding: '0.65rem',
               border: 'none',
               backgroundColor: 'transparent',
-              color: '#38bdf8',
+              color: activeSidebarTab === 'lineas' ? '#38bdf8' : '#9ca3af',
               fontWeight: 600,
               fontSize: '0.8rem',
               cursor: 'pointer',
-              borderBottom: '2px solid #38bdf8'
+              borderBottom: activeSidebarTab === 'lineas' ? '2px solid #38bdf8' : 'none'
             }}
           >
             🚌 Líneas
@@ -1868,209 +1753,297 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               padding: '0.65rem',
               border: 'none',
               backgroundColor: 'transparent',
-              color: '#9ca3af',
+              color: activeSidebarTab === 'paradas' ? '#38bdf8' : '#9ca3af',
               fontWeight: 600,
               fontSize: '0.8rem',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              borderBottom: activeSidebarTab === 'paradas' ? '2px solid #38bdf8' : 'none'
             }}
           >
             🚏 Paradas ({allBranchStops.length})
           </button>
         </div>
 
-        {/* Nested Combos: Línea y Ramal */}
-        <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {/* Combo 1: Línea */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              LÍNEA / EMPRESA
-            </label>
-            <select
-              value={selectedLineFilterId}
-              onChange={e => {
-                const val = e.target.value;
-                setSelectedLineFilterId(val);
-                if (val !== 'all') {
-                  const firstBranch = branchesList.find(b => b.line_id === val);
-                  if (firstBranch) setSelectedBranchId(firstBranch.id);
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.65rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                backgroundColor: '#1f2937',
-                color: '#ffffff',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="all">Todas las Líneas ({linesList.length})</option>
-              {linesList.map(line => (
-                <option key={line.id} value={line.id}>
-                  Línea {line.code} - {line.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Cuerpo del Sidebar */}
+        {activeSidebarTab === 'lineas' ? (
+          selectedSource === 'redsube' ? (
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <RedSubeV3Panel
+                showNotification={showNotification}
+                onRouteToggle={(ramal, isChecked, routeData) => {
+                  const matchedBranch = branchesList.find(b => 
+                    (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
+                    (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
+                  );
+                  if (matchedBranch) {
+                    setSelectedBranchId(matchedBranch.id);
+                  }
+                }}
+                onSelectDirection={(ramal, dir) => {
+                  setDirection(dir);
+                }}
+                onUnitsUpdate={(units) => {
+                  setTelemetryVehicles(units.map((u: any) => ({
+                    id: u.id || u.vehicle_id || Math.random().toString(),
+                    lat: u.latitude || u.lat || -34.0970,
+                    lng: u.longitude || u.lng || -59.0300,
+                    bearing: u.bearing || u.heading || 0,
+                    speed: u.speed || 0,
+                    intern: u.label || u.agency_name || 'RedSUBE',
+                    linea: u.route_short_name || u.linea || '228',
+                    delayMinutes: 0,
+                    status: 'running',
+                    timestamp: u.timestamp || Date.now()
+                  })));
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Nested Combos: Línea y Ramal */}
+              <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {/* Combo 1: Línea */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    LÍNEA / EMPRESA
+                  </label>
+                  <select
+                    value={selectedLineFilterId}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setSelectedLineFilterId(val);
+                      if (val !== 'all') {
+                        const firstBranch = branchesList.find(b => b.line_id === val);
+                        if (firstBranch) setSelectedBranchId(firstBranch.id);
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      backgroundColor: '#1f2937',
+                      color: '#ffffff',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="all">Todas las Líneas ({linesList.length})</option>
+                    {linesList.map(line => (
+                      <option key={line.id} value={line.id}>
+                        Línea {line.code} - {line.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          {/* Combo 2: Ramal (Anidado) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              RAMAL
-            </label>
-            <select
-              value={selectedBranchId}
-              onChange={e => setSelectedBranchId(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem 0.65rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                backgroundColor: '#1f2937',
-                color: '#ffffff',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="">Seleccionar Ramal...</option>
-              {nestedBranchesForCombo.map(b => (
-                <option key={b.id} value={b.id}>
-                  {b.code ? `${b.code} - ${b.name}` : b.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+                {/* Combo 2: Ramal (Anidado) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <label style={{ fontSize: '0.65rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    RAMAL
+                  </label>
+                  <select
+                    value={selectedBranchId}
+                    onChange={e => setSelectedBranchId(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      backgroundColor: '#1f2937',
+                      color: '#ffffff',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="">Seleccionar Ramal...</option>
+                    {nestedBranchesForCombo.map(b => (
+                      <option key={b.id} value={b.id}>
+                        {b.code ? `${b.code} - ${b.name}` : b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-        {/* Tree Accordion / List Content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {Object.entries(groupedBranches).map(([groupKey, groupItems]) => {
-            const isExpanded = expandedCompanies[groupKey] !== false;
-            return (
-              <div key={groupKey} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                {/* Group Title */}
-                <button
-                  onClick={() => setExpandedCompanies(prev => ({ ...prev, [groupKey]: !isExpanded }))}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.4rem 0.75rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    border: 'none',
-                    borderRadius: '6px',
-                    color: '#9ca3af',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
-                >
-                  <span>🏢 {groupKey} ({groupItems.length})</span>
-                  <span>{isExpanded ? '▾' : '▸'}</span>
-                </button>
-
-                {/* Branch Cards */}
-                {isExpanded && groupItems.map(b => {
-                  const isSelected = b.id === selectedBranchId;
+              {/* Tree Accordion / List Content */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {Object.entries(groupedBranches).map(([groupKey, groupItems]) => {
+                  const isExpanded = expandedCompanies[groupKey] !== false;
                   return (
-                    <div
-                      key={b.id}
-                      onClick={() => setSelectedBranchId(b.id)}
-                      style={{
-                        padding: '0.65rem 0.75rem',
-                        borderRadius: '10px',
-                        backgroundColor: isSelected ? '#1e293b' : 'transparent',
-                        border: isSelected ? '1px solid #0284c7' : '1px solid transparent',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.4rem'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isSelected ? '#38bdf8' : '#6b7280' }} />
-                          <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#ffffff' : '#e5e7eb' }}>
-                            {b.code ? `${b.code} - ${b.name}` : b.name}
-                          </span>
-                        </div>
-                        {(() => {
-                          const statusId = b.branch_publication_statuses_id;
-                          const isDraft = statusId === 'bpub_draft';
-                          const isUnpublished = statusId === 'bpub_unpublished';
-                          const label = isDraft ? 'BORRADOR' : (isUnpublished ? 'NO PUBLICADO' : 'PUBLICADO');
-                          const bg = isDraft ? 'rgba(245, 158, 11, 0.15)' : (isUnpublished ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.12)');
-                          const color = isDraft ? '#f59e0b' : (isUnpublished ? '#fca5a5' : '#10b981');
-                          return (
-                            <span style={{
-                              fontSize: '0.65rem',
-                              backgroundColor: bg,
-                              color: color,
-                              padding: '0.15rem 0.4rem',
-                              borderRadius: '4px',
-                              fontWeight: 700
-                            }}>
-                              {label}
-                            </span>
-                          );
-                        })()}
-                      </div>
+                    <div key={groupKey} style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                      <button
+                        onClick={() => setExpandedCompanies(prev => ({ ...prev, [groupKey]: !isExpanded }))}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.4rem 0.75rem',
+                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                          border: 'none',
+                          borderRadius: '6px',
+                          color: '#9ca3af',
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}
+                      >
+                        <span>🏢 {groupKey} ({groupItems.length})</span>
+                        <span>{isExpanded ? '▾' : '▸'}</span>
+                      </button>
 
-                      {isSelected && (
-                        <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
-                          <button
-                            onClick={e => { e.stopPropagation(); setDirection('ida'); }}
-                            className="btn-animated btn-animated-primary"
+                      {isExpanded && groupItems.map(b => {
+                        const isSelected = b.id === selectedBranchId;
+                        return (
+                          <div
+                            key={b.id}
+                            onClick={() => setSelectedBranchId(b.id)}
                             style={{
-                              flex: 1,
-                              padding: '0.25rem 0.4rem',
-                              borderRadius: '6px',
-                              border: 'none',
-                              backgroundColor: direction === 'ida' ? '#0284c7' : '#334155',
-                              color: '#ffffff',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer'
+                              padding: '0.65rem 0.75rem',
+                              borderRadius: '10px',
+                              backgroundColor: isSelected ? '#1e293b' : 'transparent',
+                              border: isSelected ? '1px solid #0284c7' : '1px solid transparent',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.4rem'
                             }}
                           >
-                            + {b.direction_ida_label || 'Ida'}
-                          </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); setDirection('vuelta'); }}
-                            className="btn-animated btn-animated-primary"
-                            style={{
-                              flex: 1,
-                              padding: '0.25rem 0.4rem',
-                              borderRadius: '6px',
-                              border: 'none',
-                              backgroundColor: direction === 'vuelta' ? '#0284c7' : '#334155',
-                              color: '#ffffff',
-                              fontSize: '0.7rem',
-                              fontWeight: 600,
-                              cursor: 'pointer'
-                            }}
-                          >
-                            + {b.direction_vuelta_label || 'Vuelta'}
-                          </button>
-                        </div>
-                      )}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isSelected ? '#38bdf8' : '#6b7280' }} />
+                                <span style={{ fontWeight: 600, fontSize: '0.82rem', color: isSelected ? '#ffffff' : '#e5e7eb' }}>
+                                  {b.code ? `${b.code} - ${b.name}` : b.name}
+                                </span>
+                              </div>
+                              {(() => {
+                                const statusId = b.branch_publication_statuses_id;
+                                const isDraft = statusId === 'bpub_draft';
+                                const isUnpublished = statusId === 'bpub_unpublished';
+                                const label = isDraft ? 'BORRADOR' : (isUnpublished ? 'NO PUBLICADO' : 'PUBLICADO');
+                                const bg = isDraft ? 'rgba(245, 158, 11, 0.15)' : (isUnpublished ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.12)');
+                                const color = isDraft ? '#f59e0b' : (isUnpublished ? '#fca5a5' : '#10b981');
+                                return (
+                                  <span style={{
+                                    fontSize: '0.65rem',
+                                    backgroundColor: bg,
+                                    color: color,
+                                    padding: '0.15rem 0.4rem',
+                                    borderRadius: '4px',
+                                    fontWeight: 700
+                                  }}>
+                                    {label}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+
+                            {isSelected && (
+                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.2rem' }}>
+                                <button
+                                  onClick={e => { e.stopPropagation(); setDirection('ida'); }}
+                                  className="btn-animated btn-animated-primary"
+                                  style={{
+                                    flex: 1,
+                                    padding: '0.25rem 0.4rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    backgroundColor: direction === 'ida' ? '#0284c7' : '#334155',
+                                    color: '#ffffff',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  + {b.direction_ida_label || 'Ida'}
+                                </button>
+                                <button
+                                  onClick={e => { e.stopPropagation(); setDirection('vuelta'); }}
+                                  className="btn-animated btn-animated-primary"
+                                  style={{
+                                    flex: 1,
+                                    padding: '0.25rem 0.4rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    backgroundColor: direction === 'vuelta' ? '#0284c7' : '#334155',
+                                    color: '#ffffff',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  + {b.direction_vuelta_label || 'Vuelta'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })}
               </div>
-            );
-          })}
-        </div>
-          </>
+            </>
+          )
+        ) : (
+          /* Tab de Paradas en el Sidebar */
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 0.6rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ padding: '0.2rem 0.4rem 0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8' }}>
+                Paradas de {selectedBranchObj?.name || 'Ramal activo'}
+              </span>
+              <span style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 600 }}>
+                {stops.length} en {direction.toUpperCase()}
+              </span>
+            </div>
+            {stops.length === 0 ? (
+              <div style={{ padding: '2rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.78rem' }}>
+                No hay paradas cargadas para este ramal en sentido {direction.toUpperCase()}.
+              </div>
+            ) : (
+              stops.map((stop, idx) => (
+                <div
+                  key={stop.id || `sidebar_stop_${idx}`}
+                  onClick={() => {
+                    setFocusCoords([stop.lat, stop.lng]);
+                    setSelectedStopId(stop.id);
+                    setShowRightDock(true);
+                  }}
+                  style={{
+                    padding: '0.5rem 0.65rem',
+                    borderRadius: '8px',
+                    backgroundColor: selectedStopId === stop.id ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                    border: selectedStopId === stop.id ? '1px solid #38bdf8' : '1px solid rgba(255, 255, 255, 0.05)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    color: '#38bdf8',
+                    minWidth: '22px'
+                  }}>
+                    {idx + 1}.
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#f1f5f9', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {stop.name || 'Parada sin nombre'}
+                  </span>
+                  <MapPin size={13} color="#94a3b8" />
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
 
