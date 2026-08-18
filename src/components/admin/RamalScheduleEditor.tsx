@@ -1306,6 +1306,9 @@ export default function RamalScheduleEditor({
         ...branch,
         code: branch.code,
         name: branch.name,
+        direction: direction,
+        currentDayType: dayCode,
+        currentDayTypeName: activeDayTypeName,
         schedules: consolidatedSchedules
       };
 

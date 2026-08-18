@@ -154,7 +154,9 @@ function hasValidSchedules(obj: any): boolean {
 
 export default function TimetableModal({ routeCode, onClose, routeData, isLoadingDetail, routeObj, calendarExceptions = [] }: TimetableModalProps) {
   const isMobile = useIsMobile();
-  const [activeDirection, setActiveDirection] = useState<'ida' | 'vuelta'>('ida');
+  const [activeDirection, setActiveDirection] = useState<'ida' | 'vuelta'>(() => {
+    return routeData?.direction || routeObj?.direction || 'ida';
+  });
 
   const param = routeObj?.id || routeObj?.code || routeCode || '';
 
@@ -207,6 +209,13 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
             }
           });
           if (hasValidSchedules(consolidated)) {
+            // Si viene routeData con schedules (ej: live preview), mergear para no pisar cambios en vivo
+            if (hasValidSchedules(routeData)) {
+              consolidated.schedules = {
+                ...consolidated.schedules,
+                ...routeData.schedules
+              };
+            }
             TIMETABLE_MEMORY_CACHE.set(param, consolidated);
             setInternalRouteData(consolidated);
           }
@@ -217,8 +226,20 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
   }, [param, routeCode, routeObj, routeData]);
 
   const effectiveRouteData = useMemo(() => {
+    if (hasValidSchedules(routeData)) {
+      if (internalRouteData && internalRouteData.schedules) {
+        return {
+          ...internalRouteData,
+          ...routeData,
+          schedules: {
+            ...internalRouteData.schedules,
+            ...routeData.schedules
+          }
+        };
+      }
+      return routeData;
+    }
     if (hasValidSchedules(internalRouteData)) return internalRouteData;
-    if (hasValidSchedules(routeData)) return routeData;
     if (hasValidSchedules(routeObj)) return routeObj;
     return internalRouteData || routeObj || routeData;
   }, [routeData, routeObj, internalRouteData]);
@@ -238,6 +259,8 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
 
   const [dayTypes, setDayTypes] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>(() => {
+    const customDay = routeData?.currentDayTypeName || routeData?.currentDayType || routeObj?.currentDayTypeName || routeObj?.currentDayType;
+    if (customDay) return formatSpecialLabel(customDay);
     return getTodayDayLabel(routeObjToUse || routeObj || routeData?.route, calendarExceptions);
   });
 
@@ -260,12 +283,12 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
       (exc: any) => exc.date === dateStr && (exc.company === companyName || exc.company === 'all' || exc.company === 'SIT' || !exc.company)
     );
 
-    if (hasException) {
-      setSelectedDay(computedToday);
-    } else if (data?.currentDayTypeName) {
+    if (data?.currentDayTypeName) {
       setSelectedDay(formatSpecialLabel(data.currentDayTypeName));
     } else if (data?.currentDayType) {
       setSelectedDay(formatSpecialLabel(data.currentDayType));
+    } else if (hasException) {
+      setSelectedDay(computedToday);
     } else {
       setSelectedDay(computedToday);
     }
@@ -395,12 +418,12 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     if (!data || !data.schedules) return null;
 
     let targetCode = 'lunes_a_viernes';
-    if (dayLabel === 'Lunes a Viernes') targetCode = 'lunes_a_viernes';
-    else if (dayLabel === 'Sábado' || dayLabel === 'Sábados') targetCode = 'sabados';
-    else if (dayLabel === 'Domingos y Feriados') targetCode = 'domingos_feriados';
-    else if (dayLabel.startsWith('Especial')) targetCode = 'especial';
+    if (dayLabel === 'Lunes a Viernes' || dayLabel === 'lunes_a_viernes') targetCode = 'lunes_a_viernes';
+    else if (dayLabel === 'Sábado' || dayLabel === 'Sábados' || dayLabel === 'sabados' || dayLabel === 'sabado') targetCode = 'sabados';
+    else if (dayLabel === 'Domingos y Feriados' || dayLabel === 'domingos_feriados') targetCode = 'domingos_feriados';
+    else if (dayLabel.startsWith('Especial') || dayLabel === 'especial') targetCode = 'especial';
 
-    // 1. Buscar coincidencia exacta por clave de la schedule (e.g. lunes_a_viernes_ida, domingos_feriados_vuelta)
+    // 1. Buscar coincidencia exacta por clave de la schedule (e.g. lunes_a_viernes_ida, sabados_vuelta)
     const exactKey = `${targetCode}_${direction}`;
     if (data.schedules[exactKey]) return data.schedules[exactKey];
 
@@ -414,12 +437,16 @@ export default function TimetableModal({ routeCode, onClose, routeData, isLoadin
     }
 
     // 3. Fallbacks compatibles con AWS legacy (weekday, saturday, sunday_holiday)
-    if (dayLabel === 'Lunes a Viernes') {
+    if (dayLabel === 'Lunes a Viernes' || dayLabel === 'lunes_a_viernes') {
       if (data.schedules[`weekday_${direction}`]) return data.schedules[`weekday_${direction}`];
-    } else if (dayLabel === 'Sábado') {
+      if (data.schedules[`lunes_a_viernes_${direction}`]) return data.schedules[`lunes_a_viernes_${direction}`];
+    } else if (dayLabel === 'Sábado' || dayLabel === 'Sábados' || dayLabel === 'sabados' || dayLabel === 'sabado') {
       if (data.schedules[`saturday_${direction}`]) return data.schedules[`saturday_${direction}`];
-    } else if (dayLabel === 'Domingos y Feriados') {
+      if (data.schedules[`sabados_${direction}`]) return data.schedules[`sabados_${direction}`];
+      if (data.schedules[`sabado_${direction}`]) return data.schedules[`sabado_${direction}`];
+    } else if (dayLabel === 'Domingos y Feriados' || dayLabel === 'domingos_feriados') {
       if (data.schedules[`sunday_holiday_${direction}`]) return data.schedules[`sunday_holiday_${direction}`];
+      if (data.schedules[`domingos_feriados_${direction}`]) return data.schedules[`domingos_feriados_${direction}`];
       if (data.schedules[`sunday_${direction}`]) return data.schedules[`sunday_${direction}`];
       if (data.schedules[`holiday_${direction}`]) return data.schedules[`holiday_${direction}`];
     }
