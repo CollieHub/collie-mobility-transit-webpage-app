@@ -265,7 +265,7 @@ function perpendicularDistanceKm(pt: [number, number], lineStart: [number, numbe
 }
 
 // Ramer-Douglas-Peucker algorithm to extract significant control waypoints from dense shape nodes
-function simplifyPolylineRdp(points: [number, number][], epsilonKm: number = 0.2): [number, number][] {
+function simplifyPolylineRdp(points: [number, number][], epsilonKm: number = 0.005): [number, number][] {
   if (points.length <= 2) return points;
 
   let dmax = 0;
@@ -1062,7 +1062,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               return pt;
             });
             setIdaPolylinePath(parsedIdaCoords);
-            setIdaWaypointsCount(simplifyPolylineRdp(parsedIdaCoords, 0.2).length);
+            setIdaWaypointsCount(parsedIdaCoords.length);
           } catch (_) { setIdaPolylinePath([]); setIdaWaypointsCount(0); }
         } else { setIdaPolylinePath([]); setIdaWaypointsCount(0); }
 
@@ -1075,7 +1075,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               return pt;
             });
             setVueltaPolylinePath(parsedVueltaCoords);
-            setVueltaWaypointsCount(simplifyPolylineRdp(parsedVueltaCoords, 0.2).length);
+            setVueltaWaypointsCount(parsedVueltaCoords.length);
           } catch (_) { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
         } else { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
 
@@ -1084,17 +1084,20 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
           try {
             const formatted = direction === 'ida' ? parsedIdaCoords : parsedVueltaCoords;
             setFullPolylinePath(formatted);
-            const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
-            setWaypoints(simplifiedControls);
+            // Conservar puntos de control de alta fidelidad
+            const controls = formatted.length <= 80 ? formatted : simplifyPolylineRdp(formatted, 0.005);
+            setWaypoints(controls);
             setUndoStack([]);
             setExistingShapeId(match.id);
 
-            // Re-calculate clean distance directly from OSRM or simplified control waypoints
-            if (simplifiedControls.length >= 2) {
-              const osrmRes = await fetchOsrmFullRoute(simplifiedControls);
-              setRouteDistanceKm(osrmRes.distanceKm);
-            } else if (match.total_distance_km && match.total_distance_km > 0) {
+            if (match.total_distance_km && match.total_distance_km > 0) {
               setRouteDistanceKm(match.total_distance_km);
+            } else if (formatted.length >= 2) {
+              let sum = 0;
+              for (let i = 0; i < formatted.length - 1; i++) {
+                sum += calculateDistanceKm(formatted[i][0], formatted[i][1], formatted[i + 1][0], formatted[i + 1][1]);
+              }
+              setRouteDistanceKm(Math.round(sum * 100) / 100);
             }
           } catch (_) {
             setWaypoints([]);
