@@ -28,7 +28,7 @@ import {
   LocateFixed
 } from 'lucide-react';
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
-import RedSubeV3Panel from './RedSubeV3Panel';
+import RedSubeV3Panel, { getBranchColor } from './RedSubeV3Panel';
 import type { V3Route } from './RedSubeV3Panel';
 
 // Fix Leaflet marker icons
@@ -1997,6 +1997,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     timestamp: u.timestamp || Date.now()
                   })));
                 }}
+                currentDirection={direction}
               />
             </div>
           ) : (
@@ -2099,8 +2100,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                         <span>{isExpanded ? '▾' : '▸'}</span>
                       </button>
 
-                      {isExpanded && groupItems.map(b => {
+                      {isExpanded && groupItems.map((b, bIdx) => {
                         const isSelected = b.id === selectedBranchId;
+                        const branchColor = getBranchColor(b.code || b.name, bIdx);
                         return (
                           <div
                             key={b.id}
@@ -2108,58 +2110,80 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                             style={{
                               padding: '0.65rem 0.75rem',
                               borderRadius: '10px',
-                              backgroundColor: isSelected ? '#1e293b' : 'transparent',
-                              border: isSelected ? '1px solid #0284c7' : '1px solid rgba(255, 255, 255, 0.04)',
+                              backgroundColor: isSelected ? `${branchColor}12` : '#1e293b',
+                              border: isSelected ? `1px solid ${branchColor}88` : '1px solid rgba(255, 255, 255, 0.08)',
                               cursor: 'pointer',
                               transition: 'all 0.15s ease',
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '0.35rem'
+                              gap: '0.45rem',
+                              boxShadow: isSelected ? `0 2px 12px ${branchColor}22` : 'none'
                             }}
                           >
-                            {/* Línea 1: Código/Nombre de Ramal a la izquierda y Checkbox a la derecha */}
+                            {/* Línea 1: Badge Código, Nombre de Ramal a la izquierda y Checkbox a la derecha */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.55rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
-                                <div style={{
-                                  width: '8px',
-                                  height: '8px',
-                                  borderRadius: '50%',
-                                  backgroundColor: isSelected ? '#38bdf8' : '#6b7280',
-                                  flexShrink: 0
-                                }} />
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
+                                {b.code && (
+                                  <span
+                                    style={{
+                                      minWidth: '44px',
+                                      height: '24px',
+                                      padding: '0 6px',
+                                      borderRadius: '6px',
+                                      backgroundColor: `${branchColor}22`,
+                                      color: branchColor,
+                                      fontSize: '0.74rem',
+                                      fontWeight: 800,
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {b.code}
+                                  </span>
+                                )}
                                 <span style={{
                                   fontWeight: 600,
-                                  fontSize: '0.82rem',
-                                  color: isSelected ? '#ffffff' : '#e5e7eb',
+                                  fontSize: '0.84rem',
+                                  color: isSelected ? '#ffffff' : '#f8fafc',
                                   lineHeight: '1.25',
                                   overflow: 'hidden',
                                   textOverflow: 'ellipsis',
                                   whiteSpace: 'nowrap'
                                 }}>
-                                  {b.code ? `${b.code} - ${b.name}` : b.name}
+                                  {b.name}
                                 </span>
                               </div>
 
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={(e) => {
+                              <button
+                                type="button"
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedBranchId(prev => prev === b.id ? '' : b.id);
                                 }}
                                 style={{
-                                  width: '16px',
-                                  height: '16px',
-                                  cursor: 'pointer',
-                                  accentColor: '#0284c7',
+                                  width: '18px',
+                                  height: '18px',
                                   borderRadius: '4px',
-                                  flexShrink: 0
+                                  border: `2px solid ${branchColor}`,
+                                  background: isSelected ? `${branchColor}35` : 'transparent',
+                                  flexShrink: 0,
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'all 0.15s'
                                 }}
-                              />
+                              >
+                                {isSelected && <div style={{ width: '9px', height: '9px', borderRadius: '2px', background: branchColor }} />}
+                              </button>
                             </div>
 
                             {/* Línea 2: Indicador de Publicación y Mirita */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.95rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                               {(() => {
                                 const statusId = b.branch_publication_statuses_id;
                                 const isDraft = statusId === 'bpub_draft';
@@ -2193,9 +2217,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                                 style={{
                                   background: 'transparent',
                                   border: 'none',
-                                  color: isSelected ? '#38bdf8' : '#94a3b8',
+                                  color: '#94a3b8',
                                   cursor: 'pointer',
-                                  padding: '2px 4px',
+                                  padding: '3px',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -2203,49 +2227,55 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                                   transition: 'color 0.15s, background 0.15s'
                                 }}
                                 onMouseOver={(e) => { e.currentTarget.style.color = '#38bdf8'; e.currentTarget.style.background = 'rgba(56, 189, 248, 0.15)'; }}
-                                onMouseOut={(e) => { e.currentTarget.style.color = isSelected ? '#38bdf8' : '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
                                 title="Enfocar recorrido (Mira)"
                               >
-                                <LocateFixed size={14} />
+                                <LocateFixed size={15} />
                               </button>
                             </div>
 
                             {/* Línea 3: Botones de Sentido cuando está seleccionado */}
                             {isSelected && (
-                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', paddingLeft: '0.95rem' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', marginTop: '0.15rem' }}>
                                 <button
+                                  type="button"
                                   onClick={e => { e.stopPropagation(); setDirection('ida'); }}
-                                  className="btn-animated btn-animated-primary"
                                   style={{
-                                    flex: 1,
-                                    padding: '0.25rem 0.4rem',
+                                    padding: '0.4rem 0.5rem',
                                     borderRadius: '6px',
-                                    border: 'none',
-                                    backgroundColor: direction === 'ida' ? '#0284c7' : '#334155',
-                                    color: '#ffffff',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 600,
-                                    cursor: 'pointer'
+                                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                                    backgroundColor: direction === 'ida' ? '#0284c7' : 'rgba(56, 189, 248, 0.1)',
+                                    color: direction === 'ida' ? '#ffffff' : '#38bdf8',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.15s ease'
                                   }}
                                 >
-                                  + {b.direction_ida_label || 'Ida'}
+                                  ➔ {b.direction_ida_label || 'Ida'}
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={e => { e.stopPropagation(); setDirection('vuelta'); }}
-                                  className="btn-animated btn-animated-primary"
                                   style={{
-                                    flex: 1,
-                                    padding: '0.25rem 0.4rem',
+                                    padding: '0.4rem 0.5rem',
                                     borderRadius: '6px',
-                                    border: 'none',
-                                    backgroundColor: direction === 'vuelta' ? '#0284c7' : '#334155',
-                                    color: '#ffffff',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 600,
-                                    cursor: 'pointer'
+                                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                                    backgroundColor: direction === 'vuelta' ? '#9333ea' : 'rgba(168, 85, 247, 0.1)',
+                                    color: direction === 'vuelta' ? '#ffffff' : '#c084fc',
+                                    fontSize: '0.72rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.15s ease'
                                   }}
                                 >
-                                  + {b.direction_vuelta_label || 'Vuelta'}
+                                  ➔ {b.direction_vuelta_label || 'Vuelta'}
                                 </button>
                               </div>
                             )}

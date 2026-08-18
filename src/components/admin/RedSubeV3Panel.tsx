@@ -1,6 +1,48 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Bus, Search, CheckSquare, Square, Clock, Sparkles, LocateFixed } from 'lucide-react';
 
+export const ROUTE_COLORS_PALETTE = [
+  '#880E4F',
+  '#E65100',
+  '#673AB7',
+  '#009688',
+  '#3F51B5',
+  '#FF9800',
+  '#0F9D58',
+  '#A52714',
+  '#F9A825',
+  '#558B2F',
+  '#311B92',
+  '#006064',
+  '#C2185B',
+  '#0D47A1',
+  '#1B5E20',
+  '#B71C1C',
+  '#E64A19',
+  '#4A148C',
+  '#00838F',
+  '#F57C00'
+];
+
+export function getBranchColor(codeOrName: string, index: number = 0): string {
+  if (!codeOrName) return ROUTE_COLORS_PALETTE[index % ROUTE_COLORS_PALETTE.length];
+  
+  const match = codeOrName.match(/\d+/);
+  if (match) {
+    const num = parseInt(match[0], 10);
+    if (num <= 20) {
+      return ROUTE_COLORS_PALETTE[(num - 1) % ROUTE_COLORS_PALETTE.length];
+    }
+  }
+  
+  let hash = 0;
+  for (let i = 0; i < codeOrName.length; i++) {
+    hash = codeOrName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hashIdx = (Math.abs(hash) + index) % ROUTE_COLORS_PALETTE.length;
+  return ROUTE_COLORS_PALETTE[hashIdx];
+}
+
 export interface V3Route {
   ramal: string;
   name: string;
@@ -16,6 +58,8 @@ interface RedSubeV3PanelProps {
   onFocusRoute?: (ramal: string, routeData: V3Route) => void;
   onUnitsUpdate?: (vehicles: any[]) => void;
   showNotification?: (type: 'success' | 'error', msg: string) => void;
+  currentDirection?: 'ida' | 'vuelta';
+  activeRamal?: string;
 }
 
 export default function RedSubeV3Panel({
@@ -23,7 +67,9 @@ export default function RedSubeV3Panel({
   onSelectDirection,
   onFocusRoute,
   onUnitsUpdate,
-  showNotification
+  showNotification,
+  currentDirection,
+  activeRamal
 }: RedSubeV3PanelProps) {
   const [unitsLimit, setUnitsLimit] = useState<number>(50);
   const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('ramal');
@@ -338,22 +384,22 @@ export default function RedSubeV3Panel({
             No se encontraron ramales para esta empresa.
           </div>
         ) : (
-          routes.map(r => {
+          routes.map((r, idx) => {
             const isChecked = selectedRamales.has(r.ramal);
             const isExpanded = expandedDetails.has(r.ramal);
             const isCorrected = correctedVersions.has(r.ramal);
-            const ramalColor = r.color || '#e65100';
+            const ramalColor = (r.color && r.color !== '#e65100') ? r.color : getBranchColor(r.ramal, idx);
 
             return (
               <div
                 key={r.ramal}
                 style={{
-                  backgroundColor: '#1e293b',
+                  backgroundColor: isChecked ? `${ramalColor}12` : '#1e293b',
                   border: isChecked ? `1px solid ${ramalColor}88` : '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '10px',
                   overflow: 'hidden',
                   transition: 'all 0.15s ease',
-                  boxShadow: isChecked ? `0 2px 10px ${ramalColor}22` : 'none'
+                  boxShadow: isChecked ? `0 2px 12px ${ramalColor}22` : 'none'
                 }}
               >
                 {/* Card Header */}
@@ -365,19 +411,24 @@ export default function RedSubeV3Panel({
                     justifyContent: 'space-between',
                     padding: '0.65rem 0.75rem',
                     cursor: 'pointer',
-                    backgroundColor: isChecked ? `${ramalColor}12` : 'transparent'
+                    backgroundColor: isChecked ? `${ramalColor}10` : 'transparent'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1, minWidth: 0 }}>
                     <span
                       style={{
-                        padding: '0.2rem 0.5rem',
+                        minWidth: '44px',
+                        height: '24px',
+                        padding: '0 6px',
                         borderRadius: '6px',
-                        border: `1.5px solid ${ramalColor}`,
+                        backgroundColor: `${ramalColor}22`,
                         color: ramalColor,
-                        fontSize: '0.72rem',
+                        fontSize: '0.74rem',
                         fontWeight: 800,
-                        backgroundColor: `${ramalColor}15`,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
                         whiteSpace: 'nowrap'
                       }}
                     >
@@ -386,9 +437,9 @@ export default function RedSubeV3Panel({
                     <span
                       title={r.name}
                       style={{
-                        fontSize: '0.8rem',
+                        fontSize: '0.84rem',
                         fontWeight: 600,
-                        color: '#f8fafc',
+                        color: isChecked ? '#ffffff' : '#f8fafc',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
@@ -398,13 +449,29 @@ export default function RedSubeV3Panel({
                     </span>
                   </div>
 
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => {}}
-                    onClick={e => e.stopPropagation()}
-                    style={{ accentColor: '#e65100', cursor: 'pointer', width: '16px', height: '16px' }}
-                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleRoute(r);
+                    }}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      borderRadius: '4px',
+                      border: `2px solid ${ramalColor}`,
+                      background: isChecked ? `${ramalColor}35` : 'transparent',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s'
+                    }}
+                  >
+                    {isChecked && <div style={{ width: '9px', height: '9px', borderRadius: '2px', background: ramalColor }} />}
+                  </button>
                 </div>
 
                 {/* Card Expandable Details */}
@@ -412,7 +479,7 @@ export default function RedSubeV3Panel({
                   <div
                     style={{
                       padding: '0.65rem 0.75rem',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                      borderTop: `1px solid ${ramalColor}20`,
                       backgroundColor: 'rgba(0, 0, 0, 0.2)',
                       display: 'flex',
                       flexDirection: 'column',
@@ -475,14 +542,15 @@ export default function RedSubeV3Panel({
                             padding: '0.4rem 0.5rem',
                             borderRadius: '6px',
                             border: '1px solid rgba(56, 189, 248, 0.3)',
-                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                            color: '#38bdf8',
+                            backgroundColor: (currentDirection === 'ida' && isChecked) ? '#0284c7' : 'rgba(56, 189, 248, 0.1)',
+                            color: (currentDirection === 'ida' && isChecked) ? '#ffffff' : '#38bdf8',
                             fontSize: '0.72rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.15s ease'
                           }}
                         >
                           ➔ {r.headsignIda}
@@ -496,14 +564,15 @@ export default function RedSubeV3Panel({
                             padding: '0.4rem 0.5rem',
                             borderRadius: '6px',
                             border: '1px solid rgba(168, 85, 247, 0.3)',
-                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                            color: '#c084fc',
+                            backgroundColor: (currentDirection === 'vuelta' && isChecked) ? '#9333ea' : 'rgba(168, 85, 247, 0.1)',
+                            color: (currentDirection === 'vuelta' && isChecked) ? '#ffffff' : '#c084fc',
                             fontSize: '0.72rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.15s ease'
                           }}
                         >
                           ➔ {r.headsignVuelta}
