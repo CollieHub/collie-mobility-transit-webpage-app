@@ -28,8 +28,8 @@ export default function RedSubeV3Panel({
   const [selectedCompany, setSelectedCompany] = useState<string>('228');
   const [companies, setCompanies] = useState<any[]>([
     { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))' },
-    { id: '194', name: 'Línea 194 (Metropol Zárate ⇄ Once)' },
-    { id: '204', name: 'Línea 204 (Zárate ⇄ Campana)' },
+    { id: '194', name: 'Línea 194 (LA NUEVA METROPOL S.A. (Línea 194))' },
+    { id: '204', name: 'Línea 204 (LINEA 204 S.A.)' },
     { id: 'SIT', name: 'SIT (Servicio Integral Zárate)' },
     { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)' },
     { id: 'TODAS', name: '— Todas las Líneas Activas —' }

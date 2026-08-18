@@ -2386,37 +2386,14 @@ app.delete('/v1/admin/table/:tableName/:id', async (c) => {
 
 const V3_STATIC_COMPANIES = [
   { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '228' },
-  { id: '194', name: 'Línea 194 (Metropol Zárate ⇄ Once)', lineCode: '194' },
-  { id: '204', name: 'Línea 204 (Zárate ⇄ Campana)', lineCode: '204' },
+  { id: '194', name: 'Línea 194 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '194' },
+  { id: '204', name: 'Línea 204 (LINEA 204 S.A.)', lineCode: '204' },
   { id: 'SIT', name: 'SIT (Servicio Integral Zárate)', lineCode: 'SIT' },
   { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)', lineCode: '314' },
   { id: 'TODAS', name: '— Todas las Líneas Activas —', lineCode: 'TODAS' }
 ];
 
 const V3_ROUTES_DATA: Record<string, any[]> = {
-  "228": [
-    { ramal: "228AC", name: "Pte. Saavedra ⇄ Zárate", headsignIda: "Pte. Saavedra", headsignVuelta: "Zárate", color: "#0284c7" },
-    { ramal: "228BA", name: "Escobar ⇄ Fonavi ⇄ Garín ⇄ Saavedra", headsignIda: "Escobar", headsignVuelta: "Saavedra", color: "#10b981" },
-    { ramal: "228CB", name: "Ariel del Plata ⇄ Zárate", headsignIda: "Ariel del Plata", headsignVuelta: "Zárate", color: "#f59e0b" },
-    { ramal: "228CC", name: "Lima ⇄ Zárate (Original)", headsignIda: "Lima", headsignVuelta: "Zárate", color: "#ec4899" },
-    { ramal: "228CD", name: "Luján ⇄ Zárate (x Cardales)", headsignIda: "Luján", headsignVuelta: "Zárate", color: "#8b5cf6" },
-    { ramal: "228EA", name: "Pque. Industrial Pilar ⇄ Est. Pilar", headsignIda: "Pque. Industrial Pilar", headsignVuelta: "Est. Pilar", color: "#06b6d4" },
-    { ramal: "228EB", name: "Benavídez ⇄ Bº Las Mascotas", headsignIda: "Benavídez", headsignVuelta: "Bº Las Mascotas", color: "#84cc16" },
-    { ramal: "228FA", name: "Pte. Saavedra ⇄ Del Viso Est. Toro", headsignIda: "Pte. Saavedra", headsignVuelta: "Del Viso", color: "#d946ef" }
-  ],
-  "194": [
-    { ramal: "194-EXPRESS", name: "Zárate ⇄ Plaza Miserere (Once)", headsignIda: "Once", headsignVuelta: "Zárate", color: "#e65100" },
-    { ramal: "194-DIRECTO", name: "Zárate ⇄ Escobar ⇄ Once", headsignIda: "Once", headsignVuelta: "Zárate", color: "#1e88e5" },
-    { ramal: "194-COMUN", name: "Zárate ⇄ Campana ⇄ Saavedra ⇄ Once", headsignIda: "Once", headsignVuelta: "Zárate", color: "#43a047" }
-  ],
-  "204": [
-    { ramal: "204A", name: "Zárate ⇄ Campana x Colectora", headsignIda: "Campana", headsignVuelta: "Zárate", color: "#00acc1" },
-    { ramal: "204B", name: "Saavedra ⇄ Escobar", headsignIda: "Escobar", headsignVuelta: "Saavedra", color: "#3949ab" }
-  ],
-  "314": [
-    { ramal: "314A", name: "Puente Saavedra ⇄ Villa Adelina", headsignIda: "Villa Adelina", headsignVuelta: "Pte. Saavedra", color: "#0284c7" },
-    { ramal: "314B", name: "Puente Saavedra ⇄ Boulogne", headsignIda: "Boulogne", headsignVuelta: "Pte. Saavedra", color: "#059669" }
-  ],
   "SIT": [
     { ramal: "RZ01", name: "Burgar - Terminal NK", headsignIda: "Terminal NK", headsignVuelta: "Burgar", color: "#e65100" },
     { ramal: "RZ02", name: "Escalada - Los Ceibos", headsignIda: "Los Ceibos", headsignVuelta: "Escalada", color: "#e65100" },
@@ -2432,8 +2409,8 @@ const V3_ROUTES_DATA: Record<string, any[]> = {
 app.get('/v1/redsube/lines', async (c) => {
   const customLines = [
     { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '228' },
-    { id: '194', name: 'Línea 194 (Metropol Zárate ⇄ Once)', lineCode: '194' },
-    { id: '204', name: 'Línea 204 (Zárate ⇄ Campana)', lineCode: '204' },
+    { id: '194', name: 'Línea 194 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '194' },
+    { id: '204', name: 'Línea 204 (LINEA 204 S.A.)', lineCode: '204' },
     { id: 'SIT', name: 'SIT (Servicio Integral Zárate)', lineCode: 'SIT' },
     { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)', lineCode: '314' },
     { id: 'TODAS', name: '— Todas las Líneas Activas —', lineCode: 'TODAS' }
@@ -2457,26 +2434,35 @@ app.get('/v1/redsube/lines', async (c) => {
 });
 
 app.get('/v1/redsube/line-routes', async (c) => {
-  const company = c.req.query('company') || '228';
+  const company = c.req.query('company') || '194';
 
-  // 1. Custom hardcoded routes first if defined
+  // 1. Custom hardcoded routes first (solo para servicios propios como SIT Zárate)
   if (V3_ROUTES_DATA[company]) {
     return c.json({ success: true, company, routes: V3_ROUTES_DATA[company] });
   }
 
   if (company === 'TODAS') {
-    const allCustom = [
-      ...(V3_ROUTES_DATA['228'] || []),
-      ...(V3_ROUTES_DATA['194'] || []),
-      ...(V3_ROUTES_DATA['204'] || []),
-      ...(V3_ROUTES_DATA['314'] || []),
-      ...(V3_ROUTES_DATA['SIT'] || [])
-    ];
-    return c.json({ success: true, company, routes: allCustom });
+    const featuredLineCodes = ['228', '194', '204', '314'];
+    let allRoutes: any[] = [...(V3_ROUTES_DATA['SIT'] || [])];
+    for (const code of featuredLineCodes) {
+      const foundLine = (allGtfsLines as any[]).find((l: any) => l.lineCode === code);
+      if (foundLine && Array.isArray(foundLine.ramales)) {
+        allRoutes.push(...foundLine.ramales.map((r: any) => ({
+          ramal: r.shortName || r.route_id,
+          name: r.longName || `Línea ${r.shortName}`,
+          headsignIda: r.headsignIda || (r.longName ? r.longName.split('⇄')[0]?.trim() : ''),
+          headsignVuelta: r.headsignVuelta || (r.longName ? r.longName.split('⇄')[1]?.trim() : ''),
+          color: '#e65100',
+          route_id: r.route_id
+        })));
+      }
+    }
+    return c.json({ success: true, company, routes: allRoutes });
   }
 
-  // 2. Query from allGtfsLines catalog
-  const found = (allGtfsLines as any[]).find((l: any) => l.lineCode === company || l.displayName.includes(company));
+  // 2. Query from allGtfsLines official catalog
+  const found = (allGtfsLines as any[]).find((l: any) => String(l.lineCode).trim() === String(company).trim()) ||
+                (allGtfsLines as any[]).find((l: any) => l.displayName?.toLowerCase().startsWith(`línea ${company.toLowerCase()} `));
   if (found && Array.isArray(found.ramales) && found.ramales.length > 0) {
     const routes = found.ramales.map((r: any) => ({
       ramal: r.shortName || r.route_id,
