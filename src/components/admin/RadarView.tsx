@@ -1734,7 +1734,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             style={{
               width: '100%',
               padding: '0.5rem 0.75rem',
-              marginBottom: '0.65rem',
+              marginBottom: '0.5rem',
               borderRadius: '8px',
               border: isEditingEnabled ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.15)',
               backgroundColor: isEditingEnabled ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
@@ -1751,6 +1751,101 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             {isEditingEnabled ? <Unlock size={14} /> : <Lock size={14} />}
             <span>{isEditingEnabled ? '✏️ Habilitar Edición: SÍ' : '🔒 Habilitar Edición: NO'}</span>
           </button>
+
+          {/* Quick Actions Bar: Importar My Maps, Importar KML, Guardar, Descartar */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.4rem' }}>
+              <button
+                onClick={() => executeIfEditing(() => setShowMyMapsIngestorModal(true))}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar My Maps (Ingestador de Recorridos)'}
+                style={{
+                  backgroundColor: isEditingEnabled ? 'rgba(236, 72, 153, 0.14)' : '#1e293b',
+                  color: isEditingEnabled ? '#f472b6' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(236, 72, 153, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '8px',
+                  padding: '0.45rem 0.5rem',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  opacity: isEditingEnabled ? 1 : 0.4,
+                  transition: 'all 0.2s'
+                }}
+              >
+                <MapPin size={13} color={isEditingEnabled ? '#f472b6' : '#64748b'} /> Importar My Maps
+              </button>
+              <button
+                onClick={() => executeIfEditing(() => kmlInputRef.current?.click())}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Importar paradas desde archivo KML'}
+                style={{
+                  backgroundColor: isEditingEnabled ? 'rgba(56, 189, 248, 0.12)' : '#1e293b',
+                  color: isEditingEnabled ? '#38bdf8' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '8px',
+                  padding: '0.45rem 0.5rem',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  opacity: isEditingEnabled ? 1 : 0.4
+                }}
+              >
+                <FileCode size={13} /> Importar KML
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={handleSaveAll}
+                disabled={isSaving || !isEditingEnabled}
+                className="btn-animated btn-animated-success"
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  backgroundColor: isEditingEnabled ? '#10b981' : '#334155',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem'
+                }}
+              >
+                <Save size={14} /> Guardar
+              </button>
+              <button
+                onClick={() => executeIfEditing(loadBranchData)}
+                disabled={!isEditingEnabled}
+                title={!isEditingEnabled ? 'Debes habilitar la edición primero' : 'Descartar cambios no guardados'}
+                className="btn-animated btn-animated-danger"
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  backgroundColor: isEditingEnabled ? 'rgba(239, 68, 68, 0.15)' : '#1e293b',
+                  color: isEditingEnabled ? '#ef4444' : '#64748b',
+                  border: isEditingEnabled ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  opacity: isEditingEnabled ? 1 : 0.4,
+                  cursor: isEditingEnabled ? 'pointer' : 'not-allowed'
+                }}
+              >
+                Descartar
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
