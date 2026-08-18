@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Bus, Search, CheckSquare, Square, Clock, Sparkles } from 'lucide-react';
+import { Bus, Search, CheckSquare, Square, Clock, Sparkles, LocateFixed } from 'lucide-react';
 
 export interface V3Route {
   ramal: string;
@@ -13,6 +13,7 @@ export interface V3Route {
 interface RedSubeV3PanelProps {
   onRouteToggle?: (ramal: string, isChecked: boolean, routeData: V3Route) => void;
   onSelectDirection?: (ramal: string, direction: 'ida' | 'vuelta') => void;
+  onFocusRoute?: (ramal: string, routeData: V3Route) => void;
   onUnitsUpdate?: (vehicles: any[]) => void;
   showNotification?: (type: 'success' | 'error', msg: string) => void;
 }
@@ -20,6 +21,7 @@ interface RedSubeV3PanelProps {
 export default function RedSubeV3Panel({
   onRouteToggle,
   onSelectDirection,
+  onFocusRoute,
   onUnitsUpdate,
   showNotification
 }: RedSubeV3PanelProps) {
@@ -417,23 +419,50 @@ export default function RedSubeV3Panel({
                       gap: '0.5rem'
                     }}
                   >
-                    {/* Status badge */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span
-                        style={{
-                          backgroundColor: '#059669',
-                          color: '#ffffff',
-                          fontSize: '0.65rem',
-                          fontWeight: 800,
-                          padding: '0.15rem 0.45rem',
-                          borderRadius: '4px'
+                    {/* Status badge & Mirita Focus Button */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span
+                          style={{
+                            backgroundColor: '#059669',
+                            color: '#ffffff',
+                            fontSize: '0.65rem',
+                            fontWeight: 800,
+                            padding: '0.15rem 0.45rem',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          NORMAL
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 600 }}>
+                          {r.unitsCount ? `${r.unitsCount} unidades activas` : 'Conectado a RedSUBE'}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onFocusRoute?.(r.ramal, r);
                         }}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#94a3b8',
+                          cursor: 'pointer',
+                          padding: '3px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '4px',
+                          transition: 'color 0.15s, background 0.15s'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.color = '#38bdf8'; e.currentTarget.style.background = 'rgba(56, 189, 248, 0.15)'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                        title="Enfocar recorrido (Mira)"
                       >
-                        NORMAL
-                      </span>
-                      <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 600 }}>
-                        {r.unitsCount ? `${r.unitsCount} unidades activas` : 'Conectado a RedSUBE'}
-                      </span>
+                        <LocateFixed size={15} />
+                      </button>
                     </div>
 
                     {/* Direction Buttons */}

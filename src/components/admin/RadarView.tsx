@@ -24,7 +24,8 @@ import {
   Lock,
   Unlock,
   Hash,
-  FileCode
+  FileCode,
+  LocateFixed
 } from 'lucide-react';
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
 import RedSubeV3Panel from './RedSubeV3Panel';
@@ -1118,6 +1119,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     }
   }, [selectedBranchId, direction, selectedSource]);
 
+  const handleFocusCurrentRoute = useCallback(() => {
+    const allCoords = [...idaPolylinePath, ...vueltaPolylinePath, ...fullPolylinePath];
+    if (allCoords.length >= 2) {
+      setRouteBounds([...allCoords]);
+    } else if (allBranchStops.length > 0) {
+      const stopCoords = allBranchStops.map(s => [s.lat, s.lng] as [number, number]);
+      setRouteBounds(stopCoords);
+    }
+  }, [idaPolylinePath, vueltaPolylinePath, fullPolylinePath, allBranchStops]);
+
   useEffect(() => {
     loadBranchData();
   }, [loadBranchData]);
@@ -1961,6 +1972,17 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     setSelectedBranchId(matchedBranch.id);
                   }
                 }}
+                onFocusRoute={(ramal, routeData) => {
+                  const activeBranches = redSubeBranchesList.length > 0 ? redSubeBranchesList : branchesList;
+                  const matchedBranch = activeBranches.find(b => 
+                    (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
+                    (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
+                  );
+                  if (matchedBranch) {
+                    setSelectedBranchId(matchedBranch.id);
+                  }
+                  handleFocusCurrentRoute();
+                }}
                 onUnitsUpdate={(units) => {
                   setTelemetryVehicles(units.map((u: any) => ({
                     id: u.id || u.vehicle_id || Math.random().toString(),
@@ -2136,8 +2158,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                               />
                             </div>
 
-                            {/* Línea 2: Indicador de Publicación */}
-                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0.95rem' }}>
+                            {/* Línea 2: Indicador de Publicación y Mirita */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: '0.95rem' }}>
                               {(() => {
                                 const statusId = b.branch_publication_statuses_id;
                                 const isDraft = statusId === 'bpub_draft';
@@ -2158,6 +2180,34 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                                   </span>
                                 );
                               })()}
+
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (selectedBranchId !== b.id) {
+                                    setSelectedBranchId(b.id);
+                                  }
+                                  handleFocusCurrentRoute();
+                                }}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  color: isSelected ? '#38bdf8' : '#94a3b8',
+                                  cursor: 'pointer',
+                                  padding: '2px 4px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '4px',
+                                  transition: 'color 0.15s, background 0.15s'
+                                }}
+                                onMouseOver={(e) => { e.currentTarget.style.color = '#38bdf8'; e.currentTarget.style.background = 'rgba(56, 189, 248, 0.15)'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.color = isSelected ? '#38bdf8' : '#94a3b8'; e.currentTarget.style.background = 'transparent'; }}
+                                title="Enfocar recorrido (Mira)"
+                              >
+                                <LocateFixed size={14} />
+                              </button>
                             </div>
 
                             {/* Línea 3: Botones de Sentido cuando está seleccionado */}
@@ -2645,6 +2695,35 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               </Marker>
             ))}
           </MapContainer>
+
+          {/* Botón flotante Mirita para centrar/enfocar el recorrido */}
+          <button
+            type="button"
+            onClick={handleFocusCurrentRoute}
+            style={{
+              position: 'absolute',
+              bottom: '24px',
+              right: showRightDock ? '360px' : '24px',
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              backgroundColor: '#1e293b',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: '#38bdf8',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+              zIndex: 999,
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#0284c7'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.08)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#1e293b'; e.currentTarget.style.color = '#38bdf8'; e.currentTarget.style.transform = 'scale(1)'; }}
+            title="Mirita: Enfocar recorrido del ramal en el mapa"
+          >
+            <LocateFixed size={20} />
+          </button>
 
           {/* 3. RIGHT FLOATING WIDGET DOCK (CONMUTADOR DE PESTAÑAS: PARADAS vs RECORRIDO) */}
           {showRightDock && (
