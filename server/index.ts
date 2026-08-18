@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import allGtfsLines from '../src/lib/redsube/all_gtfs_lines.json';
 
 type Bindings = {
   DB: D1Database;
@@ -2429,21 +2430,74 @@ const V3_ROUTES_DATA: Record<string, any[]> = {
 };
 
 app.get('/v1/redsube/lines', async (c) => {
-  return c.json({ success: true, companies: V3_STATIC_COMPANIES });
+  const customLines = [
+    { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))', lineCode: '228' },
+    { id: '194', name: 'Línea 194 (Metropol Zárate ⇄ Once)', lineCode: '194' },
+    { id: '204', name: 'Línea 204 (Zárate ⇄ Campana)', lineCode: '204' },
+    { id: 'SIT', name: 'SIT (Servicio Integral Zárate)', lineCode: 'SIT' },
+    { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)', lineCode: '314' },
+    { id: 'TODAS', name: '— Todas las Líneas Activas —', lineCode: 'TODAS' }
+  ];
+
+  const gtfsList = (allGtfsLines as any[]).map((l: any) => ({
+    id: l.lineCode,
+    name: l.displayName,
+    lineCode: l.lineCode,
+    agencyName: l.agencyName
+  }));
+
+  const combined = [...customLines];
+  for (const item of gtfsList) {
+    if (!combined.some(c => c.id === item.id)) {
+      combined.push(item);
+    }
+  }
+
+  return c.json({ success: true, companies: combined });
 });
 
 app.get('/v1/redsube/line-routes', async (c) => {
   const company = c.req.query('company') || '228';
-  let routes = V3_ROUTES_DATA[company] || [];
+
+  // 1. Custom hardcoded routes first if defined
+  if (V3_ROUTES_DATA[company]) {
+    return c.json({ success: true, company, routes: V3_ROUTES_DATA[company] });
+  }
+
   if (company === 'TODAS') {
-    routes = [
+    const allCustom = [
       ...(V3_ROUTES_DATA['228'] || []),
       ...(V3_ROUTES_DATA['194'] || []),
       ...(V3_ROUTES_DATA['204'] || []),
+      ...(V3_ROUTES_DATA['314'] || []),
       ...(V3_ROUTES_DATA['SIT'] || [])
     ];
+    return c.json({ success: true, company, routes: allCustom });
   }
-  return c.json({ success: true, company, routes });
+
+  // 2. Query from allGtfsLines catalog
+  const found = (allGtfsLines as any[]).find((l: any) => l.lineCode === company || l.displayName.includes(company));
+  if (found && Array.isArray(found.ramales) && found.ramales.length > 0) {
+    const routes = found.ramales.map((r: any) => ({
+      ramal: r.shortName || r.route_id,
+      name: r.longName || `Línea ${r.shortName}`,
+      headsignIda: r.headsignIda || (r.longName ? r.longName.split('⇄')[0]?.trim() : ''),
+      headsignVuelta: r.headsignVuelta || (r.longName ? r.longName.split('⇄')[1]?.trim() : ''),
+      color: '#e65100',
+      route_id: r.route_id
+    }));
+    return c.json({ success: true, company, routes });
+  }
+
+  // 3. Fallback to D1 query
+  try {
+    const res = await c.env.DB.prepare('SELECT b.id, b.code as ramal, b.name, b.headsign_ida as headsignIda, b.headsign_vuelta as headsignVuelta, b.color, l.code as lineCode FROM "arg.redsube.branches" b JOIN "arg.redsube.lines" l ON b.line_id = l.id WHERE l.code = ? ORDER BY b.code ASC').bind(company).all();
+    if (res.results && res.results.length > 0) {
+      return c.json({ success: true, company, routes: res.results });
+    }
+  } catch (_) {}
+
+  return c.json({ success: true, company, routes: [] });
 });
 
 app.get('/v1/redsube/vehicles', async (c) => {

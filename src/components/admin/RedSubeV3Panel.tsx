@@ -36,8 +36,8 @@ export default function RedSubeV3Panel({
   ]);
   const [routes, setRoutes] = useState<V3Route[]>([]);
   const [activeUnitsCount, setActiveUnitsCount] = useState<number>(0);
-  const [selectedRamales, setSelectedRamales] = useState<Set<string>>(new Set(['228A']));
-  const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set(['228A']));
+  const [selectedRamales, setSelectedRamales] = useState<Set<string>>(new Set());
+  const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
   const [correctedVersions, setCorrectedVersions] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
