@@ -1269,19 +1269,20 @@ app.post('/v1/admin/kml/integrate', async (c) => {
   }
 });
 
-// 3.4.3 Guardado Atómico Batch de Paradas por Ramal y Sentido
+// 3.4.3 Guardado Atómico Batch de Paradas por Ramal y Sentido (soporta Core y RedSUBE)
 app.post('/v1/admin/stops/batch', async (c) => {
   try {
-    const { branch_id, direction, stops } = await c.req.json();
+    const { branch_id, direction, stops, schema_target } = await c.req.json();
     if (!branch_id || !direction) {
       return c.json({ success: false, error: 'Ramal y sentido son requeridos' }, 400);
     }
 
+    const stopsTableName = schema_target === 'redsube' ? 'arg.redsube.stops' : 'arg.core.stops';
     const statements: any[] = [];
 
     // 1. Eliminar paradas existentes de esa rama y sentido
     statements.push(
-      c.env.DB.prepare('DELETE FROM "arg.core.stops" WHERE branch_id = ? AND direction = ?').bind(branch_id, direction)
+      c.env.DB.prepare(`DELETE FROM "${stopsTableName}" WHERE branch_id = ? AND direction = ?`).bind(branch_id, direction)
     );
 
     // 2. Insertar paradas actualizadas
@@ -1293,7 +1294,7 @@ app.post('/v1/admin/stops/batch', async (c) => {
         const isCtrl = st.is_control_point === 1 ? 1 : 0;
         statements.push(
           c.env.DB.prepare(
-            'INSERT INTO "arg.core.stops" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            `INSERT INTO "${stopsTableName}" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, is_control_point) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).bind(stopId, branch_id, direction, idx + 1, st.name || `Parada ${idx + 1}`, st.lat, st.lng, pLat, pLng, isCtrl)
         );
       });
@@ -1304,7 +1305,7 @@ app.post('/v1/admin/stops/batch', async (c) => {
 
     return c.json({
       success: true,
-      message: `Se guardaron ${Array.isArray(stops) ? stops.length : 0} paradas correctamente`,
+      message: `Se guardaron ${Array.isArray(stops) ? stops.length : 0} paradas correctamente en ${stopsTableName}`,
       count: Array.isArray(stops) ? stops.length : 0
     });
   } catch (err: any) {
@@ -1952,50 +1953,110 @@ const ALLOWED_ADMIN_TABLES: Record<string, { label: string; primaryKey: string; 
     orderBy: 'display_order ASC, created_at DESC',
     fields: ['id', 'title', 'subtitle', 'image_url', 'redirect_url', 'color', 'border', 'text_color', 'display_order', 'is_active', 'created_at']
   },
-  'redsube.caba.lines': {
+  'arg.redsube.lines': {
     label: 'Líneas (RedSUBE)',
-    primaryKey: 'linea_code',
-    orderBy: 'linea_code ASC',
-    fields: ['linea_code', 'display_name', 'agency_name', 'agency_id', 'color', 'last_updated']
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'code', 'name', 'color', 'jurisdiction', 'agency_id', 'created_at']
   },
-  'redsube.caba.branches': {
+  'arg.redsube.branches': {
     label: 'Ramales (RedSUBE)',
-    primaryKey: 'ramal_code',
-    orderBy: 'linea_code ASC, ramal_code ASC',
-    fields: ['ramal_code', 'linea_code', 'route_id', 'nombre_largo', 'headsign_ida', 'headsign_vuelta', 'shape_id_ida', 'shape_id_vuelta', 'color', 'last_updated']
+    primaryKey: 'id',
+    orderBy: 'code ASC',
+    fields: ['id', 'line_id', 'code', 'name', 'agency_id', 'route_id', 'headsign_ida', 'headsign_vuelta', 'color', 'description', 'created_at']
   },
-  'redsube.caba.agencies': {
-    label: 'Empresas (RedSUBE)',
-    primaryKey: 'empresa_id',
-    orderBy: 'empresa_id ASC',
-    fields: ['empresa_id', 'nombre', 'nombre_corto', 'marquesina_fallback', 'all_lines', 'all_ramales', 'last_updated']
+  'arg.redsube.agencies': {
+    label: 'Empresas / Agencias (RedSUBE)',
+    primaryKey: 'agency_id',
+    orderBy: 'agency_name ASC',
+    fields: ['agency_id', 'agency_name', 'agency_url', 'agency_timezone', 'agency_lang']
   },
-  'redsube.caba.gtfs_transit_unidad_recorrido': {
-    label: 'Telemetría Unidades (RedSUBE)',
-    primaryKey: 'vehicle_id',
-    orderBy: 'last_updated DESC',
-    fields: ['vehicle_id', 'linea_code', 'ramal_code', 'empresa_id', 'interno', 'patente', 'trip_id', 'route_id', 'shape_id', 'headsign', 'source', 'lat', 'lng', 'speed_kmh', 'bearing', 'last_updated']
+  'arg.redsube.route_shapes': {
+    label: 'Trazados / Shapes de Ramal (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'direction ASC',
+    fields: ['id', 'branch_id', 'direction', 'coordinates_json', 'total_distance_km', 'created_at']
   },
-  'redsube.gtfs.routes': {
+  'arg.redsube.stops': {
+    label: 'Paradas (RedSUBE)',
+    primaryKey: 'id',
+    orderBy: 'stop_order ASC',
+    fields: ['id', 'branch_id', 'direction', 'stop_order', 'name', 'lat', 'lng', 'proj_lat', 'proj_lng', 'stop_desc', 'created_at']
+  },
+  'arg.redsube.routes': {
     label: 'Rutas GTFS (RedSUBE)',
     primaryKey: 'route_id',
     orderBy: 'route_id ASC',
     fields: ['route_id', 'agency_id', 'route_short_name', 'route_long_name', 'route_desc', 'route_type', 'route_color', 'route_text_color']
   },
-  'redsube.gtfs.trips': {
+  'arg.redsube.trips': {
     label: 'Viajes GTFS (RedSUBE)',
     primaryKey: 'trip_id',
     orderBy: 'trip_id ASC',
     fields: ['trip_id', 'route_id', 'service_id', 'trip_headsign', 'direction_id', 'shape_id']
   },
+  'arg.redsube.stop_times': {
+    label: 'Horarios de Paradas GTFS (RedSUBE)',
+    primaryKey: 'trip_id',
+    orderBy: 'trip_id ASC, stop_sequence ASC',
+    fields: ['trip_id', 'arrival_time', 'departure_time', 'stop_id', 'stop_sequence']
+  },
+  'arg.redsube.shapes': {
+    label: 'Puntos Shape GTFS (RedSUBE)',
+    primaryKey: 'shape_id',
+    orderBy: 'shape_id ASC, shape_pt_sequence ASC',
+    fields: ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']
+  },
+  'arg.redsube.gtfs_transit_unidad_recorrido': {
+    label: 'Telemetría Unidades (RedSUBE)',
+    primaryKey: 'vehicle_id',
+    orderBy: 'last_updated DESC',
+    fields: ['vehicle_id', 'linea_code', 'ramal_code', 'empresa_id', 'interno', 'patente', 'trip_id', 'route_id', 'shape_id', 'headsign', 'source', 'lat', 'lng', 'speed_kmh', 'bearing', 'last_updated']
+  },
+  'redsube.caba.lines': {
+    label: 'Líneas (RedSUBE Legacy)',
+    primaryKey: 'linea_code',
+    orderBy: 'linea_code ASC',
+    fields: ['linea_code', 'display_name', 'agency_name', 'agency_id', 'color', 'last_updated']
+  },
+  'redsube.caba.branches': {
+    label: 'Ramales (RedSUBE Legacy)',
+    primaryKey: 'ramal_code',
+    orderBy: 'linea_code ASC, ramal_code ASC',
+    fields: ['ramal_code', 'linea_code', 'route_id', 'nombre_largo', 'headsign_ida', 'headsign_vuelta', 'shape_id_ida', 'shape_id_vuelta', 'color', 'last_updated']
+  },
+  'redsube.caba.agencies': {
+    label: 'Empresas (RedSUBE Legacy)',
+    primaryKey: 'empresa_id',
+    orderBy: 'empresa_id ASC',
+    fields: ['empresa_id', 'nombre', 'nombre_corto', 'marquesina_fallback', 'all_lines', 'all_ramales', 'last_updated']
+  },
+  'redsube.caba.gtfs_transit_unidad_recorrido': {
+    label: 'Telemetría Unidades (RedSUBE Legacy)',
+    primaryKey: 'vehicle_id',
+    orderBy: 'last_updated DESC',
+    fields: ['vehicle_id', 'linea_code', 'ramal_code', 'empresa_id', 'interno', 'patente', 'trip_id', 'route_id', 'shape_id', 'headsign', 'source', 'lat', 'lng', 'speed_kmh', 'bearing', 'last_updated']
+  },
+  'redsube.gtfs.routes': {
+    label: 'Rutas GTFS (RedSUBE Legacy)',
+    primaryKey: 'route_id',
+    orderBy: 'route_id ASC',
+    fields: ['route_id', 'agency_id', 'route_short_name', 'route_long_name', 'route_desc', 'route_type', 'route_color', 'route_text_color']
+  },
+  'redsube.gtfs.trips': {
+    label: 'Viajes GTFS (RedSUBE Legacy)',
+    primaryKey: 'trip_id',
+    orderBy: 'trip_id ASC',
+    fields: ['trip_id', 'route_id', 'service_id', 'trip_headsign', 'direction_id', 'shape_id']
+  },
   'redsube.gtfs.stops': {
-    label: 'Paradas GTFS (RedSUBE)',
+    label: 'Paradas GTFS (RedSUBE Legacy)',
     primaryKey: 'stop_id',
     orderBy: 'stop_name ASC',
     fields: ['stop_id', 'stop_name', 'stop_desc', 'stop_lat', 'stop_lon', 'zone_id']
   },
   'redsube.gtfs.shapes': {
-    label: 'Trazados / Shapes GTFS (RedSUBE)',
+    label: 'Trazados / Shapes GTFS (RedSUBE Legacy)',
     primaryKey: 'shape_id',
     orderBy: 'shape_id ASC, shape_pt_sequence ASC',
     fields: ['shape_id', 'shape_pt_lat', 'shape_pt_lon', 'shape_pt_sequence', 'shape_dist_traveled']

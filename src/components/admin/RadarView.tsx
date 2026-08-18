@@ -716,6 +716,19 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     }
   }, [propSelectedSource]);
 
+  const [redSubeBranchesList, setRedSubeBranchesList] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/v1/admin/table/arg.redsube.branches?limit=5000')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.rows) {
+          setRedSubeBranchesList(data.rows);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
@@ -1009,8 +1022,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
       return;
     }
 
+    const shapesTable = selectedSource === 'redsube' ? 'arg.redsube.route_shapes' : 'route_shapes';
+    const stopsTable = selectedSource === 'redsube' ? 'arg.redsube.stops' : 'stops';
+
     try {
-      const res = await fetch(`/v1/admin/table/route_shapes?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
+      const res = await fetch(`/v1/admin/table/${shapesTable}?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
@@ -1091,7 +1107,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     }
 
     try {
-      const res = await fetch(`/v1/admin/table/stops?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
+      const res = await fetch(`/v1/admin/table/${stopsTable}?branch_id=${encodeURIComponent(selectedBranchId)}&limit=5000`);
       if (res.ok) {
         const data = await res.json();
         const rows = data.rows || [];
@@ -1100,7 +1116,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     } catch (_) {
       setAllBranchStops([]);
     }
-  }, [selectedBranchId, direction]);
+  }, [selectedBranchId, direction, selectedSource]);
 
   useEffect(() => {
     loadBranchData();
@@ -1667,6 +1683,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
     setIsSaving(true);
     try {
+      const shapesTable = selectedSource === 'redsube' ? 'arg.redsube.route_shapes' : 'route_shapes';
       const pathToSave = displayPolylinePath.length > 0 ? displayPolylinePath : waypoints;
       if (pathToSave.length >= 2) {
         const shapeId = existingShapeId || `shp_${selectedBranchId}_${direction}_${Date.now()}`;
@@ -1679,8 +1696,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         };
 
         const shapeUrl = existingShapeId
-          ? `/v1/admin/table/route_shapes/${encodeURIComponent(existingShapeId)}`
-          : `/v1/admin/table/route_shapes`;
+          ? `/v1/admin/table/${shapesTable}/${encodeURIComponent(existingShapeId)}`
+          : `/v1/admin/table/${shapesTable}`;
         const shapeMethod = existingShapeId ? 'PUT' : 'POST';
 
         await fetch(shapeUrl, {
@@ -1697,7 +1714,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         body: JSON.stringify({
           branch_id: selectedBranchId,
           direction: direction,
-          stops: stops
+          stops: stops,
+          schema_target: selectedSource
         })
       });
 
@@ -1707,7 +1725,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
       }
 
       await fetch('/v1/admin/cache/purge');
-      showNotification?.('success', `¡Recorrido y ${stops.length} paradas guardados correctamente en D1!`);
+      showNotification?.('success', `¡Recorrido y ${stops.length} paradas guardados correctamente en D1 (${shapesTable})!`);
     } catch (err: any) {
       showNotification?.('error', `Error al guardar: ${err.message}`);
     } finally {
@@ -1716,8 +1734,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   };
 
   const selectedBranchObj = useMemo(() => {
-    return branchesList.find(b => b.id === selectedBranchId);
-  }, [branchesList, selectedBranchId]);
+    const list = selectedSource === 'redsube' ? (redSubeBranchesList.length > 0 ? redSubeBranchesList : branchesList) : branchesList;
+    return list.find(b => b.id === selectedBranchId);
+  }, [branchesList, redSubeBranchesList, selectedBranchId, selectedSource]);
 
   return (
     <div style={{ display: 'flex', gap: '1rem', height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
@@ -1919,7 +1938,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     setSelectedBranchId('');
                     return;
                   }
-                  const matchedBranch = branchesList.find(b => 
+                  const activeBranches = redSubeBranchesList.length > 0 ? redSubeBranchesList : branchesList;
+                  const matchedBranch = activeBranches.find(b => 
                     (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
                     (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
                   );
@@ -1932,7 +1952,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 }}
                 onSelectDirection={(ramal, dir) => {
                   setDirection(dir);
-                  const matchedBranch = branchesList.find(b => 
+                  const activeBranches = redSubeBranchesList.length > 0 ? redSubeBranchesList : branchesList;
+                  const matchedBranch = activeBranches.find(b => 
                     (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
                     (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
                   );
