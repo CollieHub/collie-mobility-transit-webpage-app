@@ -1079,11 +1079,6 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
           } catch (_) { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
         } else { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
 
-        const allCoords = [...parsedIdaCoords, ...parsedVueltaCoords];
-        if (allCoords.length >= 2) {
-          setRouteBounds(allCoords);
-        }
-
         const match = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === direction);
         if (match && match.coordinates_json) {
           try {
