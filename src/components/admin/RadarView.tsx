@@ -30,6 +30,7 @@ import {
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
 import RedSubeV3Panel, { getBranchColor } from './RedSubeV3Panel';
 import type { V3Route } from './RedSubeV3Panel';
+import { getStopIconSvgString } from '../icons/StopIcon';
 
 // Fix Leaflet marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -105,40 +106,30 @@ function createWaypointIcon(orderNum: number, isStart: boolean, isEnd: boolean, 
   });
 }
 
-function createStopIcon(color: string = '#ea580c') {
-  const size = 12;
-  const svgCode = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.5));">
-      <!-- Fondo del Icono Naranja / Color del Ramal -->
-      <rect width="32" height="32" rx="7" fill="${color}"/>
-      <!-- Borde interior blanco continuo -->
-      <rect x="1.5" y="1.5" width="29" height="29" rx="5.5" fill="none" stroke="#ffffff" stroke-width="2.2" />
-      <!-- Icono de Colectivo Blanco -->
-      <g transform="translate(4,4)">
-          <path fill="#FFFFFF" d="M4,16c0,0.88 0.39,1.67 1,2.22l0,1.78c0,0.55 0.45,1 1,1l1,0c0.55,0 1,-0.45 1,-1l0,-1l8,0l0,1c0,0.55 0.45,1 1,1l1,0c0.55,0 1,-0.45 1,-1l0,-1.78c0.61,-0.55 1,-1.34 1,-2.22L20,6c0,-3.5 -3.58,-4 -8,-4s-8,0.5 -8,4l0,10zM7.5,17c-0.83,0 -1.5,-0.67 -1.5,-1.5S6.67,14 7.5,14s1.5,0.67 1.5,1.5S8.33,17 7.5,17zM16.5,17c-0.83,0 -1.5,-0.67 -1.5,-1.5s0.67,-1.5 1.5,-1.5s1.5,0.67 1.5,1.5S17.33,17 16.5,17zM18,11L6,11L6,6l12,0L18,11z"/>
-      </g>
-    </svg>`;
+function createStopIcon(color: string = '#ea580c', isIda: boolean = true, size: number = 18) {
+  const svgCode = getStopIconSvgString(color, isIda, size);
   return L.divIcon({
     className: 'custom-stop-icon',
     html: svgCode,
     iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2]
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
   });
 }
 
-function createStopIconWithNumber(orderNum: number, color: string = '#ea580c') {
-  const size = 13;
+function createStopIconWithNumber(orderNum: number, color: string = '#ea580c', isIda: boolean = true, size: number = 18) {
   const svgCode = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.5));">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="cursor: grab; filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.5));">
       <rect width="32" height="32" rx="8" fill="${color}"/>
-      <rect x="1.5" y="1.5" width="29" height="29" rx="6.5" fill="none" stroke="#ffffff" stroke-width="2.5" />
+      <rect x="1.5" y="1.5" width="29" height="29" rx="6.5" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="${!isIda ? '3,2' : 'none'}" />
       <text x="16" y="21" font-size="14" font-weight="900" font-family="system-ui, -apple-system, sans-serif" fill="#ffffff" text-anchor="middle">${orderNum}</text>
     </svg>`;
   return L.divIcon({
     className: 'custom-stop-number-icon',
     html: svgCode,
     iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2]
+    iconAnchor: [size / 2, size / 2],
+    popupAnchor: [0, -size / 2]
   });
 }
 
@@ -576,6 +567,21 @@ function MapFocusController({ focusCoords, bounds }: { focusCoords: [number, num
   return null;
 }
 
+function MapZoomListener({ onZoomChange }: { onZoomChange: (z: number) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    const handleZoom = () => {
+      onZoomChange(map.getZoom());
+    };
+    map.on('zoomend', handleZoom);
+    handleZoom();
+    return () => {
+      map.off('zoomend', handleZoom);
+    };
+  }, [map, onZoomChange]);
+  return null;
+}
+
 function getPositionAtDistance(
   pathData: { coordinates: [number, number][]; cumulativeDistances: number[]; totalDistance: number },
   distance: number
@@ -757,6 +763,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [allBranchStops, setAllBranchStops] = useState<StopItem[]>([]);
   const [idaWaypointsCount, setIdaWaypointsCount] = useState<number>(0);
   const [vueltaWaypointsCount, setVueltaWaypointsCount] = useState<number>(0);
+
+  const [currentZoom, setCurrentZoom] = useState<number>(13);
+
+  const stopIconSize = useMemo(() => {
+    if (currentZoom < 13) return 0;
+    if (currentZoom === 13) return 12;
+    if (currentZoom === 14) return 16;
+    if (currentZoom === 15) return 20;
+    return 24; // Para zoom >= 16
+  }, [currentZoom]);
 
   const idaStopsCount = useMemo(() => {
     return allBranchStops.filter(s => s.direction === 'ida').length;
@@ -2509,6 +2525,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             )}
 
             <MapFocusController focusCoords={focusCoords} bounds={routeBounds} />
+            <MapZoomListener onZoomChange={setCurrentZoom} />
             <MapClickHandler
               isEditingEnabled={isEditingEnabled}
               activeTool={activeTool}
@@ -2647,22 +2664,24 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             })}
 
             {/* Stop Draggable Markers: Render active and other direction stops */}
-            {allBranchStops.map((st, idx) => {
+            {stopIconSize > 0 && allBranchStops.map((st, idx) => {
               const isActiveDir = st.direction === direction;
+              const isIda = st.direction !== 'vuelta';
               const displayNum = (st.stop_order ?? (idx + 1));
               const isSelectedStop = selectedStopId === st.id;
+              const stopColor = isSelectedStop ? '#ec4899' : (isIda ? '#0284c7' : '#9333ea');
 
               return (
                 <Marker
                   key={`stop_marker_${st.id}`}
                   position={[st.lat, st.lng]}
                   draggable={isEditingEnabled && isActiveDir}
-                  opacity={rightDockTab === 'recorrido' ? 0.35 : (isActiveDir ? 1 : 0.65)}
+                  opacity={rightDockTab === 'recorrido' ? 0.35 : (isActiveDir ? 1 : 0.75)}
                   zIndexOffset={rightDockTab === 'paradas' ? (isSelectedStop ? 3500 : (isActiveDir ? 2000 : 1200)) : 500}
                   icon={
                     stopIconMode === 'number'
-                      ? createStopIconWithNumber(displayNum, isSelectedStop ? '#ec4899' : (st.direction === 'ida' ? '#0284c7' : '#ea580c'))
-                      : createStopIcon(isSelectedStop ? '#ec4899' : (st.direction === 'ida' ? '#ea580c' : '#d97706'))
+                      ? createStopIconWithNumber(displayNum, stopColor, isIda, stopIconSize)
+                      : createStopIcon(stopColor, isIda, stopIconSize)
                   }
                   eventHandlers={{
                     click() {
