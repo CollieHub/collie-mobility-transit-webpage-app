@@ -733,6 +733,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [waypoints, setWaypoints] = useState<[number, number][]>([]);
   // Full polyline path: Detailed OSRM curve geometry coordinates for clean street polyline rendering
   const [fullPolylinePath, setFullPolylinePath] = useState<[number, number][]>([]);
+  const [idaPolylinePath, setIdaPolylinePath] = useState<[number, number][]>([]);
+  const [vueltaPolylinePath, setVueltaPolylinePath] = useState<[number, number][]>([]);
   // Exact road distance calculated by OSRM or Haversine
   const [routeDistanceKm, setRouteDistanceKm] = useState<number>(0);
 
@@ -997,6 +999,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     if (!selectedBranchId) {
       setWaypoints([]);
       setFullPolylinePath([]);
+      setIdaPolylinePath([]);
+      setVueltaPolylinePath([]);
       setRouteDistanceKm(0);
       setExistingShapeId(null);
       setAllBranchStops([]);
@@ -1013,34 +1017,45 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         const idaMatch = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === 'ida');
         const vueltaMatch = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === 'vuelta');
 
+        let parsedIdaCoords: [number, number][] = [];
+        let parsedVueltaCoords: [number, number][] = [];
+
         if (idaMatch && idaMatch.coordinates_json) {
           try {
             const parsed = JSON.parse(idaMatch.coordinates_json);
-            setIdaWaypointsCount(simplifyPolylineRdp(parsed, 0.2).length);
-          } catch (_) { setIdaWaypointsCount(0); }
-        } else { setIdaWaypointsCount(0); }
-
-        if (vueltaMatch && vueltaMatch.coordinates_json) {
-          try {
-            const parsed = JSON.parse(vueltaMatch.coordinates_json);
-            setVueltaWaypointsCount(simplifyPolylineRdp(parsed, 0.2).length);
-          } catch (_) { setVueltaWaypointsCount(0); }
-        } else { setVueltaWaypointsCount(0); }
-
-        const match = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === direction);
-        if (match && match.coordinates_json) {
-          try {
-            const parsed = JSON.parse(match.coordinates_json);
-            const formatted: [number, number][] = parsed.map((pt: any) => {
+            parsedIdaCoords = parsed.map((pt: any) => {
               if (Array.isArray(pt)) return [pt[0], pt[1]];
               if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
               return pt;
             });
+            setIdaPolylinePath(parsedIdaCoords);
+            setIdaWaypointsCount(simplifyPolylineRdp(parsedIdaCoords, 0.2).length);
+          } catch (_) { setIdaPolylinePath([]); setIdaWaypointsCount(0); }
+        } else { setIdaPolylinePath([]); setIdaWaypointsCount(0); }
 
+        if (vueltaMatch && vueltaMatch.coordinates_json) {
+          try {
+            const parsed = JSON.parse(vueltaMatch.coordinates_json);
+            parsedVueltaCoords = parsed.map((pt: any) => {
+              if (Array.isArray(pt)) return [pt[0], pt[1]];
+              if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
+              return pt;
+            });
+            setVueltaPolylinePath(parsedVueltaCoords);
+            setVueltaWaypointsCount(simplifyPolylineRdp(parsedVueltaCoords, 0.2).length);
+          } catch (_) { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
+        } else { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
+
+        const allCoords = [...parsedIdaCoords, ...parsedVueltaCoords];
+        if (allCoords.length >= 2) {
+          setRouteBounds(allCoords);
+        }
+
+        const match = rows.find((r: any) => r.branch_id === selectedBranchId && r.direction === direction);
+        if (match && match.coordinates_json) {
+          try {
+            const formatted = direction === 'ida' ? parsedIdaCoords : parsedVueltaCoords;
             setFullPolylinePath(formatted);
-            if (formatted.length >= 2) {
-              setRouteBounds(formatted);
-            }
             const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
             setWaypoints(simplifiedControls);
             setUndoStack([]);
@@ -1069,6 +1084,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     } catch (_) {
       setWaypoints([]);
       setFullPolylinePath([]);
+      setIdaPolylinePath([]);
+      setVueltaPolylinePath([]);
       setRouteDistanceKm(0);
       setExistingShapeId(null);
     }
@@ -2400,9 +2417,65 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               onAddStop={handleAddStop}
             />
 
-            {/* Interactive Polyline: Continuous OSRM street route shape */}
+            {/* Traza de Fondo NO Activa (Ida o Vuelta simultánea) */}
+            {direction === 'vuelta' && idaPolylinePath.length > 1 && (
+              <>
+                <Polyline
+                  positions={idaPolylinePath}
+                  pathOptions={{
+                    color: '#000000',
+                    weight: 6.0,
+                    opacity: 0.85,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                  }}
+                  interactive={false}
+                />
+                <Polyline
+                  positions={idaPolylinePath}
+                  pathOptions={{
+                    color: '#0284c7',
+                    weight: 4.5,
+                    opacity: 0.8,
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                  }}
+                  interactive={false}
+                />
+              </>
+            )}
+
+            {direction === 'ida' && vueltaPolylinePath.length > 1 && (
+              <Polyline
+                positions={vueltaPolylinePath}
+                pathOptions={{
+                  color: '#e11d48',
+                  weight: 4.5,
+                  opacity: 0.75,
+                  dashArray: '8, 6',
+                  lineJoin: 'round',
+                  lineCap: 'round'
+                }}
+                interactive={false}
+              />
+            )}
+
+            {/* Interactive Polyline: Continuous OSRM street route shape (Dirección Activa) */}
             {displayPolylinePath.length > 1 && (
               <>
+                {direction === 'ida' && (
+                  <Polyline
+                    positions={displayPolylinePath}
+                    pathOptions={{
+                      color: '#000000',
+                      weight: 7.0,
+                      opacity: 1.0,
+                      lineJoin: 'round',
+                      lineCap: 'round'
+                    }}
+                    interactive={false}
+                  />
+                )}
                 <Polyline
                   positions={displayPolylinePath}
                   eventHandlers={{
@@ -2420,9 +2493,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   }}
                   pathOptions={{
                     color: direction === 'ida' ? '#0284c7' : '#e11d48',
-                    weight: 7,
-                    opacity: 0.85,
-                    dashArray: activeTool === 'draw_route' ? '6, 8' : (direction === 'vuelta' ? '8, 6' : undefined)
+                    weight: 5.0,
+                    opacity: 0.95,
+                    dashArray: activeTool === 'draw_route' ? '6, 8' : (direction === 'vuelta' ? '8, 6' : undefined),
+                    lineJoin: 'round',
+                    lineCap: 'round'
                   }}
                 />
                 <RouteDirectionArrows
@@ -2470,29 +2545,34 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               );
             })}
 
-            {/* Stop Draggable Markers: Paradas en mapa (atenuadas cuando se edita/ve la pestaña Recorrido) */}
-            {stops.map((st, idx) => {
-              const displayNum = idx + 1;
+            {/* Stop Draggable Markers: Render active and other direction stops */}
+            {allBranchStops.map((st, idx) => {
+              const isActiveDir = st.direction === direction;
+              const displayNum = (st.stop_order ?? (idx + 1));
               const isSelectedStop = selectedStopId === st.id;
 
               return (
                 <Marker
                   key={`stop_marker_${st.id}`}
                   position={[st.lat, st.lng]}
-                  draggable={isEditingEnabled}
-                  opacity={rightDockTab === 'recorrido' ? 0.35 : 1}
-                  zIndexOffset={rightDockTab === 'paradas' ? (isSelectedStop ? 3500 : 2000) : 500}
+                  draggable={isEditingEnabled && isActiveDir}
+                  opacity={rightDockTab === 'recorrido' ? 0.35 : (isActiveDir ? 1 : 0.65)}
+                  zIndexOffset={rightDockTab === 'paradas' ? (isSelectedStop ? 3500 : (isActiveDir ? 2000 : 1200)) : 500}
                   icon={
                     stopIconMode === 'number'
-                      ? createStopIconWithNumber(displayNum, isSelectedStop ? '#ec4899' : (direction === 'ida' ? '#0284c7' : '#ea580c'))
-                      : createStopIcon(isSelectedStop ? '#ec4899' : (direction === 'ida' ? '#ea580c' : '#d97706'))
+                      ? createStopIconWithNumber(displayNum, isSelectedStop ? '#ec4899' : (st.direction === 'ida' ? '#0284c7' : '#ea580c'))
+                      : createStopIcon(isSelectedStop ? '#ec4899' : (st.direction === 'ida' ? '#ea580c' : '#d97706'))
                   }
                   eventHandlers={{
                     click() {
+                      if (st.direction !== direction) {
+                        setDirection(st.direction);
+                      }
                       setSelectedStopId(st.id);
                       setSelectedWaypointIdx(null);
                     },
                     dragend(e: any) {
+                      if (!isEditingEnabled || !isActiveDir) return;
                       const newLat = e.target.getLatLng().lat;
                       const newLng = e.target.getLatLng().lng;
                       handleStopDragEnd(st.id, [newLat, newLng]);
@@ -2501,9 +2581,23 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 >
                   <Popup>
                     <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <span style={{ 
+                        fontSize: '0.65rem', 
+                        padding: '2px 5px', 
+                        borderRadius: '4px', 
+                        backgroundColor: st.direction === 'ida' ? '#0284c7' : '#ea580c', 
+                        color: '#fff',
+                        marginRight: '6px'
+                      }}>
+                        {st.direction.toUpperCase()}
+                      </span>
                       {displayNum}. {(st.name || '').replace(/^\d+[\.\s\-]+\s*/, '')}
-                      <br />
-                      <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
+                      {isActiveDir && (
+                        <>
+                          <br />
+                          <span style={{ fontSize: '0.7rem', color: '#6b7280' }}>Arrastra para re-posicionar parada</span>
+                        </>
+                      )}
                     </div>
                   </Popup>
                 </Marker>
