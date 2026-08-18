@@ -1925,8 +1925,29 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                               gap: '0.35rem'
                             }}
                           >
-                            {/* Línea 1: Checkbox + Código y Nombre de Ramal */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                            {/* Línea 1: Código/Nombre de Ramal a la izquierda y Checkbox a la derecha */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.55rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                  width: '8px',
+                                  height: '8px',
+                                  borderRadius: '50%',
+                                  backgroundColor: isSelected ? '#38bdf8' : '#6b7280',
+                                  flexShrink: 0
+                                }} />
+                                <span style={{
+                                  fontWeight: 600,
+                                  fontSize: '0.82rem',
+                                  color: isSelected ? '#ffffff' : '#e5e7eb',
+                                  lineHeight: '1.25',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {b.code ? `${b.code} - ${b.name}` : b.name}
+                                </span>
+                              </div>
+
                               <input
                                 type="checkbox"
                                 checked={isSelected}
@@ -1943,26 +1964,10 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                                   flexShrink: 0
                                 }}
                               />
-                              <div style={{
-                                width: '8px',
-                                height: '8px',
-                                borderRadius: '50%',
-                                backgroundColor: isSelected ? '#38bdf8' : '#6b7280',
-                                flexShrink: 0
-                              }} />
-                              <span style={{
-                                fontWeight: 600,
-                                fontSize: '0.82rem',
-                                color: isSelected ? '#ffffff' : '#e5e7eb',
-                                lineHeight: '1.25',
-                                flex: 1
-                              }}>
-                                {b.code ? `${b.code} - ${b.name}` : b.name}
-                              </span>
                             </div>
 
                             {/* Línea 2: Indicador de Publicación */}
-                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '1.55rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '0.95rem' }}>
                               {(() => {
                                 const statusId = b.branch_publication_statuses_id;
                                 const isDraft = statusId === 'bpub_draft';
@@ -1987,7 +1992,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
                             {/* Línea 3: Botones de Sentido cuando está seleccionado */}
                             {isSelected && (
-                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', paddingLeft: '1.55rem' }}>
+                              <div style={{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', paddingLeft: '0.95rem' }}>
                                 <button
                                   onClick={e => { e.stopPropagation(); setDirection('ida'); }}
                                   className="btn-animated btn-animated-primary"
