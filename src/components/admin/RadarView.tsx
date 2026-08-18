@@ -553,13 +553,25 @@ function LeafletStreetSearch({
   );
 }
 
-function MapFocusController({ focusCoords }: { focusCoords: [number, number] | null }) {
+function MapFocusController({ focusCoords, bounds }: { focusCoords: [number, number] | null; bounds?: [number, number][] | null }) {
   const map = useMap();
   useEffect(() => {
     if (focusCoords) {
       map.flyTo(focusCoords, 16, { duration: 1 });
     }
   }, [focusCoords, map]);
+
+  useEffect(() => {
+    if (bounds && bounds.length >= 2) {
+      try {
+        const lBounds = L.latLngBounds(bounds.map(p => L.latLng(p[0], p[1])));
+        if (lBounds.isValid()) {
+          map.fitBounds(lBounds, { padding: [60, 60], maxZoom: 15, duration: 1 });
+        }
+      } catch (_) {}
+    }
+  }, [bounds, map]);
+
   return null;
 }
 
@@ -755,6 +767,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [focusCoords, setFocusCoords] = useState<[number, number] | null>(null);
+  const [routeBounds, setRouteBounds] = useState<[number, number][] | null>(null);
   const [searchedLocation, setSearchedLocation] = useState<{ coords: [number, number]; name: string } | null>(null);
 
   const handleSelectSearchedStreet = useCallback((coords: [number, number], name: string) => {
@@ -1018,6 +1031,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             });
 
             setFullPolylinePath(formatted);
+            if (formatted.length >= 2) {
+              setRouteBounds(formatted);
+            }
             const simplifiedControls = simplifyPolylineRdp(formatted, 0.2);
             setWaypoints(simplifiedControls);
             setUndoStack([]);
@@ -1780,16 +1796,30 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               <RedSubeV3Panel
                 showNotification={showNotification}
                 onRouteToggle={(ramal, isChecked, routeData) => {
+                  if (!isChecked) {
+                    setSelectedBranchId('');
+                    return;
+                  }
                   const matchedBranch = branchesList.find(b => 
                     (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
                     (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
                   );
                   if (matchedBranch) {
                     setSelectedBranchId(matchedBranch.id);
+                    if (routeData?.headsignIda) {
+                      setDirection('ida');
+                    }
                   }
                 }}
                 onSelectDirection={(ramal, dir) => {
                   setDirection(dir);
+                  const matchedBranch = branchesList.find(b => 
+                    (b.code && b.code.toUpperCase() === ramal.toUpperCase()) || 
+                    (b.name && b.name.toUpperCase().includes(ramal.toUpperCase()))
+                  );
+                  if (matchedBranch && selectedBranchId !== matchedBranch.id) {
+                    setSelectedBranchId(matchedBranch.id);
+                  }
                 }}
                 onUnitsUpdate={(units) => {
                   setTelemetryVehicles(units.map((u: any) => ({
@@ -2258,7 +2288,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               </Marker>
             )}
 
-            <MapFocusController focusCoords={focusCoords} />
+            <MapFocusController focusCoords={focusCoords} bounds={routeBounds} />
             <MapClickHandler
               isEditingEnabled={isEditingEnabled}
               activeTool={activeTool}
