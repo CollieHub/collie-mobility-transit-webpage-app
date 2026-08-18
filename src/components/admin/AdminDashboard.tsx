@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import RamalScheduleEditor from './RamalScheduleEditor';
 import CalendarView from './CalendarView';
 import RadarView from './RadarView';
+import { getBranchColor } from './RedSubeV3Panel';
 import {
   BuildingIcon,
   BusIcon,
@@ -199,17 +200,22 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   const userJson = sessionStorage.getItem('collie_admin_user');
   const currentUser = userJson ? JSON.parse(userJson) : { name: 'Admin Collie', email: 'admin@pordondeviene.com.ar' };
 
-  useEffect(() => {
-    fetch('/v1/admin/tables')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.tables) {
-          setTables(data.tables);
-        }
-      })
-      .catch(() => {});
+  const getResolvedTableName = useCallback((tableName: string, source: SourceProvider = selectedSourceProvider): string => {
+    if (source === 'redsube') {
+      if (tableName === 'lines') return 'arg.redsube.lines';
+      if (tableName === 'branches') return 'arg.redsube.branches';
+      if (tableName === 'companies') return 'arg.redsube.agencies';
+      if (tableName === 'stops') return 'arg.redsube.stops';
+      if (tableName === 'route_shapes') return 'arg.redsube.route_shapes';
+    }
+    return tableName;
+  }, [selectedSourceProvider]);
 
-    fetch('/v1/admin/table/lines')
+  const loadAuxiliaryData = useCallback(() => {
+    const targetLinesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.lines' : 'lines';
+    const targetBranchesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.branches' : 'branches';
+
+    fetch(`/v1/admin/table/${targetLinesTable}?limit=5000`)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.rows) {
@@ -221,7 +227,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       })
       .catch(() => {});
 
-    fetch('/v1/admin/table/branches?limit=5000')
+    fetch(`/v1/admin/table/${targetBranchesTable}?limit=5000`)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.rows) {
@@ -229,6 +235,24 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
             String(a.code).localeCompare(String(b.code), undefined, { numeric: true })
           );
           setBranchesList(sorted);
+        }
+      })
+      .catch(() => {});
+  }, [selectedSourceProvider]);
+
+  useEffect(() => {
+    loadAuxiliaryData();
+    setSelectedLineIds(new Set());
+    setSelectedLineFilter('all');
+    setSelectedBranchFilter('all');
+  }, [loadAuxiliaryData]);
+
+  useEffect(() => {
+    fetch('/v1/admin/tables')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.tables) {
+          setTables(data.tables);
         }
       })
       .catch(() => {});
@@ -292,14 +316,15 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       .catch(() => {});
   };
 
-  const fetchTableRows = (tableName: string, query = '') => {
+  const fetchTableRows = useCallback((tableName: string, query = '') => {
     if (tableName === 'radar') {
       setIsLoading(false);
       return;
     }
     setIsLoading(true);
     setSelectedRowKeys(new Set());
-    const url = `/v1/admin/table/${tableName}?limit=5000&q=${encodeURIComponent(query)}`;
+    const resolvedTable = getResolvedTableName(tableName, selectedSourceProvider);
+    const url = `/v1/admin/table/${resolvedTable}?limit=5000&q=${encodeURIComponent(query)}`;
     fetch(url)
       .then(res => res.json())
       .then(data => {
@@ -325,24 +350,27 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
         showNotification('error', `Error de red: ${err.message}`);
         setIsLoading(false);
       });
-  };
+  }, [getResolvedTableName, selectedSourceProvider]);
+
+  const resolvedActiveTable = getResolvedTableName(activeTable, selectedSourceProvider);
+  const currentMeta = tables[resolvedActiveTable] || tables[activeTable] || { label: activeTable, primaryKey: 'id', fields: [] };
 
   const handleBulkSetStatus = async (statusType: 'published' | 'draft' | 'unpublished') => {
     if (selectedRowKeys.size === 0) return;
     setIsLoading(true);
 
     let targetStatusId = 'bpub_published';
-    if (activeTable === 'lines') {
+    if (activeTable === 'lines' || resolvedActiveTable.includes('.lines')) {
       targetStatusId = statusType === 'published' ? 'lpub_published' : (statusType === 'draft' ? 'lpub_draft' : 'lpub_unpublished');
     } else {
       targetStatusId = statusType === 'published' ? 'bpub_published' : (statusType === 'draft' ? 'bpub_draft' : 'bpub_unpublished');
     }
-    const statusField = activeTable === 'lines' ? 'line_publication_statuses_id' : 'branch_publication_statuses_id';
+    const statusField = (activeTable === 'lines' || resolvedActiveTable.includes('.lines')) ? 'line_publication_statuses_id' : 'branch_publication_statuses_id';
 
     try {
       const keysArray = Array.from(selectedRowKeys);
       for (const key of keysArray) {
-        await fetch(`/v1/admin/table/${activeTable}/${encodeURIComponent(key)}`, {
+        await fetch(`/v1/admin/table/${resolvedActiveTable}/${encodeURIComponent(key)}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ [statusField]: targetStatusId })
@@ -366,7 +394,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       return;
     }
     fetchTableRows(activeTable, searchQuery);
-  }, [activeTable]);
+  }, [activeTable, selectedSourceProvider, fetchTableRows]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -402,13 +430,13 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
   const handleOpenCreate = () => {
     const initialForm: Record<string, any> = {};
-    const tableMeta = tables[activeTable];
-    if (tableMeta) {
+    const tableMeta = currentMeta;
+    if (tableMeta && tableMeta.fields) {
       tableMeta.fields.forEach(f => {
         initialForm[f] = '';
       });
     }
-    if (activeTable === 'branches' && selectedLineFilter !== 'all') {
+    if ((activeTable === 'branches' || resolvedActiveTable.includes('.branches')) && selectedLineFilter !== 'all') {
       initialForm['line_id'] = selectedLineFilter;
     }
     setFormData(initialForm);
@@ -417,14 +445,14 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
   const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    const tableMeta = tables[activeTable];
+    const tableMeta = currentMeta;
     if (!tableMeta) return;
 
     const isEditing = !!editRow;
-    const pKey = tableMeta.primaryKey;
+    const pKey = tableMeta.primaryKey || 'id';
     const url = isEditing
-      ? `/v1/admin/table/${activeTable}/${encodeURIComponent(editRow[pKey])}`
-      : `/v1/admin/table/${activeTable}`;
+      ? `/v1/admin/table/${resolvedActiveTable}/${encodeURIComponent(editRow[pKey])}`
+      : `/v1/admin/table/${resolvedActiveTable}`;
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
@@ -440,6 +468,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
         setEditRow(null);
         setIsCreateModalOpen(false);
         fetchTableRows(activeTable, searchQuery);
+        loadAuxiliaryData();
       } else {
         showNotification('error', data.error || 'Error al guardar');
       }
@@ -449,24 +478,25 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   };
 
   const handleDeleteRow = async (row: any) => {
-    const tableMeta = tables[activeTable];
+    const tableMeta = currentMeta;
     if (!tableMeta) return;
-    const pKey = tableMeta.primaryKey;
+    const pKey = tableMeta.primaryKey || 'id';
     const recordId = row[pKey];
     const recordLabel = row.name || row.code || recordId;
 
-    if (!window.confirm(`¿Estás seguro de eliminar el registro '${recordLabel}'?`)) {
+    if (!window.confirm(`¿Estás seguro de eliminar el registro '${recordLabel}' de '${resolvedActiveTable}'?`)) {
       return;
     }
 
     try {
-      const res = await fetch(`/v1/admin/table/${activeTable}/${encodeURIComponent(recordId)}`, {
+      const res = await fetch(`/v1/admin/table/${resolvedActiveTable}/${encodeURIComponent(recordId)}`, {
         method: 'DELETE'
       });
       const data = await res.json();
       if (data.success) {
         showNotification('success', `Registro '${recordLabel}' eliminado`);
         fetchTableRows(activeTable, searchQuery);
+        loadAuxiliaryData();
       } else {
         showNotification('error', data.error || 'Error al eliminar');
       }
@@ -474,8 +504,6 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       showNotification('error', `Error de red: ${err.message}`);
     }
   };
-
-  const currentMeta = tables[activeTable] || { label: activeTable, primaryKey: 'id', fields: [] };
 
   const isUUID = (val: any): boolean => {
     if (typeof val !== 'string') return false;
@@ -488,23 +516,23 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   });
 
   const allFields = currentMeta.fields.length > 0 ? currentMeta.fields : (rows.length > 0 ? Object.keys(rows[0]) : []);
-  const displayFields = allFields.filter(f => f !== 'id' && f !== 'company_id' && !f.endsWith('_uuid'));
+  const displayFields = allFields.filter(f => f !== 'id' && f !== 'company_id' && !f.endsWith('_uuid') && f !== 'created_at' && f !== 'last_updated');
   const fieldsToRender = displayFields.length > 0 ? displayFields : allFields.filter(f => f !== 'id' && f !== 'company_id');
 
   const displayedRows = rows
     .filter(r => {
       if (selectedLineIds.size > 0) {
-        if (activeTable === 'lines') {
+        if (activeTable === 'lines' || resolvedActiveTable.includes('.lines')) {
           return selectedLineIds.has(r.id);
         }
-        if (activeTable === 'branches') {
+        if (activeTable === 'branches' || resolvedActiveTable.includes('.branches')) {
           return selectedLineIds.has(r.line_id);
         }
         if (activeTable === 'schedules') {
           const branch = branchesList.find(b => b.id === r.branch_id);
           return branch ? selectedLineIds.has(branch.line_id) : true;
         }
-        if (activeTable === 'stops' || activeTable === 'route_shapes') {
+        if (activeTable === 'stops' || activeTable === 'route_shapes' || resolvedActiveTable.includes('.stops') || resolvedActiveTable.includes('.route_shapes')) {
           const branch = branchesList.find(b => b.id === r.branch_id);
           return branch ? selectedLineIds.has(branch.line_id) : true;
         }
@@ -960,7 +988,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                             top: 'calc(100% + 6px)',
                             left: 0,
                             zIndex: 100,
-                            minWidth: '260px',
+                            minWidth: '280px',
+                            maxWidth: '360px',
+                            maxHeight: '360px',
+                            overflowY: 'auto',
                             backgroundColor: '#0b0f19',
                             border: '1px solid rgba(56, 189, 248, 0.3)',
                             borderRadius: '12px',
@@ -1196,6 +1227,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                             let headerLabel = col;
                             if (col === 'line_id') headerLabel = 'Línea';
                             if (col === 'branch_id') headerLabel = 'Ramal';
+                            if (col === 'agency_id') headerLabel = 'Empresa / Agencia';
+                            if (col === 'headsign_ida') headerLabel = 'Sentido Ida';
+                            if (col === 'headsign_vuelta') headerLabel = 'Sentido Vuelta';
+                            if (col === 'jurisdiction') headerLabel = 'Jurisdicción';
                             if (col === 'day_types_id') headerLabel = 'Tipo de Día';
                             if (col === 'branch_statuses_id') headerLabel = 'Estado del servicio';
                             if (col === 'branch_colors_id') headerLabel = 'Color';
@@ -1252,13 +1287,14 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                 isJson = true;
                               }
 
-                               if (col === 'code' && (activeTable === 'branches' || activeTable === 'routes')) {
+                               if (col === 'code' && (activeTable === 'branches' || resolvedActiveTable.includes('.branches') || activeTable === 'routes')) {
                                  let foundColor = branchColorsList.find(c => c.id === row.branch_colors_id || c.id === row.color);
                                  if (!foundColor && row.display_order) {
                                    const dispOrd = typeof row.display_order === 'number' ? row.display_order : parseInt(row.display_order, 10);
                                    foundColor = branchColorsList.find(c => (typeof c.display_order === 'number' ? c.display_order : parseInt(c.display_order, 10)) === dispOrd);
                                  }
-                                 const colorHex = foundColor ? foundColor.code_hexa : (row.color && String(row.color).startsWith('#') ? row.color : '#38bdf8');
+                                 const dynamicColor = getBranchColor(row.code);
+                                 const colorHex = foundColor ? foundColor.code_hexa : (row.color && String(row.color).startsWith('#') ? row.color : (dynamicColor || '#38bdf8'));
 
                                  return (
                                    <td key={col} style={{ padding: '0.75rem 1rem' }}>
@@ -1281,8 +1317,8 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                }
 
                               if (col === 'line_id') {
-                                const foundLine = linesList.find(l => l.id === val);
-                                const lineLabel = foundLine ? `Línea ${foundLine.code}` : (row.company || 'Línea');
+                                const foundLine = linesList.find(l => l.id === val || l.code === val);
+                                const lineLabel = foundLine ? `Línea ${foundLine.code}` : (row.line_code ? `Línea ${row.line_code}` : (row.company || `Línea ${val}`));
 
                                 return (
                                   <td key={col} style={{ padding: '0.75rem 1rem' }}>
@@ -1300,6 +1336,54 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                     }}>
                                       {lineLabel}
                                     </span>
+                                  </td>
+                                );
+                              }
+
+                              if (col === 'agency_id') {
+                                return (
+                                  <td key={col} style={{ padding: '0.75rem 1rem' }}>
+                                    <span style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      padding: '0.2rem 0.55rem',
+                                      borderRadius: '6px',
+                                      fontSize: '0.775rem',
+                                      fontWeight: 600,
+                                      backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                                      color: '#c084fc',
+                                      border: '1px solid rgba(168, 85, 247, 0.25)'
+                                    }}>
+                                      Empresa {val}
+                                    </span>
+                                  </td>
+                                );
+                              }
+
+                              if (col === 'jurisdiction') {
+                                return (
+                                  <td key={col} style={{ padding: '0.75rem 1rem' }}>
+                                    <span style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      padding: '0.2rem 0.55rem',
+                                      borderRadius: '6px',
+                                      fontSize: '0.775rem',
+                                      fontWeight: 600,
+                                      backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                                      color: '#38bdf8',
+                                      border: '1px solid rgba(56, 189, 248, 0.25)'
+                                    }}>
+                                      {val || 'Nacional'}
+                                    </span>
+                                  </td>
+                                );
+                              }
+
+                              if (col === 'headsign_ida' || col === 'headsign_vuelta' || col === 'direction_ida_label' || col === 'direction_vuelta_label') {
+                                return (
+                                  <td key={col} style={{ padding: '0.75rem 1rem', fontStyle: 'italic', color: '#cbd5e1' }}>
+                                    {val || '-'}
                                   </td>
                                 );
                               }
@@ -1431,7 +1515,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                         e.stopPropagation();
                                         const newStatusId = curr.nextId;
                                         try {
-                                          await fetch(`/v1/admin/table/lines/${encodeURIComponent(row[currentMeta.primaryKey])}`, {
+                                          await fetch(`/v1/admin/table/${resolvedActiveTable}/${encodeURIComponent(row[currentMeta.primaryKey])}`, {
                                             method: 'PUT',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({ line_publication_statuses_id: newStatusId })
@@ -1491,7 +1575,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                         e.stopPropagation();
                                         const newStatusId = curr.nextId;
                                         try {
-                                          await fetch(`/v1/admin/table/branches/${encodeURIComponent(row[currentMeta.primaryKey])}`, {
+                                          await fetch(`/v1/admin/table/${resolvedActiveTable}/${encodeURIComponent(row[currentMeta.primaryKey])}`, {
                                             method: 'PUT',
                                             headers: { 'Content-Type': 'application/json' },
                                             body: JSON.stringify({ branch_publication_statuses_id: newStatusId })
@@ -1546,55 +1630,8 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                         title={hexVal}
                                       />
                                     ) : (
-                                      <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>-</span>
+                                      <span style={{ color: '#9ca3af' }}>{val || '-'}</span>
                                     )}
-                                  </td>
-                                );
-                              }
-
-                              if (col === 'direction_ida_label' || col === 'direction_vuelta_label') {
-                                const isIda = col === 'direction_ida_label';
-                                const hasValue = val !== null && val !== undefined && String(val).trim() !== '' && String(val).toLowerCase() !== 'null';
-
-                                let displayLabel = '';
-                                if (hasValue) {
-                                  displayLabel = String(val).trim();
-                                } else {
-                                  const name = row.name || row.title || '';
-                                  if (name && (name.includes('-') || name.includes('–') || name.includes('—'))) {
-                                    let cleanTitle = name;
-                                    if (row.code && cleanTitle.startsWith(row.code)) {
-                                      cleanTitle = cleanTitle.replace(row.code, '').trim();
-                                    }
-                                    const parts = cleanTitle.split(/\s*[-–—]\s*/);
-                                    if (parts.length >= 2) {
-                                      let rawDest = isIda ? parts[parts.length - 1].trim() : parts[0].trim();
-                                      if (!isIda) {
-                                        rawDest = rawDest.replace(/^(COMUN|DIRECTO|EXPRESO|DIFERENCIAL|LOCAL)\s+/i, '').trim();
-                                      }
-                                      if (rawDest) {
-                                        displayLabel = rawDest;
-                                      }
-                                    }
-                                  }
-                                  if (displayLabel) {
-                                    displayLabel = displayLabel.replace(/\s*\(.*?\)/g, '').trim();
-                                  }
-                                  if (!displayLabel) {
-                                    displayLabel = isIda ? 'Ida' : 'Vuelta';
-                                  }
-                                }
-
-                                return (
-                                  <td key={col} style={{ padding: '0.75rem 1rem' }}>
-                                    <span style={{
-                                      fontSize: '0.8rem',
-                                      color: hasValue ? '#e5e7eb' : '#9ca3af',
-                                      fontStyle: hasValue ? 'normal' : 'italic',
-                                      fontWeight: hasValue ? 500 : 400
-                                    }}>
-                                      {displayLabel}
-                                    </span>
                                   </td>
                                 );
                               }
@@ -1703,7 +1740,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
             <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', paddingRight: '0.35rem' }}>
               {currentMeta.fields
-                .filter(field => field !== 'id' && !field.endsWith('_uuid'))
+                .filter(field => field !== 'id' && !field.endsWith('_uuid') && field !== 'created_at' && field !== 'last_updated')
                 .map(field => {
                   const isPK = field === currentMeta.primaryKey;
                   const val = formData[field] !== undefined && formData[field] !== null ? (
@@ -1713,6 +1750,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                   let labelText = field;
                   if (field === 'line_id') labelText = 'Línea de Transporte';
                   if (field === 'branch_id') labelText = 'Ramal de Colectivo';
+                  if (field === 'agency_id') labelText = 'Empresa / Agencia';
+                  if (field === 'headsign_ida') labelText = 'Sentido Ida';
+                  if (field === 'headsign_vuelta') labelText = 'Sentido Vuelta';
+                  if (field === 'jurisdiction') labelText = 'Jurisdicción';
                   if (field === 'day_types_id') labelText = 'Tipo de Día';
                   if (field === 'branch_statuses_id') labelText = 'Estado del servicio';
                   if (field === 'branch_colors_id') labelText = 'Color del Ramal';
