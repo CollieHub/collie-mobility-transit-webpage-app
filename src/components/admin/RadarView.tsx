@@ -2422,7 +2422,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     color: direction === 'ida' ? '#0284c7' : '#e11d48',
                     weight: 7,
                     opacity: 0.85,
-                    dashArray: activeTool === 'draw_route' ? '6, 8' : undefined
+                    dashArray: activeTool === 'draw_route' ? '6, 8' : (direction === 'vuelta' ? '8, 6' : undefined)
                   }}
                 />
                 <RouteDirectionArrows
