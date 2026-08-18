@@ -699,6 +699,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
   const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(false);
   const isPolylineClickRef = useRef<boolean>(false);
+  const initialBranchSetRef = useRef<boolean>(false);
 
   const [activeSidebarTab, setActiveSidebarTab] = useState<'lineas' | 'paradas'>('lineas');
   const [selectedLineFilterId, setSelectedLineFilterId] = useState<string>('all');
@@ -934,8 +935,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     return groups;
   }, [nestedBranchesForCombo]);
 
-  // Seleccionar la línea SIT por defecto cuando abre la aplicación
+  // Seleccionar la línea SIT por defecto ÚNICAMENTE en la carga inicial
   useEffect(() => {
+    if (initialBranchSetRef.current) return;
+    if (linesList.length === 0 && branchesList.length === 0) return;
+
     if (linesList.length > 0 && selectedLineFilterId === 'all') {
       const sitLine = linesList.find(l =>
         l.id === 'linea_sit' ||
@@ -948,14 +952,17 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         const sitBranch = branchesList.find(b => b.line_id === sitLine.id);
         if (sitBranch) {
           setSelectedBranchId(sitBranch.id);
+          initialBranchSetRef.current = true;
         }
-      } else if (branchesList.length > 0 && !selectedBranchId) {
+      } else if (branchesList.length > 0) {
         setSelectedBranchId(branchesList[0].id);
+        initialBranchSetRef.current = true;
       }
-    } else if (branchesList.length > 0 && !selectedBranchId) {
+    } else if (branchesList.length > 0) {
       setSelectedBranchId(branchesList[0].id);
+      initialBranchSetRef.current = true;
     }
-  }, [linesList, branchesList, selectedLineFilterId, selectedBranchId]);
+  }, [linesList, branchesList, selectedLineFilterId]);
 
   const updateFullPolylinePathFromControls = useCallback(async (controls: [number, number][]) => {
     if (controls.length < 2) {
