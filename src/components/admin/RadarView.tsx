@@ -44,29 +44,92 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createBusVehicleIcon(linea: string) {
-  const lineText = linea || 'SUBE';
+function createBusVehicleIcon(linea: string, bearing: number = 0, isSelected: boolean = false) {
+  const lineText = (linea || 'SUBE').slice(0, 7);
+  const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? bearing : 0;
+  const hasBearing = safeBearing !== 0;
+
+  const bgGradient = isSelected
+    ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+    : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+
+  const shadowEffect = isSelected
+    ? '0 0 12px rgba(245, 158, 11, 0.8), 0 3px 8px rgba(0, 0, 0, 0.6)'
+    : '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)';
+
+  const arrowColor = isSelected ? '#f59e0b' : '#38bdf8';
+
+  // Flecha orbital que apunta hacia el rumbo (bearing) de avance de la unidad
+  const bearingArrowHtml = `
+    <div style="
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      top: -13px;
+      left: -6px;
+      transform: rotate(${safeBearing}deg);
+      transform-origin: center center;
+      pointer-events: none;
+      z-index: 2;
+    ">
+      <!-- Borde exterior de contraste blanco/oscuro -->
+      <div style="
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-bottom: 11px solid #ffffff;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+      "></div>
+      <!-- Punta de flecha direccional brillante -->
+      <div style="
+        position: absolute;
+        top: 0px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 8px solid ${arrowColor};
+      "></div>
+    </div>
+  `;
+
   return L.divIcon({
     className: 'custom-vehicle-icon',
-    html: `<div style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-      color: #ffffff;
-      padding: 2px 7px;
-      min-width: 24px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-      border: 1.5px solid #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5);
-      white-space: nowrap;
-      cursor: pointer;
-      pointer-events: auto;
-      text-align: center;
-    ">${lineText}</div>`,
+    html: `
+      <div style="position: relative; width: 36px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+        ${hasBearing ? bearingArrowHtml : ''}
+        <div style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: ${bgGradient};
+          color: #ffffff;
+          padding: 2px 6px;
+          min-width: 24px;
+          border-radius: 11px;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: -0.2px;
+          border: 1.5px solid #ffffff;
+          box-shadow: ${shadowEffect};
+          white-space: nowrap;
+          cursor: pointer;
+          pointer-events: auto;
+          text-align: center;
+          position: relative;
+          z-index: 1;
+        ">
+          ${lineText}
+        </div>
+      </div>
+    `,
     iconSize: [36, 22],
     iconAnchor: [18, 11]
   });
@@ -3202,15 +3265,17 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
             {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría GTFS V3) */}
             {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => {
+              const isSelected = selectedVehicle && (String(selectedVehicle.intern) === String(veh.intern) || String(selectedVehicle.id) === String(veh.id));
+              const vehBearing = typeof veh.bearing === 'number' && !isNaN(veh.bearing) ? veh.bearing : (parseFloat(veh.bearing) || 0);
               const dirLabel = veh.direction === 0 ? 'Ida (Hacia Destino)' : veh.direction === 1 ? 'Vuelta (Hacia Cabecera)' : (direction === 'ida' ? 'Ida' : 'Vuelta');
               const formattedTime = veh.timestamp ? (typeof veh.timestamp === 'number' && veh.timestamp < 2000000000 ? new Date(veh.timestamp * 1000).toLocaleTimeString() : new Date(veh.timestamp).toLocaleTimeString()) : 'En vivo';
-              
+
               return (
                 <Marker
                   key={`telemetry_veh_${veh.id || idx}`}
                   position={[veh.lat, veh.lng]}
-                  zIndexOffset={7000}
-                  icon={createBusVehicleIcon(veh.linea || veh.route_short_name)}
+                  zIndexOffset={isSelected ? 9000 : 7000}
+                  icon={createBusVehicleIcon(veh.linea || veh.route_short_name, vehBearing, isSelected)}
                   eventHandlers={{
                     click(e) {
                       if (e.originalEvent) {
