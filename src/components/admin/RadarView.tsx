@@ -840,20 +840,38 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [vehicleJsonCopied, setVehicleJsonCopied] = useState<boolean>(false);
   const [showGpsTraces, setShowGpsTraces] = useState<boolean>(true);
   const [showRawGpsPoints, setShowRawGpsPoints] = useState<boolean>(false);
-  const [gpsTraces, setGpsTraces] = useState<Record<string, Array<{
-    lat: number;
-    lng: number;
-    speed?: number;
-    bearing?: number;
-    timestamp?: number;
-    intern?: string;
-    linea?: string;
-    route_short_name?: string;
-  }>>>(() => {
+  const [gpsTraces, setGpsTraces] = useState<Record<string, {
+    points: Array<{
+      lat: number;
+      lng: number;
+      speed?: number;
+      bearing?: number;
+      timestamp?: number;
+      intern?: string;
+      linea?: string;
+      route_short_name?: string;
+    }>;
+    streetPath: [number, number][];
+  }>>(() => {
     if (typeof window === 'undefined') return {};
     try {
       const saved = localStorage.getItem('collie_radar_gps_traces_v1');
-      return saved ? JSON.parse(saved) : {};
+      if (!saved) return {};
+      const parsed = JSON.parse(saved);
+      const normalized: Record<string, { points: any[]; streetPath: [number, number][] }> = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        if (Array.isArray(v)) {
+          normalized[k] = { points: v, streetPath: v.map((p: any) => [p.lat, p.lng]) };
+        } else if (v && typeof v === 'object' && Array.isArray((v as any).points)) {
+          normalized[k] = {
+            points: (v as any).points,
+            streetPath: Array.isArray((v as any).streetPath) && (v as any).streetPath.length > 0
+              ? (v as any).streetPath
+              : (v as any).points.map((p: any) => [p.lat, p.lng])
+          };
+        }
+      }
+      return normalized;
     } catch {
       return {};
     }
@@ -865,6 +883,36 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
       localStorage.setItem('collie_radar_gps_traces_v1', JSON.stringify(gpsTraces));
     } catch (_) {}
   }, [gpsTraces]);
+
+  // Ruteo por calles OSRM automático para trazas existentes que tengan puntos sin ruteo detallado
+  useEffect(() => {
+    let isCancelled = false;
+    const computeStreetRoutes = async () => {
+      for (const [k, trace] of Object.entries(gpsTraces)) {
+        if (trace && trace.points.length >= 2 && (!trace.streetPath || trace.streetPath.length <= trace.points.length)) {
+          const controls: [number, number][] = trace.points.map(p => [p.lat, p.lng]);
+          try {
+            const osrmRes = await fetchOsrmFullRoute(controls);
+            if (!isCancelled && osrmRes && osrmRes.points.length > 0) {
+              setGpsTraces(prev => {
+                const cur = prev[k];
+                if (!cur) return prev;
+                return {
+                  ...prev,
+                  [k]: {
+                    ...cur,
+                    streetPath: osrmRes.points
+                  }
+                };
+              });
+            }
+          } catch (_) {}
+        }
+      }
+    };
+    computeStreetRoutes();
+    return () => { isCancelled = true; };
+  }, []);
 
   const handleClearGpsTraces = useCallback(() => {
     setGpsTraces({});
@@ -2210,15 +2258,14 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
                   setTelemetryVehicles(mappedUnits);
 
-                  // Acumular el camino recorrido (GPS Traces) por cada unidad activa
-                  setGpsTraces(prev => {
-                    let changed = false;
-                    const next = { ...prev };
+                  // Acumular el camino recorrido por calles (OSRM) por cada unidad activa
+                  for (const u of mappedUnits) {
+                    if (typeof u.lat !== 'number' || typeof u.lng !== 'number' || isNaN(u.lat) || isNaN(u.lng)) continue;
+                    const key = String(u.intern || u.id || u.vehicle_id);
 
-                    for (const u of mappedUnits) {
-                      if (typeof u.lat !== 'number' || typeof u.lng !== 'number' || isNaN(u.lat) || isNaN(u.lng)) continue;
-                      const key = String(u.intern || u.id || u.vehicle_id);
-                      const currentPts = next[key] || [];
+                    setGpsTraces(prev => {
+                      const cur = prev[key] || { points: [], streetPath: [] };
+                      const currentPts = cur.points || [];
                       const lastPt = currentPts.length > 0 ? currentPts[currentPts.length - 1] : null;
 
                       let shouldAdd = true;
@@ -2229,25 +2276,53 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                         }
                       }
 
-                      if (shouldAdd) {
-                        changed = true;
-                        const newPoint = {
-                          lat: u.lat,
-                          lng: u.lng,
-                          speed: u.speed || 0,
-                          bearing: u.bearing || 0,
-                          timestamp: u.timestamp || Date.now(),
-                          intern: u.intern,
-                          linea: u.linea || u.route_short_name,
-                          route_short_name: u.route_short_name || u.linea
-                        };
-                        // Guardar hasta 150 puntos por unidad para trazado suave y fluido
-                        next[key] = [...currentPts.slice(-150), newPoint];
-                      }
-                    }
+                      if (!shouldAdd) return prev;
 
-                    return changed ? next : prev;
-                  });
+                      const newPt = {
+                        lat: u.lat,
+                        lng: u.lng,
+                        speed: u.speed || 0,
+                        bearing: u.bearing || 0,
+                        timestamp: u.timestamp || Date.now(),
+                        intern: u.intern,
+                        linea: u.linea || u.route_short_name,
+                        route_short_name: u.route_short_name || u.linea
+                      };
+
+                      const newPoints = [...currentPts.slice(-100), newPt];
+
+                      // Disparar ruteo OSRM para seguir las calles entre el punto anterior y el nuevo
+                      if (lastPt) {
+                        fetchOsrmFullRoute([[lastPt.lat, lastPt.lng], [newPt.lat, newPt.lng]])
+                          .then(osrmRes => {
+                            if (osrmRes && osrmRes.points && osrmRes.points.length > 0) {
+                              setGpsTraces(innerPrev => {
+                                const innerCur = innerPrev[key];
+                                if (!innerCur) return innerPrev;
+                                const prevPath = innerCur.streetPath || [];
+                                const combined = prevPath.length > 0 ? [...prevPath, ...osrmRes.points.slice(1)] : osrmRes.points;
+                                return {
+                                  ...innerPrev,
+                                  [key]: {
+                                    ...innerCur,
+                                    streetPath: combined.slice(-500)
+                                  }
+                                };
+                              });
+                            }
+                          })
+                          .catch(() => {});
+                      }
+
+                      return {
+                        ...prev,
+                        [key]: {
+                          points: newPoints,
+                          streetPath: cur.streetPath && cur.streetPath.length > 0 ? [...cur.streetPath, [newPt.lat, newPt.lng]] : [[newPt.lat, newPt.lng]]
+                        }
+                      };
+                    });
+                  }
                 }}
                 currentDirection={direction}
                 mapBounds={mapBounds}
@@ -3024,10 +3099,13 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               );
             })}
 
-            {/* 1. Líneas de Camino / Trazas GPS Recorridas por las Unidades en Tiempo Real */}
-            {showGpsTraces && Object.entries(gpsTraces).map(([vKey, points]) => {
-              if (!points || points.length < 2) return null;
-              const coords: [number, number][] = points.map(p => [p.lat, p.lng]);
+            {/* 1. Líneas de Camino / Trazas GPS Siguiendo las Calles en Tiempo Real (OSRM) */}
+            {showGpsTraces && Object.entries(gpsTraces).map(([vKey, trace]) => {
+              const pts = trace?.points || [];
+              const streetPath = trace?.streetPath || [];
+              if (pts.length < 2 && streetPath.length < 2) return null;
+
+              const coords: [number, number][] = streetPath.length > 0 ? streetPath : pts.map(p => [p.lat, p.lng]);
               const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
 
               return (
@@ -3043,13 +3121,13 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     }}
                     interactive={false}
                   />
-                  {/* Línea Neón Principal */}
+                  {/* Línea Neón Principal por las Calles */}
                   <Polyline
                     positions={coords}
                     smoothFactor={1.0}
                     pathOptions={{
                       color: isSelected ? '#f59e0b' : '#00e676',
-                      weight: isSelected ? 5 : 3,
+                      weight: isSelected ? 5 : 3.5,
                       opacity: 1.0,
                       dashArray: isSelected ? '8, 6' : undefined
                     }}
@@ -3067,7 +3145,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   >
                     <Tooltip sticky interactive={false}>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
-                        Camino Línea {points[0]?.linea || ''} #{points[0]?.intern || vKey} ({points.length} puntos)
+                        Camino Línea {pts[0]?.linea || ''} #{pts[0]?.intern || vKey} ({pts.length} reportes por calles)
                       </div>
                     </Tooltip>
                   </Polyline>
@@ -3076,15 +3154,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             })}
 
             {/* 2. Puntos GPS Históricos Individuales (CircleMarkers) */}
-            {(showRawGpsPoints || selectedVehicle) && Object.entries(gpsTraces).map(([vKey, points]) => {
-              if (!points || points.length === 0) return null;
+            {(showRawGpsPoints || selectedVehicle) && Object.entries(gpsTraces).map(([vKey, trace]) => {
+              const pts = trace?.points || [];
+              if (pts.length === 0) return null;
               const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
               if (!showRawGpsPoints && !isSelected) return null;
 
               return (
                 <React.Fragment key={`gps-raw-pts-${vKey}`}>
-                  {points.map((pt, idx) => {
-                    const isLast = idx === points.length - 1;
+                  {pts.map((pt, idx) => {
+                    const isLast = idx === pts.length - 1;
                     if (isLast && !showRawGpsPoints) return null; // No solapar con el marcador del vehículo principal
 
                     return (
@@ -3102,7 +3181,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                         <Tooltip sticky interactive={false}>
                           <div style={{ fontSize: '0.74rem', lineHeight: '1.45', padding: '2px 4px', color: '#0f172a' }}>
                             <div style={{ fontWeight: 800, color: isSelected ? '#d97706' : '#0284c7', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '2px', marginBottom: '2px' }}>
-                              Punto #{idx + 1} • #{pt.intern || vKey} (Línea {pt.linea || ''})
+                              Reporte #{idx + 1} • #{pt.intern || vKey} (Línea {pt.linea || ''})
                             </div>
                             <div>Velocidad: <strong style={{ color: '#059669' }}>{Math.round(pt.speed || 0)} km/h</strong> {pt.bearing ? `(${Math.round(pt.bearing)}°)` : ''}</div>
                             {pt.timestamp && (
@@ -3576,17 +3655,20 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     <span>Lat: {selectedVehicle.lat?.toFixed(5)}, Lng: {selectedVehicle.lng?.toFixed(5)}</span>
                     <span style={{ color: '#00e676', fontWeight: 600 }}>
-                      🛤️ Camino: {(gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || []).length} puntos
+                      🛤️ Camino: {(gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)]?.points || []).length} reportes por calles
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {(gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || []).length >= 2 && (
+                    {((gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)]?.streetPath || []).length >= 2 || (gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)]?.points || []).length >= 2) && (
                       <button
                         type="button"
                         onClick={() => {
-                          const pts = gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || [];
-                          if (mapInstance && pts.length >= 2) {
-                            mapInstance.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])), { padding: [40, 40], maxZoom: 16 });
+                          const trace = gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)];
+                          const coords = (trace?.streetPath && trace.streetPath.length >= 2) 
+                            ? trace.streetPath 
+                            : (trace?.points || []).map(p => [p.lat, p.lng] as [number, number]);
+                          if (mapInstance && coords.length >= 2) {
+                            mapInstance.fitBounds(L.latLngBounds(coords), { padding: [40, 40], maxZoom: 16 });
                           }
                         }}
                         style={{
