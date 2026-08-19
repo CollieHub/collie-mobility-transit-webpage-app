@@ -49,68 +49,63 @@ function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: b
   const isUndefinedLine = !cleanLine || cleanLine.toLowerCase() === 'a definir' || cleanLine.toLowerCase() === 'bus' || cleanLine.toLowerCase() === 'sube';
 
   const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? bearing : 0;
-  const hasBearing = safeBearing !== 0;
 
   const bgGradient = isSelected
     ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-    : (isUndefinedLine ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)');
+    : (isUndefinedLine ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)');
 
   const shadowEffect = isSelected
-    ? '0 0 12px rgba(245, 158, 11, 0.8), 0 3px 8px rgba(0, 0, 0, 0.6)'
-    : (isUndefinedLine ? '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(16, 185, 129, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)');
+    ? '0 0 14px rgba(245, 158, 11, 0.9), 0 3px 8px rgba(0, 0, 0, 0.6)'
+    : (isUndefinedLine ? '0 2px 6px rgba(0, 0, 0, 0.4), 0 0 8px rgba(34, 197, 94, 0.5)' : '0 2px 6px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)');
 
-  const arrowColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#34d399' : '#38bdf8');
-
-  // Flecha orbital que apunta hacia el rumbo (bearing) de avance de la unidad
-  const bearingArrowHtml = `
-    <div style="
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      top: ${isUndefinedLine ? '-10px' : '-13px'};
-      left: ${isUndefinedLine ? '-10px' : '-6px'};
-      transform: rotate(${safeBearing}deg);
-      transform-origin: center center;
-      pointer-events: none;
-      z-index: 2;
-    ">
-      <!-- Borde exterior de contraste blanco/oscuro -->
-      <div style="
-        position: absolute;
-        top: -2px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 7px solid transparent;
-        border-right: 7px solid transparent;
-        border-bottom: 11px solid #ffffff;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
-      "></div>
-      <!-- Punta de flecha direccional brillante -->
-      <div style="
-        position: absolute;
-        top: 0px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-bottom: 8px solid ${arrowColor};
-      "></div>
-    </div>
-  `;
+  const arrowColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#22c55e' : '#0284c7');
 
   if (isUndefinedLine) {
     return L.divIcon({
       className: 'custom-vehicle-icon-generic',
       html: `
-        <div style="position: relative; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-          ${hasBearing ? bearingArrowHtml : ''}
+        <div style="position: relative; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <!-- Flecha de Rumbo Direccional Rotada (SIEMPRE VISIBLE) -->
           <div style="
-            width: 28px;
-            height: 28px;
+            position: absolute;
+            width: 34px;
+            height: 34px;
+            top: 0;
+            left: 0;
+            transform: rotate(${safeBearing}deg);
+            transform-origin: center center;
+            pointer-events: none;
+            z-index: 2;
+          ">
+            <div style="
+              position: absolute;
+              top: -5px;
+              left: 50%;
+              transform: translateX(-50%);
+              width: 0;
+              height: 0;
+              border-left: 5px solid transparent;
+              border-right: 5px solid transparent;
+              border-bottom: 8px solid #ffffff;
+              filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+            "></div>
+            <div style="
+              position: absolute;
+              top: -3px;
+              left: 50%;
+              transform: translateX(-50%);
+              width: 0;
+              height: 0;
+              border-left: 3.5px solid transparent;
+              border-right: 3.5px solid transparent;
+              border-bottom: 6px solid ${arrowColor};
+            "></div>
+          </div>
+
+          <!-- Círculo Central con icono de Colectivo -->
+          <div style="
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -124,14 +119,14 @@ function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: b
             position: relative;
             z-index: 1;
           ">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
             </svg>
           </div>
         </div>
       `,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14]
+      iconSize: [34, 34],
+      iconAnchor: [17, 17]
     });
   }
 
@@ -140,8 +135,45 @@ function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: b
   return L.divIcon({
     className: 'custom-vehicle-icon',
     html: `
-      <div style="position: relative; width: 36px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
-        ${hasBearing ? bearingArrowHtml : ''}
+      <div style="position: relative; width: 44px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <!-- Flecha de Rumbo Direccional Rotada (SIEMPRE VISIBLE) -->
+        <div style="
+          position: absolute;
+          width: 44px;
+          height: 30px;
+          top: 0;
+          left: 0;
+          transform: rotate(${safeBearing}deg);
+          transform-origin: center center;
+          pointer-events: none;
+          z-index: 2;
+        ">
+          <div style="
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 9px solid #ffffff;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+          "></div>
+          <div style="
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 7px solid ${arrowColor};
+          "></div>
+        </div>
+
+        <!-- Pastilla con Número de Línea -->
         <div style="
           display: inline-flex;
           align-items: center;
@@ -167,8 +199,8 @@ function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: b
         </div>
       </div>
     `,
-    iconSize: [36, 22],
-    iconAnchor: [18, 11]
+    iconSize: [44, 30],
+    iconAnchor: [22, 15]
   });
 }
 
@@ -2343,8 +2375,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     ...u,
                     id: String(u.id || u.vehicle_id || u.intern || Math.random()),
                     intern: String(u.intern || u.id || u.vehicle_id || 'Unidad'),
-                    linea: u.linea || u.route_short_name || 'SUBE',
-                    route_short_name: u.route_short_name || u.linea || '',
+                    linea: u.linea && u.linea.toUpperCase() !== 'SUBE' ? u.linea : (u.route_short_name && u.route_short_name.toUpperCase() !== 'SUBE' ? u.route_short_name : ''),
+                    route_short_name: u.route_short_name && u.route_short_name.toUpperCase() !== 'SUBE' ? u.route_short_name : (u.linea && u.linea.toUpperCase() !== 'SUBE' ? u.linea : ''),
                     route_id: u.route_id || '',
                     trip_headsign: u.trip_headsign || '',
                     agency_name: u.agency_name || '',
@@ -2793,7 +2825,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
               {selectedSource === 'redsube'
                 ? (selectedVehicle 
-                    ? `Línea ${selectedVehicle.linea || selectedVehicle.route_short_name} #${selectedVehicle.intern || selectedVehicle.id} • ${selectedVehicle.trip_headsign || 'En Circulación'}`
+                    ? `${selectedVehicle.linea && selectedVehicle.linea.toUpperCase() !== 'SUBE' ? `Línea ${selectedVehicle.linea}` : 'Línea a definir'} #${selectedVehicle.intern || selectedVehicle.id} • ${selectedVehicle.trip_headsign || 'En Circulación'}`
                     : (selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Monitoreo de Flota RedSUBE'))
                 : (selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Selecciona un Ramal')}
             </span>
