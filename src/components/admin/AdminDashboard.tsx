@@ -3,6 +3,7 @@ import RamalScheduleEditor from './RamalScheduleEditor';
 import CalendarView from './CalendarView';
 import RadarView from './RadarView';
 import { getBranchColor } from './RedSubeV3Panel';
+import allGtfsLines from '../../lib/redsube/all_gtfs_lines.json';
 import {
   BuildingIcon,
   BusIcon,
@@ -508,6 +509,48 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   const isUUID = (val: any): boolean => {
     if (typeof val !== 'string') return false;
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val.trim());
+  };
+
+  const getAgencyDisplayName = (row: any, val: any): string => {
+    if (!val && !row.agency_id) return '-';
+
+    // 1. Check if row.line_id or row.code matches a line in linesList with name containing (Company)
+    const foundLine = linesList.find(l => l.id === row.line_id || l.code === row.line_id || l.id === row.id);
+    if (foundLine?.name && foundLine.name.includes('(') && foundLine.name.includes(')')) {
+      const match = foundLine.name.match(/\((.*?)\)/);
+      if (match && match[1] && !match[1].toLowerCase().startsWith('línea')) {
+        return match[1].trim();
+      }
+    }
+
+    // 2. Check allGtfsLines catalog by lineCode
+    const lineCodeStr = String(foundLine?.code || row.line_code || row.line_id || row.code || '').trim();
+    if (lineCodeStr) {
+      const exact = (allGtfsLines as any[]).find(l => String(l.lineCode).trim().toLowerCase() === lineCodeStr.toLowerCase());
+      if (exact?.agencyName) return exact.agencyName;
+
+      // Try base numeric line (e.g. 194 from 194A)
+      const baseCode = lineCodeStr.replace(/[^0-9]/g, '');
+      if (baseCode) {
+        const baseMatch = (allGtfsLines as any[]).find(l => String(l.lineCode).trim() === baseCode);
+        if (baseMatch?.agencyName) return baseMatch.agencyName;
+      }
+    }
+
+    // 3. Search in allGtfsLines by route_id if available
+    if (row.route_id) {
+      for (const l of (allGtfsLines as any[])) {
+        if (Array.isArray(l.ramales) && l.ramales.some((r: any) => String(r.route_id) === String(row.route_id))) {
+          if (l.agencyName) return l.agencyName;
+        }
+      }
+    }
+
+    // 4. Check companiesList
+    const foundComp = companiesList.find(c => String(c.id) === String(val) || String(c.agency_id) === String(val));
+    if (foundComp?.name || foundComp?.agency_name) return foundComp.name || foundComp.agency_name;
+
+    return `Empresa ${val}`;
   };
 
   const availableBranchesForFilter = branchesList.filter(b => {
@@ -1341,6 +1384,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                               }
 
                               if (col === 'agency_id') {
+                                const agencyLabel = getAgencyDisplayName(row, val);
                                 return (
                                   <td key={col} style={{ padding: '0.75rem 1rem' }}>
                                     <span style={{
@@ -1352,9 +1396,15 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
                                       fontWeight: 600,
                                       backgroundColor: 'rgba(168, 85, 247, 0.1)',
                                       color: '#c084fc',
-                                      border: '1px solid rgba(168, 85, 247, 0.25)'
-                                    }}>
-                                      Empresa {val}
+                                      border: '1px solid rgba(168, 85, 247, 0.25)',
+                                      maxWidth: '260px',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                    title={agencyLabel}
+                                    >
+                                      {agencyLabel}
                                     </span>
                                   </td>
                                 );
