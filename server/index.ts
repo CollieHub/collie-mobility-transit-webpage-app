@@ -1,6 +1,40 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import allGtfsLines from '../src/lib/redsube/all_gtfs_lines.json';
+import agenciesMap from '../src/lib/redsube/agencies_map.json';
+
+const routeIdToGtfsMap: Record<string, { lineCode: string; shortName: string; agencyName: string; headsignIda?: string; headsignVuelta?: string }> = {};
+
+for (const line of (allGtfsLines as any[])) {
+  for (const ram of (line.ramales || [])) {
+    if (ram.route_id) {
+      routeIdToGtfsMap[String(ram.route_id)] = {
+        lineCode: line.lineCode,
+        shortName: ram.shortName || line.lineCode,
+        agencyName: line.agencyName || '',
+        headsignIda: ram.headsignIda,
+        headsignVuelta: ram.headsignVuelta
+      };
+    }
+  }
+}
+
+const agencyToLineMap: Record<string, { line: string; agencyName: string }> = {
+  '4854': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '709': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '710': { line: '228', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '9': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '379': { line: '204', agencyName: 'MICRO OMNIBUS TIGRE S.A.' },
+  '18': { line: '57', agencyName: 'TRANSPORTES ATLANTIDA S.A.C.' },
+  '3': { line: '28', agencyName: 'D.O.T.A. S.A.' },
+  '4': { line: '107', agencyName: 'NUDO S.A.' },
+  '6': { line: '60', agencyName: 'LINEA SESENTA SA' },
+  '7': { line: '180', agencyName: 'LA VECINAL DE MATANZA S.A.C.I. DE MICROOMNIBUS' },
+  '21': { line: '188', agencyName: 'TRANSPORTE LARRAZABAL C.I.S.A.' },
+  '35': { line: '24', agencyName: 'EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F.' },
+  '19': { line: '216', agencyName: 'GENERAL PUEYRREDON S.A.T.C.I.' }
+};
 
 type Bindings = {
   DB: D1Database;
@@ -2493,11 +2527,11 @@ app.get('/v1/redsube/line-routes', async (c) => {
 app.get('/v1/redsube/vehicles', async (c) => {
   const company = c.req.query('company') || '';
   const ramal = c.req.query('ramal') || '';
-  const limit = parseInt(c.req.query('limit') || '100', 10);
+  const limit = parseInt(c.req.query('limit') || '5000', 10);
   const clientId = c.env.REDSUBE_CLIENT_ID || '6dbd9c5c729e4bbf89b904cbdddd4efd';
   const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '5314C00834B54ba6A860e3C28dF6cA18';
 
-  const cacheKey = `cache:redsube:vehicles:${company}:${ramal}:${limit}`;
+  const cacheKey = `cache:redsube:vehicles_proto:${company}:${ramal}:${limit}`;
   if (c.env.FLEET_KV) {
     try {
       const cached = await c.env.FLEET_KV.get(cacheKey);
@@ -2510,59 +2544,127 @@ app.get('/v1/redsube/vehicles', async (c) => {
   }
 
   try {
-    const url = `https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple?client_id=${clientId}&client_secret=${clientSecret}`;
-    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
-    if (!resp.ok) {
-      return c.json({ success: false, error: `Error HTTP ${resp.status} de RedSUBE` }, resp.status as any);
-    }
-    const data: any = await resp.json();
-    let vehicles = Array.isArray(data) ? data : [];
+    const protoUrl = `https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositions?client_id=${clientId}&client_secret=${clientSecret}`;
+    const protoResp = await fetch(protoUrl);
+    let mappedVehicles: any[] = [];
 
+    if (protoResp.ok) {
+      const buf = await protoResp.arrayBuffer();
+      const feed = (GtfsRealtimeBindings as any).transit_realtime.FeedMessage.decode(new Uint8Array(buf));
+      
+      for (const entity of (feed.entity || [])) {
+        const v = entity.vehicle;
+        if (!v || !v.position) continue;
+        const lat = v.position.latitude;
+        const lng = v.position.longitude;
+        if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) continue;
+
+        const label = v.vehicle?.label || '';
+        const labelParts = label.split('-');
+        const intern = labelParts[0] || v.vehicle?.id || entity.id;
+        const agencyId = labelParts[1] || '';
+        const routeId = v.trip?.routeId ? String(v.trip.routeId) : '';
+        const direction = typeof v.trip?.directionId === 'number' ? v.trip.directionId : undefined;
+        const rawSpeed = v.position.speed || 0;
+        const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
+
+        let linea = '';
+        let routeShortName = '';
+        let agencyName = (agenciesMap as any)[agencyId] || '';
+        let tripHeadsign = '';
+
+        if (routeId && routeIdToGtfsMap[routeId]) {
+          const g = routeIdToGtfsMap[routeId];
+          linea = g.lineCode;
+          routeShortName = g.shortName;
+          agencyName = g.agencyName || agencyName;
+          tripHeadsign = direction === 0 ? (g.headsignIda || '') : (g.headsignVuelta || '');
+        } else if (agencyId && agencyToLineMap[agencyId]) {
+          const a = agencyToLineMap[agencyId];
+          linea = a.line;
+          routeShortName = a.line;
+          agencyName = a.agencyName;
+          tripHeadsign = 'En espera / Playón';
+        } else if (agencyName) {
+          linea = agencyName;
+          routeShortName = agencyName;
+          tripHeadsign = 'En espera / Playón';
+        } else {
+          linea = 'SUBE';
+          routeShortName = 'SUBE';
+        }
+
+        mappedVehicles.push({
+          id: String(v.vehicle?.id || entity.id),
+          route_id: routeId,
+          route_short_name: routeShortName,
+          linea: linea,
+          intern: String(intern),
+          latitude: lat,
+          longitude: lng,
+          lat: lat,
+          lng: lng,
+          speed: speedKmH,
+          bearing: Math.round(v.position.bearing || 0),
+          direction: direction,
+          trip_headsign: tripHeadsign,
+          agency_name: agencyName,
+          timestamp: v.timestamp ? parseInt(v.timestamp, 10) : Math.floor(Date.now() / 1000)
+        });
+      }
+    } else {
+      // Fallback a vehiclePositionsSimple si el endpoint binario no responde
+      const simpleUrl = `https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositionsSimple?client_id=${clientId}&client_secret=${clientSecret}`;
+      const resp = await fetch(simpleUrl, { headers: { 'Accept': 'application/json' } });
+      if (resp.ok) {
+        const data: any = await resp.json();
+        const vehicles = Array.isArray(data) ? data : [];
+        mappedVehicles = vehicles.map((v: any) => {
+          const latVal = parseFloat(v.latitude || v.lat);
+          const lngVal = parseFloat(v.longitude || v.lng);
+          const rawSpeed = parseFloat(v.speed || '0');
+          const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
+          return {
+            id: String(v.id || v.vehicle_id || v.trip_id || Math.random()),
+            route_id: v.route_id,
+            route_short_name: v.route_short_name || v.linea || company,
+            linea: v.route_short_name || v.linea || company,
+            intern: String(v.id || v.vehicle_id || v.route_short_name || 'Unidad'),
+            latitude: latVal,
+            longitude: lngVal,
+            lat: latVal,
+            lng: lngVal,
+            speed: speedKmH,
+            bearing: parseFloat(v.bearing || v.heading || '0'),
+            direction: v.direction,
+            trip_headsign: v.trip_headsign || '',
+            agency_name: v.agency_name || '',
+            timestamp: v.timestamp || Date.now()
+          };
+        }).filter((v: any) => !isNaN(v.lat) && !isNaN(v.lng));
+      }
+    }
+
+    // Filtrar por línea / empresa si se especificó
     if (company && company !== 'TODAS') {
-      const cleanComp = company.replace(/^(Línea\s+|Linea\s+)/i, '').trim();
-      vehicles = vehicles.filter((v: any) => {
-        const shortName = String(v.route_short_name || v.linea || '').trim();
-        const agency = String(v.agency_name || '').trim();
-        const routeId = String(v.route_id || '').trim();
-        
-        if (ramal && (shortName.toUpperCase() === ramal.toUpperCase() || shortName.toUpperCase().includes(ramal.toUpperCase()))) return true;
+      const cleanComp = company.replace(/^(Línea\s+|Linea\s+)/i, '').trim().toUpperCase();
+      mappedVehicles = mappedVehicles.filter((v: any) => {
+        const shortName = String(v.route_short_name || v.linea || '').toUpperCase().trim();
+        const agency = String(v.agency_name || '').toUpperCase().trim();
+        const routeId = String(v.route_id || '').toUpperCase().trim();
+
+        if (ramal && (shortName === ramal.toUpperCase() || shortName.includes(ramal.toUpperCase()))) return true;
         if (shortName === cleanComp || shortName.startsWith(cleanComp)) return true;
-        if (agency.toLowerCase().includes(cleanComp.toLowerCase())) return true;
+        if (agency.includes(cleanComp)) return true;
         if (routeId === cleanComp) return true;
         return false;
       });
     }
 
-    const mapped = vehicles.map((v: any) => {
-      const latVal = parseFloat(v.latitude || v.lat);
-      const lngVal = parseFloat(v.longitude || v.lng);
-      const rawSpeed = parseFloat(v.speed || '0');
-      // Si la velocidad viene en m/s (ej < 35), convertir a km/h
-      const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
-
-      return {
-        id: String(v.id || v.vehicle_id || v.trip_id || Math.random()),
-        route_id: v.route_id,
-        route_short_name: v.route_short_name || v.linea || company,
-        linea: v.route_short_name || v.linea || company,
-        intern: String(v.id || v.vehicle_id || v.route_short_name || 'Unidad'),
-        latitude: latVal,
-        longitude: lngVal,
-        lat: latVal,
-        lng: lngVal,
-        speed: speedKmH,
-        bearing: parseFloat(v.bearing || v.heading || '0'),
-        direction: v.direction,
-        trip_headsign: v.trip_headsign || '',
-        agency_name: v.agency_name || '',
-        timestamp: v.timestamp || Date.now()
-      };
-    }).filter((v: any) => !isNaN(v.lat) && !isNaN(v.lng));
-
     const payload = {
       success: true,
-      total: mapped.length,
-      vehicles: mapped.slice(0, limit)
+      total: mappedVehicles.length,
+      vehicles: mappedVehicles.slice(0, limit)
     };
 
     if (c.env.FLEET_KV) {
