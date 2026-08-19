@@ -2490,20 +2490,17 @@ app.get('/v1/redsube/line-routes', async (c) => {
 
 app.get('/v1/redsube/vehicles', async (c) => {
   const company = c.req.query('company') || '';
-  const limit = parseInt(c.req.query('limit') || '50', 10);
-  const clientId = c.env.REDSUBE_CLIENT_ID || '';
-  const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '';
+  const ramal = c.req.query('ramal') || '';
+  const limit = parseInt(c.req.query('limit') || '100', 10);
+  const clientId = c.env.REDSUBE_CLIENT_ID || '6dbd9c5c729e4bbf89b904cbdddd4efd';
+  const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '5314C00834B54ba6A860e3C28dF6cA18';
 
-  if (!clientId || !clientSecret) {
-    return c.json({ success: false, error: 'Credenciales de RedSUBE no configuradas' }, 500);
-  }
-
-  const cacheKey = `cache:redsube:vehicles:${company}:${limit}`;
+  const cacheKey = `cache:redsube:vehicles:${company}:${ramal}:${limit}`;
   if (c.env.FLEET_KV) {
     try {
       const cached = await c.env.FLEET_KV.get(cacheKey);
       if (cached) {
-        c.header('Cache-Control', 'public, max-age=10, s-maxage=10');
+        c.header('Cache-Control', 'public, max-age=8, s-maxage=8');
         c.header('X-Cache-Status', 'HIT-KV');
         return c.json(JSON.parse(cached));
       }
@@ -2520,25 +2517,59 @@ app.get('/v1/redsube/vehicles', async (c) => {
     let vehicles = Array.isArray(data) ? data : [];
 
     if (company && company !== 'TODAS') {
+      const cleanComp = company.replace(/^(Línea\s+|Linea\s+)/i, '').trim();
       vehicles = vehicles.filter((v: any) => {
-        const line = String(v.route_short_name || v.agency_name || v.linea || '').trim();
-        return line === company || line.startsWith(company);
+        const shortName = String(v.route_short_name || v.linea || '').trim();
+        const agency = String(v.agency_name || '').trim();
+        const routeId = String(v.route_id || '').trim();
+        
+        if (ramal && (shortName.toUpperCase() === ramal.toUpperCase() || shortName.toUpperCase().includes(ramal.toUpperCase()))) return true;
+        if (shortName === cleanComp || shortName.startsWith(cleanComp)) return true;
+        if (agency.toLowerCase().includes(cleanComp.toLowerCase())) return true;
+        if (routeId === cleanComp) return true;
+        return false;
       });
     }
 
+    const mapped = vehicles.map((v: any) => {
+      const latVal = parseFloat(v.latitude || v.lat);
+      const lngVal = parseFloat(v.longitude || v.lng);
+      const rawSpeed = parseFloat(v.speed || '0');
+      // Si la velocidad viene en m/s (ej < 35), convertir a km/h
+      const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
+
+      return {
+        id: String(v.id || v.vehicle_id || v.trip_id || Math.random()),
+        route_id: v.route_id,
+        route_short_name: v.route_short_name || v.linea || company,
+        linea: v.route_short_name || v.linea || company,
+        intern: String(v.id || v.vehicle_id || v.route_short_name || 'Unidad'),
+        latitude: latVal,
+        longitude: lngVal,
+        lat: latVal,
+        lng: lngVal,
+        speed: speedKmH,
+        bearing: parseFloat(v.bearing || v.heading || '0'),
+        direction: v.direction,
+        trip_headsign: v.trip_headsign || '',
+        agency_name: v.agency_name || '',
+        timestamp: v.timestamp || Date.now()
+      };
+    }).filter((v: any) => !isNaN(v.lat) && !isNaN(v.lng));
+
     const payload = {
       success: true,
-      total: vehicles.length,
-      vehicles: vehicles.slice(0, limit)
+      total: mapped.length,
+      vehicles: mapped.slice(0, limit)
     };
 
     if (c.env.FLEET_KV) {
       try {
-        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 10 });
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 8 });
       } catch (_) {}
     }
 
-    c.header('Cache-Control', 'public, max-age=10, s-maxage=10');
+    c.header('Cache-Control', 'public, max-age=8, s-maxage=8');
     return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);

@@ -42,29 +42,31 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createBusVehicleIcon(label: string, linea: string) {
+function createBusVehicleIcon(label: string, linea: string, speed?: number) {
   return L.divIcon({
     className: 'custom-vehicle-icon',
     html: `<div style="
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      background: #0284c7;
+      gap: 5px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       color: #ffffff;
-      padding: 2px 7px;
-      border-radius: 12px;
+      padding: 3px 8px;
+      border-radius: 16px;
       font-size: 11px;
       font-weight: 800;
       border: 2px solid #ffffff;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.65);
       white-space: nowrap;
       cursor: pointer;
     ">
-      <span>🚍</span>
-      <span>${linea || label || 'SUBE'}</span>
+      <span style="font-size: 13px;">🚍</span>
+      <span>${linea || 'SUBE'}</span>
+      ${label && label !== linea ? `<span style="font-size: 9px; opacity: 0.85; background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 4px;">#${label}</span>` : ''}
+      ${typeof speed === 'number' && speed > 0 ? `<span style="font-size: 9px; color: #4ade80; font-weight: 700;">${speed}km/h</span>` : ''}
     </div>`,
-    iconSize: [60, 24],
-    iconAnchor: [30, 12]
+    iconSize: [85, 26],
+    iconAnchor: [42, 13]
   });
 }
 
@@ -2732,16 +2734,29 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               <Marker
                 key={`telemetry_veh_${veh.id || idx}`}
                 position={[veh.lat, veh.lng]}
-                zIndexOffset={4000}
-                icon={createBusVehicleIcon(veh.intern, veh.linea)}
+                zIndexOffset={4500}
+                icon={createBusVehicleIcon(veh.intern, veh.linea, veh.speed)}
               >
                 <Popup>
-                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600 }}>
-                    🚍 <strong>Línea {veh.linea}</strong> — Interno: {veh.intern}
-                    <br />
-                    <span style={{ fontSize: '0.72rem', color: '#4b5563' }}>
-                      Velocidad: {Math.round(veh.speed)} km/h
-                    </span>
+                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600, minWidth: '170px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '15px' }}>🚍</span>
+                      <strong style={{ fontSize: '0.92rem', color: '#0284c7' }}>Línea {veh.linea}</strong>
+                      <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '1px 5px', borderRadius: '4px', color: '#475569' }}>
+                        #{veh.intern}
+                      </span>
+                    </div>
+                    {veh.agency_name && (
+                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '4px' }}>
+                        🏢 {veh.agency_name}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#334155', borderTop: '1px solid #e2e8f0', paddingTop: '4px' }}>
+                      <span>Velocidad: <strong>{Math.round(veh.speed)} km/h</strong></span>
+                      {veh.direction !== undefined && (
+                        <span>Sentido: <strong>{veh.direction === 0 ? 'Ida' : 'Vuelta'}</strong></span>
+                      )}
+                    </div>
                   </div>
                 </Popup>
               </Marker>
