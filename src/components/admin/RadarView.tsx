@@ -76,9 +76,8 @@ const createBusTopDownSvg = (color = '#0284c7', lineText = '') => {
         ${cleanLine}
       </text>
     ` : `
-      <!-- Escotillas / Aire acondicionado estándar si no tiene línea -->
-      <rect x="7" y="15" width="10" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
-      <rect x="7" y="32" width="10" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+      <!-- Un solo cuadrado en el techo si no se sabe la línea -->
+      <rect x="6.5" y="23" width="11" height="11" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
     `}
 
     <!-- Faros delanteros amarillos -->
