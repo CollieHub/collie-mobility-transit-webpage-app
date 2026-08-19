@@ -2623,21 +2623,24 @@ app.get('/v1/redsube/vehicles', async (c) => {
         let agencyName = (agenciesMap as any)[agencyId] || '';
         let tripHeadsign = '';
 
-        // 1. Prioridad Máxima: Resolución determinística exacta por Trip ID (Catálogo oficial GTFS / SUBE)
+        // 1. Prioridad Máxima: Resolución determinística exacta por Trip ID (validando coincidencia de Agencia / Operador)
         const tripLookup = lookupTripId(tripId);
-        if (tripLookup) {
-          routeId = tripLookup.routeId;
-          tripHeadsign = tripLookup.headsign || tripHeadsign;
-          if (direction === undefined) {
-            direction = tripLookup.directionId;
-          }
-          if (routeIdToGtfsMap[routeId]) {
-            const g = routeIdToGtfsMap[routeId];
-            linea = g.lineCode;
-            routeShortName = g.shortName;
-            agencyName = g.agencyName || agencyName;
-            if (!tripHeadsign) {
-              tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
+        if (tripLookup && routeIdToGtfsMap[tripLookup.routeId]) {
+          const candidate = routeIdToGtfsMap[tripLookup.routeId];
+          const candidateAgencyId = String((gtfsRoutesFull as any)[tripLookup.routeId]?.agencyId || '');
+
+          // Validar que no haya colisión de IDs entre CABA y Provincia (ej: agencyId 368 de Linea 228 vs agencyId 13 de Linea 26)
+          const isAgencyMatch = !agencyId || !candidateAgencyId || agencyId === candidateAgencyId || 
+            (agencyToLineMap[agencyId] && agencyToLineMap[agencyId].line === candidate.lineCode);
+
+          if (isAgencyMatch) {
+            routeId = tripLookup.routeId;
+            linea = candidate.lineCode;
+            routeShortName = candidate.shortName;
+            agencyName = candidate.agencyName || agencyName;
+            tripHeadsign = tripLookup.headsign || (direction === 0 ? (candidate.headsignIda || candidate.longName || '') : (candidate.headsignVuelta || candidate.longName || ''));
+            if (direction === undefined) {
+              direction = tripLookup.directionId;
             }
           }
         }
