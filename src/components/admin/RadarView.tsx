@@ -44,163 +44,99 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: boolean = false) {
+const createBusTopDownSvg = (color = '#0284c7') => `
+  <svg width="18" height="40" viewBox="0 0 24 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+    <!-- Cuerpo del Colectivo -->
+    <rect x="2" y="2" width="20" height="48" rx="4" fill="${color}" stroke="#0f172a" stroke-width="2"/>
+    <!-- Techo / Detalles superiores -->
+    <rect x="4" y="10" width="16" height="28" rx="2" fill="rgba(255, 255, 255, 0.22)"/>
+    <!-- Parabrisas delantero (Frente del Colectivo) -->
+    <rect x="4" y="5" width="16" height="3.5" rx="1" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
+    <!-- Luneta trasera -->
+    <rect x="4" y="44" width="16" height="2.5" rx="0.5" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
+    <!-- Escotilla / Aire acondicionado -->
+    <rect x="7.5" y="19" width="9" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+    <!-- Faros delanteros amarillos -->
+    <circle cx="5.5" cy="3" r="1.3" fill="#fbbf24"/>
+    <circle cx="18.5" cy="3" r="1.3" fill="#fbbf24"/>
+  </svg>
+`;
+
+function createBusVehicleIcon(
+  linea?: string, 
+  bearing: number = 0, 
+  isSelected: boolean = false,
+  intern?: string,
+  tripHeadsign?: string
+) {
   let cleanLine = (linea || '').replace(/^(l[ií]nea\s*)/i, '').trim();
   const isUndefinedLine = !cleanLine || cleanLine.toLowerCase() === 'a definir' || cleanLine.toLowerCase() === 'bus' || cleanLine.toLowerCase() === 'sube';
 
-  const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? bearing : 0;
+  const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? Math.round(bearing) : 0;
 
-  const bgGradient = isSelected
-    ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-    : (isUndefinedLine ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)');
+  const busColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#10b981' : '#0284c7');
 
-  const shadowEffect = isSelected
-    ? '0 0 14px rgba(245, 158, 11, 0.9), 0 3px 8px rgba(0, 0, 0, 0.6)'
-    : (isUndefinedLine ? '0 2px 6px rgba(0, 0, 0, 0.4), 0 0 8px rgba(34, 197, 94, 0.5)' : '0 2px 6px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)');
+  // Construcción del label superior
+  const labelLine1 = isUndefinedLine ? 'Línea a definir' : `Línea ${cleanLine}`;
+  const labelLine2 = tripHeadsign && tripHeadsign.trim() !== '' && tripHeadsign !== 'En Circulación'
+    ? `-> ${tripHeadsign.trim()}`
+    : (intern ? `# ${intern}` : '');
 
-  const arrowColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#22c55e' : '#0284c7');
-
-  if (isUndefinedLine) {
-    return L.divIcon({
-      className: 'custom-vehicle-icon-generic',
-      html: `
-        <div style="position: relative; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          <!-- Flecha de Rumbo Direccional Rotada (SIEMPRE VISIBLE) -->
-          <div style="
-            position: absolute;
-            width: 34px;
-            height: 34px;
-            top: 0;
-            left: 0;
-            transform: rotate(${safeBearing}deg);
-            transform-origin: center center;
-            pointer-events: none;
-            z-index: 2;
-          ">
-            <div style="
-              position: absolute;
-              top: -5px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 0;
-              height: 0;
-              border-left: 5px solid transparent;
-              border-right: 5px solid transparent;
-              border-bottom: 8px solid #ffffff;
-              filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
-            "></div>
-            <div style="
-              position: absolute;
-              top: -3px;
-              left: 50%;
-              transform: translateX(-50%);
-              width: 0;
-              height: 0;
-              border-left: 3.5px solid transparent;
-              border-right: 3.5px solid transparent;
-              border-bottom: 6px solid ${arrowColor};
-            "></div>
-          </div>
-
-          <!-- Círculo Central con icono de Colectivo -->
-          <div style="
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: ${bgGradient};
-            color: #ffffff;
-            border: 2px solid #ffffff;
-            box-shadow: ${shadowEffect};
-            cursor: pointer;
-            pointer-events: auto;
-            position: relative;
-            z-index: 1;
-          ">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
-            </svg>
-          </div>
+  const labelHtml = `
+    <div style="
+      position: absolute;
+      bottom: 46px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: ${busColor};
+      border: 1.5px solid #ffffff;
+      color: #ffffff;
+      font-family: 'Inter', -apple-system, sans-serif;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-align: center;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+      z-index: 3000;
+      line-height: 1.2;
+      pointer-events: auto;
+    ">
+      <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">
+        ${labelLine1}
+      </div>
+      ${labelLine2 ? `
+        <div style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95); margin-top: 1px;">
+          ${labelLine2}
         </div>
-      `,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17]
-    });
-  }
+      ` : ''}
+    </div>
+  `;
 
-  const lineText = cleanLine.slice(0, 6);
+  const htmlCode = `
+    <div style="position: relative; width: 18px; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+      ${labelHtml}
+      <!-- Colectivo con rotación (mirando al frente según el rumbo de avance) -->
+      <div style="
+        transform: rotate(${safeBearing}deg);
+        transform-origin: 50% 37.5%;
+        width: 18px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        filter: ${isSelected ? 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.9))' : 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5))'};
+      ">
+        ${createBusTopDownSvg(busColor)}
+      </div>
+    </div>
+  `;
 
   return L.divIcon({
-    className: 'custom-vehicle-icon',
-    html: `
-      <div style="position: relative; width: 44px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-        <!-- Flecha de Rumbo Direccional Rotada (SIEMPRE VISIBLE) -->
-        <div style="
-          position: absolute;
-          width: 44px;
-          height: 30px;
-          top: 0;
-          left: 0;
-          transform: rotate(${safeBearing}deg);
-          transform-origin: center center;
-          pointer-events: none;
-          z-index: 2;
-        ">
-          <div style="
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-bottom: 9px solid #ffffff;
-            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
-          "></div>
-          <div style="
-            position: absolute;
-            top: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-bottom: 7px solid ${arrowColor};
-          "></div>
-        </div>
-
-        <!-- Pastilla con Número de Línea -->
-        <div style="
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: ${bgGradient};
-          color: #ffffff;
-          padding: 2px 6px;
-          min-width: 24px;
-          border-radius: 11px;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: -0.2px;
-          border: 1.5px solid #ffffff;
-          box-shadow: ${shadowEffect};
-          white-space: nowrap;
-          cursor: pointer;
-          pointer-events: auto;
-          text-align: center;
-          position: relative;
-          z-index: 1;
-        ">
-          ${lineText}
-        </div>
-      </div>
-    `,
-    iconSize: [44, 30],
-    iconAnchor: [22, 15]
+    className: 'topdown-bus-vehicle-marker',
+    html: htmlCode,
+    iconSize: [18, 40],
+    iconAnchor: [9, 15]
   });
 }
 
@@ -3417,7 +3353,13 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   key={`telemetry_veh_${veh.id || idx}`}
                   position={[veh.lat, veh.lng]}
                   zIndexOffset={isSelected ? 9000 : 7000}
-                  icon={createBusVehicleIcon(veh.linea || veh.route_short_name, vehBearing, isSelected)}
+                  icon={createBusVehicleIcon(
+                    veh.linea || veh.route_short_name, 
+                    vehBearing, 
+                    isSelected, 
+                    veh.intern || veh.id, 
+                    veh.trip_headsign
+                  )}
                   eventHandlers={{
                     click(e) {
                       if (e.originalEvent) {
