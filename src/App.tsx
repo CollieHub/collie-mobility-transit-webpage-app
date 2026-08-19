@@ -258,6 +258,19 @@ function App() {
 
   const isAdmin = useMemo(() => !!adminToken, [adminToken]);
 
+  const handleLogout = useCallback((e?: any) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    localStorage.removeItem('collie_admin_token');
+    sessionStorage.removeItem('collie_admin_token');
+    localStorage.removeItem('developer_bypass');
+    sessionStorage.removeItem('developer_bypass');
+    localStorage.removeItem('dev_access');
+    sessionStorage.removeItem('dev_access');
+    setAdminToken(null);
+    window.location.href = '/';
+  }, []);
+
   useEffect(() => {
     if (isAdmin) {
       console.log = originalConsole.log;
@@ -270,6 +283,38 @@ function App() {
       console.error = () => {};
     }
   }, [isAdmin]);
+
+  // Google Analytics dynamic script injection
+  useEffect(() => {
+    const gaId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID;
+    if (gaId) {
+      if (!document.getElementById('google-analytics-script')) {
+        const script1 = document.createElement('script');
+        script1.id = 'google-analytics-script';
+        script1.async = true;
+        script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+        document.head.appendChild(script1);
+
+        const script2 = document.createElement('script');
+        script2.id = 'google-analytics-init';
+        script2.innerHTML = `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${gaId}');
+        `;
+        document.head.appendChild(script2);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
 
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const isUrlAdmin = currentPath.startsWith('/admin') || currentPath.startsWith('/login') || currentPath.startsWith('/calendar') || searchParams.get('view') === 'admin' || searchParams.get('admin') === 'true';
@@ -306,51 +351,6 @@ function App() {
       </Suspense>
     );
   }
-
-  // Google Analytics dynamic script injection
-  useEffect(() => {
-    const gaId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID;
-    if (gaId) {
-      if (!document.getElementById('google-analytics-script')) {
-        const script1 = document.createElement('script');
-        script1.id = 'google-analytics-script';
-        script1.async = true;
-        script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-        document.head.appendChild(script1);
-
-        const script2 = document.createElement('script');
-        script2.id = 'google-analytics-init';
-        script2.innerHTML = `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${gaId}');
-        `;
-        document.head.appendChild(script2);
-      }
-    }
-  }, []);
-
-  const handleLogout = useCallback((e?: any) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
-    localStorage.removeItem('collie_admin_token');
-    sessionStorage.removeItem('collie_admin_token');
-    localStorage.removeItem('developer_bypass');
-    sessionStorage.removeItem('developer_bypass');
-    localStorage.removeItem('dev_access');
-    sessionStorage.removeItem('dev_access');
-    setAdminToken(null);
-    window.location.href = '/';
-  }, []);
-
-  useEffect(() => {
-    const handleLocationChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
-  }, []);
 
   const { config, isLoading: isLoadingConfig } = useAppConfig();
   const { ads } = useTransitAds();
