@@ -4,6 +4,7 @@ import CalendarView from './CalendarView';
 import RadarView from './RadarView';
 import { getBranchColor } from './RedSubeV3Panel';
 import allGtfsLines from '../../lib/redsube/all_gtfs_lines.json';
+import agenciesMap from '../../lib/redsube/agencies_map.json';
 import {
   BuildingIcon,
   BusIcon,
@@ -512,9 +513,15 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   };
 
   const getAgencyDisplayName = (row: any, val: any): string => {
-    if (!val && !row.agency_id) return '-';
+    const rawId = String(val || row.agency_id || '').trim();
+    if (!rawId && !row.company_id) return '-';
 
-    // 1. Check if row.line_id or row.code matches a line in linesList with name containing (Company)
+    // 1. Direct match in agenciesMap (all 202 RedSUBE agencies)
+    if (rawId && (agenciesMap as Record<string, string>)[rawId]) {
+      return (agenciesMap as Record<string, string>)[rawId];
+    }
+
+    // 2. Check if row.line_id or row.code matches a line in linesList with name containing (Company)
     const foundLine = linesList.find(l => l.id === row.line_id || l.code === row.line_id || l.id === row.id);
     if (foundLine?.name && foundLine.name.includes('(') && foundLine.name.includes(')')) {
       const match = foundLine.name.match(/\((.*?)\)/);
@@ -523,7 +530,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       }
     }
 
-    // 2. Check allGtfsLines catalog by lineCode
+    // 3. Check allGtfsLines catalog by lineCode
     const lineCodeStr = String(foundLine?.code || row.line_code || row.line_id || row.code || '').trim();
     if (lineCodeStr) {
       const exact = (allGtfsLines as any[]).find(l => String(l.lineCode).trim().toLowerCase() === lineCodeStr.toLowerCase());
@@ -537,7 +544,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       }
     }
 
-    // 3. Search in allGtfsLines by route_id if available
+    // 4. Search in allGtfsLines by route_id if available
     if (row.route_id) {
       for (const l of (allGtfsLines as any[])) {
         if (Array.isArray(l.ramales) && l.ramales.some((r: any) => String(r.route_id) === String(row.route_id))) {
@@ -549,7 +556,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
     if (row.company_name) return row.company_name;
     if (row.agency_name) return row.agency_name;
 
-    return `Empresa ${val || row.agency_id}`;
+    return rawId ? `Empresa ${rawId}` : '-';
   };
 
   const availableBranchesForFilter = branchesList.filter(b => {
