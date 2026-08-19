@@ -5206,25 +5206,11 @@
         "headsignVuelta": "Zarate"
       },
       {
-        "route_id": "2476-new",
-        "shortName": "228AC-new",
-        "longName": "Pte. Saavedra ⇄ Zarate (Vial Corregido)",
-        "headsignIda": "Pte. Saavedra (Corregido)",
-        "headsignVuelta": "Zarate (Corregido)"
-      },
-      {
         "route_id": "960",
         "shortName": "228BA",
         "longName": "ESCOBAR X X FONAVI X GARIN ⇄ SAAVEDRA X GARIN X FONAVI",
         "headsignIda": "ESCOBAR X X FONAVI X GARIN",
         "headsignVuelta": "SAAVEDRA X GARIN X FONAVI"
-      },
-      {
-        "route_id": "960-new",
-        "shortName": "228BA-new",
-        "longName": "ESCOBAR X X FONAVI X GARIN ⇄ SAAVEDRA X GARIN X FONAVI (Vial Corregido)",
-        "headsignIda": "ESCOBAR X X FONAVI X GARIN (Corregido)",
-        "headsignVuelta": "SAAVEDRA X GARIN X FONAVI (Corregido)"
       },
       {
         "route_id": "947",
@@ -5234,25 +5220,11 @@
         "headsignVuelta": "Zarate"
       },
       {
-        "route_id": "947-new",
-        "shortName": "228CB-new",
-        "longName": "A. del Plata ⇄ Zarate (Vial Corregido)",
-        "headsignIda": "A. del Plata (Corregido)",
-        "headsignVuelta": "Zarate (Corregido)"
-      },
-      {
         "route_id": "948",
         "shortName": "228CC",
         "longName": "Lima ⇄ Zarate",
         "headsignIda": "Lima",
         "headsignVuelta": "Zarate"
-      },
-      {
-        "route_id": "948-new",
-        "shortName": "228CC-new",
-        "longName": "Lima ⇄ Zarate (Vial Corregido)",
-        "headsignIda": "Lima (Corregido)",
-        "headsignVuelta": "Zarate (Corregido)"
       },
       {
         "route_id": "949",
@@ -5262,25 +5234,11 @@
         "headsignVuelta": "Zarate"
       },
       {
-        "route_id": "949-new",
-        "shortName": "228CD-new",
-        "longName": "Lujan ⇄ Zarate (Vial Corregido)",
-        "headsignIda": "Lujan (Corregido)",
-        "headsignVuelta": "Zarate (Corregido)"
-      },
-      {
         "route_id": "2942",
         "shortName": "228EA",
         "longName": "Pque. Industrial Pilar Calle 24 x Petrel ⇄ Est. Pilar",
         "headsignIda": "Pque. Industrial Pilar Calle 24 x Petrel",
         "headsignVuelta": "Est. Pilar"
-      },
-      {
-        "route_id": "2942-new",
-        "shortName": "228EA-new",
-        "longName": "Pque. Industrial Pilar Calle 24 x Petrel ⇄ Est. Pilar (Vial Corregido)",
-        "headsignIda": "Pque. Industrial Pilar Calle 24 x Petrel (Corregido)",
-        "headsignVuelta": "Est. Pilar (Corregido)"
       },
       {
         "route_id": "2943",
@@ -5290,25 +5248,11 @@
         "headsignVuelta": "BÂº Las Mascotas"
       },
       {
-        "route_id": "2943-new",
-        "shortName": "228EB-new",
-        "longName": "Benavidez ⇄ BÂº Las Mascotas (Vial Corregido)",
-        "headsignIda": "Benavidez (Corregido)",
-        "headsignVuelta": "BÂº Las Mascotas (Corregido)"
-      },
-      {
         "route_id": "1063",
         "shortName": "228FA",
         "longName": "Pte. Saavedra del Viso Est. Toro",
         "headsignIda": "Pte. Saavedra del Viso Est. Toro",
         "headsignVuelta": "Vuelta"
-      },
-      {
-        "route_id": "1063-new",
-        "shortName": "228FA-new",
-        "longName": "Pte. Saavedra del Viso Est. Toro (Vial Corregido)",
-        "headsignIda": "Pte. Saavedra del Viso Est. Toro (Corregido)",
-        "headsignVuelta": "Vuelta (Corregido)"
       }
     ]
   },

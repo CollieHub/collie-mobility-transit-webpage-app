@@ -2438,52 +2438,54 @@ app.get('/v1/redsube/lines', async (c) => {
 app.get('/v1/redsube/line-routes', async (c) => {
   const company = c.req.query('company') || '194';
 
-  // 1. Custom hardcoded routes first (solo para servicios propios como SIT Zárate)
+  // 1. D1 Database query (Single Source of Truth)
+  try {
+    if (company === 'TODAS') {
+      const res = await c.env.DB.prepare(`
+        SELECT b.id, b.code as ramal, b.name, b.headsign_ida as headsignIda, b.headsign_vuelta as headsignVuelta, b.color, l.code as lineCode 
+        FROM "arg.redsube.branches" b 
+        JOIN "arg.redsube.lines" l ON b.line_id = l.id 
+        WHERE l.code IN ('228', '194', '204', '314', 'SIT')
+        ORDER BY l.code ASC, b.code ASC
+      `).all();
+      if (res.results && res.results.length > 0) {
+        return c.json({ success: true, company, routes: res.results });
+      }
+    } else {
+      const res = await c.env.DB.prepare(`
+        SELECT b.id, b.code as ramal, b.name, b.headsign_ida as headsignIda, b.headsign_vuelta as headsignVuelta, b.color, l.code as lineCode 
+        FROM "arg.redsube.branches" b 
+        JOIN "arg.redsube.lines" l ON b.line_id = l.id 
+        WHERE l.code = ? OR l.id = ?
+        ORDER BY b.code ASC
+      `).bind(company, company).all();
+      if (res.results && res.results.length > 0) {
+        return c.json({ success: true, company, routes: res.results });
+      }
+    }
+  } catch (_) {}
+
+  // 2. Custom hardcoded routes (solo SIT Zárate si no está en D1)
   if (V3_ROUTES_DATA[company]) {
     return c.json({ success: true, company, routes: V3_ROUTES_DATA[company] });
   }
 
-  if (company === 'TODAS') {
-    const featuredLineCodes = ['228', '194', '204', '314'];
-    let allRoutes: any[] = [...(V3_ROUTES_DATA['SIT'] || [])];
-    for (const code of featuredLineCodes) {
-      const foundLine = (allGtfsLines as any[]).find((l: any) => l.lineCode === code);
-      if (foundLine && Array.isArray(foundLine.ramales)) {
-        allRoutes.push(...foundLine.ramales.map((r: any) => ({
-          ramal: r.shortName || r.route_id,
-          name: r.longName || `Línea ${r.shortName}`,
-          headsignIda: r.headsignIda || (r.longName ? r.longName.split('⇄')[0]?.trim() : ''),
-          headsignVuelta: r.headsignVuelta || (r.longName ? r.longName.split('⇄')[1]?.trim() : ''),
-          color: '#e65100',
-          route_id: r.route_id
-        })));
-      }
-    }
-    return c.json({ success: true, company, routes: allRoutes });
-  }
-
-  // 2. Query from allGtfsLines official catalog
+  // 3. Fallback to allGtfsLines catalog filtering out any '-new' entries
   const found = (allGtfsLines as any[]).find((l: any) => String(l.lineCode).trim() === String(company).trim()) ||
                 (allGtfsLines as any[]).find((l: any) => l.displayName?.toLowerCase().startsWith(`línea ${company.toLowerCase()} `));
   if (found && Array.isArray(found.ramales) && found.ramales.length > 0) {
-    const routes = found.ramales.map((r: any) => ({
-      ramal: r.shortName || r.route_id,
-      name: r.longName || `Línea ${r.shortName}`,
-      headsignIda: r.headsignIda || (r.longName ? r.longName.split('⇄')[0]?.trim() : ''),
-      headsignVuelta: r.headsignVuelta || (r.longName ? r.longName.split('⇄')[1]?.trim() : ''),
-      color: '#e65100',
-      route_id: r.route_id
-    }));
+    const routes = found.ramales
+      .filter((r: any) => !r.shortName?.endsWith('-new') && !r.route_id?.endsWith('-new'))
+      .map((r: any) => ({
+        ramal: r.shortName || r.route_id,
+        name: r.longName || `Línea ${r.shortName}`,
+        headsignIda: r.headsignIda || (r.longName ? r.longName.split('⇄')[0]?.trim() : ''),
+        headsignVuelta: r.headsignVuelta || (r.longName ? r.longName.split('⇄')[1]?.trim() : ''),
+        color: '#e65100',
+        route_id: r.route_id
+      }));
     return c.json({ success: true, company, routes });
   }
-
-  // 3. Fallback to D1 query
-  try {
-    const res = await c.env.DB.prepare('SELECT b.id, b.code as ramal, b.name, b.headsign_ida as headsignIda, b.headsign_vuelta as headsignVuelta, b.color, l.code as lineCode FROM "arg.redsube.branches" b JOIN "arg.redsube.lines" l ON b.line_id = l.id WHERE l.code = ? ORDER BY b.code ASC').bind(company).all();
-    if (res.results && res.results.length > 0) {
-      return c.json({ success: true, company, routes: res.results });
-    }
-  } catch (_) {}
 
   return c.json({ success: true, company, routes: [] });
 });
