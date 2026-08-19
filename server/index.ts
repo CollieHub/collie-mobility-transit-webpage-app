@@ -2613,23 +2613,11 @@ app.get('/v1/redsube/vehicles', async (c) => {
           agencyName = a.agencyName || agencyName;
           tripHeadsign = 'En Circulación';
         } else if (agencyName) {
-          const matchLine = agencyName.match(/LINEA\s+(\d+)/i) || agencyName.match(/(\d+)/);
+          const matchLine = agencyName.match(/LINEA\s+(\d+)/i);
           if (matchLine) {
             linea = matchLine[1];
             routeShortName = matchLine[1];
-          } else {
-            linea = agencyName.slice(0, 10);
-            routeShortName = agencyName.slice(0, 10);
           }
-          tripHeadsign = 'En Circulación';
-        } else if (label) {
-          const numMatch = label.match(/^(\d+)/);
-          linea = numMatch ? numMatch[1] : label.slice(0, 7);
-          routeShortName = linea;
-          tripHeadsign = 'En Circulación';
-        } else {
-          linea = String(intern).slice(0, 7);
-          routeShortName = linea;
           tripHeadsign = 'En Circulación';
         }
 

@@ -44,24 +44,22 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createBusVehicleIcon(linea: string, bearing: number = 0, isSelected: boolean = false) {
+function createBusVehicleIcon(linea?: string, bearing: number = 0, isSelected: boolean = false) {
   let cleanLine = (linea || '').replace(/^(l[ií]nea\s*)/i, '').trim();
-  if (!cleanLine || cleanLine.toUpperCase() === 'SUBE') {
-    cleanLine = 'BUS';
-  }
-  const lineText = cleanLine.slice(0, 6);
+  const isUndefinedLine = !cleanLine || cleanLine.toLowerCase() === 'a definir' || cleanLine.toLowerCase() === 'bus' || cleanLine.toLowerCase() === 'sube';
+
   const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? bearing : 0;
   const hasBearing = safeBearing !== 0;
 
   const bgGradient = isSelected
     ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-    : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)';
+    : (isUndefinedLine ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)');
 
   const shadowEffect = isSelected
     ? '0 0 12px rgba(245, 158, 11, 0.8), 0 3px 8px rgba(0, 0, 0, 0.6)'
-    : '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)';
+    : (isUndefinedLine ? '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(16, 185, 129, 0.5)' : '0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5)');
 
-  const arrowColor = isSelected ? '#f59e0b' : '#38bdf8';
+  const arrowColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#34d399' : '#38bdf8');
 
   // Flecha orbital que apunta hacia el rumbo (bearing) de avance de la unidad
   const bearingArrowHtml = `
@@ -69,8 +67,8 @@ function createBusVehicleIcon(linea: string, bearing: number = 0, isSelected: bo
       position: absolute;
       width: 48px;
       height: 48px;
-      top: -13px;
-      left: -6px;
+      top: ${isUndefinedLine ? '-10px' : '-13px'};
+      left: ${isUndefinedLine ? '-10px' : '-6px'};
       transform: rotate(${safeBearing}deg);
       transform-origin: center center;
       pointer-events: none;
@@ -103,6 +101,41 @@ function createBusVehicleIcon(linea: string, bearing: number = 0, isSelected: bo
       "></div>
     </div>
   `;
+
+  if (isUndefinedLine) {
+    return L.divIcon({
+      className: 'custom-vehicle-icon-generic',
+      html: `
+        <div style="position: relative; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+          ${hasBearing ? bearingArrowHtml : ''}
+          <div style="
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: ${bgGradient};
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            box-shadow: ${shadowEffect};
+            cursor: pointer;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1;
+          ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
+            </svg>
+          </div>
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+  }
+
+  const lineText = cleanLine.slice(0, 6);
 
   return L.divIcon({
     className: 'custom-vehicle-icon',
@@ -3310,7 +3343,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                           <span style={{ fontSize: '18px' }}>🚍</span>
                           <div>
                             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0284c7', lineHeight: 1.1 }}>
-                              Línea {veh.linea || veh.route_short_name}
+                              {veh.linea || veh.route_short_name ? `Línea ${veh.linea || veh.route_short_name}` : 'Línea a definir'}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
                               GTFS Route: {veh.route_id || 'N/A'}
@@ -3464,7 +3497,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   <span style={{ fontSize: '20px' }}>🚍</span>
                   <div>
                     <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#38bdf8', lineHeight: 1.1 }}>
-                      Línea {selectedVehicle.linea || selectedVehicle.route_short_name}
+                      {selectedVehicle.linea || selectedVehicle.route_short_name ? `Línea ${selectedVehicle.linea || selectedVehicle.route_short_name}` : 'Línea a definir'}
                     </div>
                     <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
                       GTFS Route ID: {selectedVehicle.route_id || 'N/A'}
@@ -3592,7 +3625,27 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                       </span>
                       <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span>🏁</span>
-                        <span>{selectedVehicle.trip_headsign || 'Sin especificar'}</span>
+                        <span>{selectedVehicle.trip_headsign || 'Sin información de destino'}</span>
+                      </div>
+                    </div>
+
+                    {/* Interno y Patente */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '8px',
+                      padding: '6px 10px',
+                      fontSize: '0.76rem',
+                      color: '#cbd5e1'
+                    }}>
+                      <div>
+                        # Interno: <strong style={{ color: '#ffffff' }}>{selectedVehicle.intern}</strong>
+                      </div>
+                      <div>
+                        🪪 Patente: <strong style={{ color: '#ffffff' }}>{selectedVehicle.license_plate || 'S/N'}</strong>
                       </div>
                     </div>
 
