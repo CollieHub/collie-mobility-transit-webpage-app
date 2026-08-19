@@ -1,1 +1,3625 @@
-{"110": {"line": "505", "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"}, "410": {"line": "514", "agencyName": "AUTOBUSES BS AS SRL- TTE LARRAZABAL SRL- UT"}, "11": {"line": "570", "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."}, "215": {"line": "500", "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."}, "75": {"line": "505", "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"}, "98": {"line": "670", "agencyName": "COMPAÑIA ISLEÑA S.R.L."}, "54": {"line": "504", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "446": {"line": "AZUL1", "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A."}, "139": {"line": "520", "agencyName": "MICRO OMNIBUS AVENIDA S.A."}, "140": {"line": "521", "agencyName": "MICRO OMNIBUS ESTE S.A"}, "174": {"line": "522", "agencyName": "EL URBANO SRL"}, "96": {"line": "523", "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"}, "109": {"line": "524", "agencyName": "EMPRESA CINCO DE AGOSTO S.R.L."}, "116": {"line": "532", "agencyName": "EMPRESA J.M. EZEIZA S.R.L."}, "322": {"line": "540", "agencyName": "AUTOBUSES BUENOS AIRES SRL"}, "203": {"line": "541", "agencyName": "YITOS S.A."}, "97": {"line": "542", "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA"}, "99": {"line": "548", "agencyName": "EMPRESA MICROOMNIBUS LARROQUE LINEA 548 SRL"}, "127": {"line": "564", "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."}, "149": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "60": {"line": "621", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "171": {"line": "622", "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"}, "74": {"line": "624", "agencyName": "LA CABAÑA S.A."}, "76": {"line": "630", "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"}, "129": {"line": "506", "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."}, "165": {"line": "520", "agencyName": "UNION PLATENSE SRL"}, "311": {"line": "503", "agencyName": "EXPRESO LA PLATA BUENOS AIRES S.A."}, "120": {"line": "OE16V", "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."}, "162": {"line": "500", "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."}, "128": {"line": "580", "agencyName": "EXPRESO VILLA NUEVA S.A."}, "102": {"line": "585", "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"}, "141": {"line": "707", "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"}, "132": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "146": {"line": "720", "agencyName": "MICRO OMNIBUS TIGRE S.A."}, "142": {"line": "721", "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"}, "212": {"line": "722", "agencyName": "UTENOR SA L 722"}, "148": {"line": "723", "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"}, "34": {"line": "1", "agencyName": "TRANSPORTES SAN CAYETANO S.A.C."}, "40": {"line": "2", "agencyName": "TRANPORTES VEINTIDOS DE SETIEMBRE S.A.C."}, "93": {"line": "4", "agencyName": "TRANSPORTES SOL DE MAYO C.I.S.A."}, "5": {"line": "5", "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."}, "4": {"line": "6", "agencyName": "NUDO S.A."}, "14": {"line": "7", "agencyName": "TRANSP. AUTOMOTORES 12 DE OCTUBRE S.A.C."}, "17": {"line": "10", "agencyName": "LINEA 10 S.A."}, "6": {"line": "12", "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."}, "55": {"line": "15", "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."}, "18": {"line": "17", "agencyName": "LINEA 17 S.A."}, "82": {"line": "19", "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."}, "21": {"line": "20", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "16": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "26": {"line": "22", "agencyName": "LINEA 22 S.A."}, "35": {"line": "24", "agencyName": "EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F."}, "13": {"line": "26", "agencyName": "17 DE AGOSTO S.A."}, "3": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "47": {"line": "29", "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A."}, "23": {"line": "31", "agencyName": "ROCARAZA S.A."}, "31": {"line": "32", "agencyName": "EL PUENTE S.A.T."}, "87": {"line": "33", "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."}, "36": {"line": "34", "agencyName": "JUAN B. JUSTO S.A.T.C.I."}, "51": {"line": "37", "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P."}, "56": {"line": "39", "agencyName": "TRANSPORTES SANTA FE S.A.C.I."}, "49": {"line": "41", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "15": {"line": "42", "agencyName": "TRANSPORTES COLEGIALES S.A.C.I."}, "83": {"line": "45", "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."}, "73": {"line": "46", "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"}, "52": {"line": "47", "agencyName": "LINEA DE MICROOMNIBUS 47 S.A.T.C.F.I."}, "57": {"line": "49", "agencyName": "BUENOS AIRES BUS SOCIEDAD ANONIMA"}, "68": {"line": "51", "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"}, "58": {"line": "53", "agencyName": "LINEA 213 S.A. DE TRANSPORTE"}, "88": {"line": "55", "agencyName": "ALMAFUERTE S.A.T.A.C.I."}, "10": {"line": "56", "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."}, "70": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "84": {"line": "59", "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"}, "69": {"line": "60", "agencyName": "MICRO OMNIBUS NORTE S.A."}, "25": {"line": "61", "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."}, "30": {"line": "63", "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."}, "41": {"line": "64", "agencyName": "VUELTA DE ROCHA S.A.T.C.I."}, "9": {"line": "65", "agencyName": "LA NUEVA METROPOL S.A."}, "85": {"line": "67", "agencyName": "TRANSPORTES DEL TEJAR S.A."}, "39": {"line": "68", "agencyName": "TRANSPORTES SESENTA Y OCHO S.R.L."}, "86": {"line": "70", "agencyName": "TRANSPORTES 270 S.A."}, "27": {"line": "71", "agencyName": "LINEA 71 S.A."}, "22": {"line": "78", "agencyName": "LOS CONSTITUYENTES S.A.T."}, "53": {"line": "80", "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."}, "59": {"line": "85", "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE"}, "78": {"line": "86", "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"}, "79": {"line": "88", "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."}, "8": {"line": "90", "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR"}, "89": {"line": "92", "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L."}, "90": {"line": "93", "agencyName": "TRANSPORTES 1º SEPTIEMBRE S.A."}, "50": {"line": "95", "agencyName": "EMPRESA ANTARTIDA ARGENTINA S.A.T."}, "61": {"line": "97", "agencyName": "BUS DEL OESTE S.A."}, "62": {"line": "98", "agencyName": "EXPRESO QUILMES S.A."}, "29": {"line": "99", "agencyName": "COLECTIVEROS UNIDOS S.A."}, "7": {"line": "100", "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."}, "2": {"line": "102", "agencyName": "TRANSP. SGTO. CABRAL"}, "81": {"line": "103", "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I."}, "71": {"line": "105", "agencyName": "EMPRESA DE TRANSPORTES AMERICA S.A.C.I."}, "24": {"line": "109", "agencyName": "TRANSPORTE NUEVE DE JULIO SAC."}, "19": {"line": "110", "agencyName": "GENERAL PUEYRREDON S.A.T.C.I."}, "42": {"line": "118", "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A."}, "92": {"line": "123", "agencyName": "TRANSPORTES LINEA 123 S.A.C.I."}, "43": {"line": "126", "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"}, "32": {"line": "130", "agencyName": "TRANSPORTES AVENIDA BERNARDO ADER S.A."}, "12": {"line": "132", "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I."}, "430": {"line": "133", "agencyName": "ERSA URBANO"}, "77": {"line": "136", "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"}, "505": {"line": "145", "agencyName": "NUESTRA SEÑORA DEL ROSARIO S.A. UNION TRANSITORIA"}, "63": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "20": {"line": "152", "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."}, "72": {"line": "159", "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."}, "64": {"line": "160", "agencyName": "MICRO OMNIBUS SUR S.A.C."}, "80": {"line": "168", "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I."}, "33": {"line": "169", "agencyName": "TRANSPORTE ESCALADA S.A.T."}, "65": {"line": "176", "agencyName": "EXPRESO GENERAL SARMIENTO S.A."}, "66": {"line": "179", "agencyName": "GRUPO LINEA 179 S.A."}, "37": {"line": "181", "agencyName": "TTES.AUTOMOTORES DE PASAJEROS SIGLO XXI SA"}, "158": {"line": "202", "agencyName": "TRANSPORTE LA UNION SA"}, "138": {"line": "204", "agencyName": "LINEA SESENTA SA"}, "131": {"line": "228", "agencyName": "LA CENTRAL DE ESCOBAR SA"}, "91": {"line": "243", "agencyName": "EXPRESO LOMAS S.A."}, "115": {"line": "244", "agencyName": "EMPRESA DEL OESTE SAT"}, "124": {"line": "247", "agencyName": "EXPRESO NUEVE DE JULIO S.A."}, "157": {"line": "252", "agencyName": "TRANSPORTE JOSE HERNANDEZ S.A.C.I."}, "144": {"line": "295", "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T."}, "123": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "117": {"line": "307", "agencyName": "EMPRESA LINEA SIETE SAT"}, "161": {"line": "312", "agencyName": "TRANSPORTES LA PERLITA S.A. "}, "133": {"line": "314", "agencyName": "LA PRIMERA DE MARTINEZ S.A"}, "143": {"line": "318", "agencyName": "MICRO OMNIBUS MITRE S.A."}, "135": {"line": "322", "agencyName": "LIBERTADOR SAN MARTIN SAT"}, "145": {"line": "324", "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"}, "172": {"line": "326", "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."}, "163": {"line": "328", "agencyName": "TRANSPORTES VILLA BOSCH SAC el"}, "155": {"line": "338", "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"}, "125": {"line": "341", "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"}, "101": {"line": "343", "agencyName": "COMPAÑIA NOROESTE S.A.T."}, "160": {"line": "354", "agencyName": "TRANSPORTES AUTOMOTORES  LANUS ESTE S.A."}, "95": {"line": "371", "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"}, "94": {"line": "506", "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"}, "105": {"line": "723", "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"}, "106": {"line": "92", "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÃ‘A S.R.L."}, "107": {"line": "541 / 544 / 561 / 562", "agencyName": "YITOS S.A."}, "111": {"line": "180", "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"}, "130": {"line": "242", "agencyName": "LA CABAÑA S.A."}, "136": {"line": "152", "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."}, "173": {"line": "176", "agencyName": "EXPRESO GENERAL SARMIENTO S.A."}, "175": {"line": "176", "agencyName": "EXPRESO GENERAL SARMIENTO S.A."}, "176": {"line": "176", "agencyName": "EXPRESO GENERAL SARMIENTO S.A."}, "177": {"line": "111", "agencyName": "LOS CONSTITUYENTES S.A.T."}, "178": {"line": "218", "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"}, "185": {"line": "188", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "188": {"line": "505", "agencyName": "TRANSPORTES GENERAL BELGRANO S.A"}, "191": {"line": "544", "agencyName": "YITOS S.A."}, "192": {"line": "244 / 302", "agencyName": "EMPRESA DEL OESTE SAT"}, "193": {"line": "244 / 302", "agencyName": "EMPRESA DEL OESTE SAT"}, "194": {"line": "269", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "197": {"line": "295", "agencyName": "MICRO OMNIBUS OÂ´HIGGINS S.A.T."}, "199": {"line": "228", "agencyName": "LA CENTRAL DE ESCOBAR SA"}, "213": {"line": "154", "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."}, "214": {"line": "154", "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."}, "216": {"line": "437", "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"}, "220": {"line": "159", "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."}, "223": {"line": "429", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "224": {"line": "159", "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."}, "225": {"line": "159", "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."}, "226": {"line": "159", "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."}, "241": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "242": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "243": {"line": "410 / 429", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "245": {"line": "176", "agencyName": "EXPRESO GENERAL SARMIENTO S.A."}, "246": {"line": "177 / 51 / 79", "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"}, "248": {"line": "464", "agencyName": "EMPRESA DEL OESTE SAT"}, "249": {"line": "464", "agencyName": "EMPRESA DEL OESTE SAT"}, "250": {"line": "464", "agencyName": "EMPRESA DEL OESTE SAT"}, "251": {"line": "33", "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."}, "254": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "256": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "257": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "258": {"line": "133 / 140", "agencyName": "ERSA URBANO"}, "262": {"line": "160", "agencyName": "MICRO OMNIBUS SUR S.A.C."}, "263": {"line": "78", "agencyName": "LOS CONSTITUYENTES S.A.T."}, "264": {"line": "283", "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"}, "265": {"line": "314", "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA (Línea 314)"}, "267": {"line": "324", "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"}, "268": {"line": "386", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "269": {"line": "386", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "270": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "271": {"line": "46", "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"}, "272": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "273": {"line": "49", "agencyName": "BUENOS AIRES BUS SOCIEDAD ANONIMA"}, "275": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "276": {"line": "98", "agencyName": "EXPRESO QUILMES S.A."}, "282": {"line": "8", "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."}, "284": {"line": "552", "agencyName": "AUTOBUSES BUENOS AIRES SRL"}, "285": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "294": {"line": "111 / 78 / 87", "agencyName": "LOS CONSTITUYENTES S.A.T."}, "296": {"line": "88", "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."}, "298": {"line": "318", "agencyName": "MICRO OMNIBUS MITRE S.A."}, "308": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "309": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "312": {"line": "707", "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"}, "315": {"line": "51", "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"}, "316": {"line": "520", "agencyName": "MICRO OMNIBUS AVENIDA S.A."}, "317": {"line": "277", "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA"}, "318": {"line": "126", "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"}, "319": {"line": "126", "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"}, "326": {"line": "51", "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"}, "330": {"line": "15", "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."}, "339": {"line": "421", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "341": {"line": "421", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "342": {"line": "263", "agencyName": "EXPRESO VILLA GALICIAÂ  SAN JOSE S.A."}, "346": {"line": "86", "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"}, "347": {"line": "98", "agencyName": "EXPRESO QUILMES S.A."}, "353": {"line": "303 / 320 / 390 / 461 / 462 / 463", "agencyName": "EMPRESA DEL OESTE SAT"}, "355": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "357": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "359": {"line": "126", "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"}, "362": {"line": "338 / 406", "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"}, "366": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "368": {"line": "318", "agencyName": "MICRO OMNIBUS MITRE S.A."}, "378": {"line": "740", "agencyName": "LA PRIMERA DE GRAND BOURG S.A."}, "379": {"line": "204A / 228", "agencyName": "MICRO OMNIBUS TIGRE S.A. (MOTSA)"}, "383": {"line": "188", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "385": {"line": "152", "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."}, "387": {"line": "63", "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."}, "388": {"line": "63", "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."}, "412": {"line": "410 / 429", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "414": {"line": "410", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "416": {"line": "429", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "420": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "423": {"line": "410", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "437": {"line": "136", "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"}, "463": {"line": "228", "agencyName": "MOTSA (Línea 228 / 204)"}, "510": {"line": "324", "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"}, "517": {"line": "97", "agencyName": "BUS DEL OESTE S.A."}, "519": {"line": "126", "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"}, "520": {"line": "624", "agencyName": "LA CABAÑA S.A."}, "522": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "523": {"line": "46", "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"}, "535": {"line": "325 / 628", "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"}, "619": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "626": {"line": "338 / 406", "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"}, "629": {"line": "263", "agencyName": "EXPRESO VILLA GALICIAÂ  SAN JOSE S.A."}, "634": {"line": "721", "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"}, "740": {"line": "98", "agencyName": "EXPRESO QUILMES S.A."}, "741": {"line": "505", "agencyName": "TRANSPORTES GENERAL BELGRANO S.A"}, "793": {"line": "620", "agencyName": "NUEVO IDEAL S.A."}, "848": {"line": "60", "agencyName": "MICRO OMNIBUS NORTE S.A."}, "865": {"line": "391", "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"}, "924": {"line": "324", "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"}, "928": {"line": "326", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "929": {"line": "326", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "930": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "931": {"line": "326", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "1047": {"line": "80", "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."}, "1048": {"line": "228", "agencyName": "MICRO OMNIBUS TIGRE S.A."}, "1049": {"line": "371", "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"}, "1050": {"line": "194", "agencyName": "LA NUEVA METROPOL S.A."}, "1051": {"line": "228", "agencyName": "MICRO OMNIBUS TIGRE S.A."}, "1063": {"line": "151 / 90", "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR"}, "1066": {"line": "371", "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"}, "1067": {"line": "293", "agencyName": "EXPRESO VILLA GALICIAÂ  SAN JOSE S.A."}, "1079": {"line": "132", "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I."}, "1080": {"line": "25 / 84", "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."}, "1081": {"line": "37", "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P."}, "1082": {"line": "80", "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."}, "1113": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "1115": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "1116": {"line": "118", "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A."}, "1122": {"line": "31", "agencyName": "ROCARAZA S.A."}, "1123": {"line": "31", "agencyName": "ROCARAZA S.A."}, "1125": {"line": "118", "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A."}, "1126": {"line": "34", "agencyName": "JUAN B. JUSTO S.A.T.C.I."}, "1127": {"line": "6", "agencyName": "NUDO S.A."}, "1129": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "1131": {"line": "47", "agencyName": "LINEA DE MICROOMNIBUS 47 S.A.T.C.F.I."}, "1132": {"line": "68", "agencyName": "TRANSPORTES SESENTA Y OCHO S.R.L."}, "1135": {"line": "720", "agencyName": "MICRO OMNIBUS TIGRE S.A."}, "1144": {"line": "154", "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."}, "1145": {"line": "154", "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."}, "1259": {"line": "326", "agencyName": "COMPAÃ‘IAÂ  DE TRANSPORTE VECINAL S.A."}, "1260": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "1264": {"line": "306", "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."}, "1266": {"line": "720", "agencyName": "MICRO OMNIBUS TIGRE S.A."}, "1282": {"line": "506", "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."}, "1338": {"line": "418", "agencyName": "UNION PLATENSE SRL"}, "1345": {"line": "336", "agencyName": "LIBERTADOR SAN MARTIN SAT"}, "1346": {"line": "336 / 392", "agencyName": "LIBERTADOR SAN MARTIN SAT"}, "1348": {"line": "204 / 228", "agencyName": "LINEA SESENTA SA"}, "1349": {"line": "204", "agencyName": "LINEA SESENTA SA"}, "2666": {"line": "55", "agencyName": "ALMAFUERTE S.A.T.A.C.I."}, "3030": {"line": "93", "agencyName": "TRANSPORTES 1Âº SEPTIEMBRE S.A."}, "3031": {"line": "93", "agencyName": "TRANSPORTES 1Âº SEPTIEMBRE S.A."}, "3033": {"line": "59", "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"}, "3034": {"line": "59", "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"}, "3035": {"line": "55", "agencyName": "ALMAFUERTE S.A.T.A.C.I."}, "3036": {"line": "93", "agencyName": "TRANSPORTES 1Âº SEPTIEMBRE S.A."}, "3037": {"line": "59", "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"}, "3516": {"line": "329 / 422", "agencyName": "TRANSPORTES LA PERLITA S.A."}, "3517": {"line": "422", "agencyName": "TRANSPORTES LA PERLITA S.A."}, "3518": {"line": "312", "agencyName": "TRANSPORTES LA PERLITA S.A."}, "3519": {"line": "110", "agencyName": "GENERAL PUEYRREDON S.A.T.C.I."}, "3660": {"line": "34", "agencyName": "JUAN B. JUSTO S.A.T.C.I."}, "3824": {"line": "109", "agencyName": "TRANSPORTE NUEVE DE JULIO SAC."}, "3826": {"line": "42", "agencyName": "TRANSPORTES COLEGIALES S.A.C.I."}, "3918": {"line": "371", "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"}, "4037": {"line": "293", "agencyName": "EXPRESO VILLA GALICIAÂ  SAN JOSE S.A."}, "4040": {"line": "59", "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"}, "4075": {"line": "318", "agencyName": "MICRO OMNIBUS MITRE S.A."}, "4245": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "4246": {"line": "148", "agencyName": "EL NUEVO HALCON S.A."}, "4247": {"line": "39", "agencyName": "TRANSPORTES SANTA FE S.A.C.I."}, "4534": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "4535": {"line": "57", "agencyName": "TRANSPORTES ATLANTIDA S.A.C."}, "4756": {"line": "504", "agencyName": "TRANSPORTE VILLA AGUIRRE S.A."}, "4854": {"line": "194 / 228", "agencyName": "LA NUEVA METROPOL S.A."}, "4855": {"line": "103 / 105", "agencyName": "Líneas GM S.R.L."}, "4856": {"line": "161", "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."}, "4857": {"line": "204", "agencyName": "Líneas GM S.R.L."}, "4858": {"line": "204", "agencyName": "Líneas GM S.R.L."}, "4859": {"line": "108", "agencyName": "25 de Agosto S.R.L."}, "4860": {"line": "108", "agencyName": "25 de Agosto S.R.L."}, "4861": {"line": "108", "agencyName": "25 de Agosto S.R.L."}, "4865": {"line": "203", "agencyName": "25 de Agosto S.R.L."}, "4866": {"line": "101 / 102", "agencyName": "Coop de Trabajo de Tte San Fernando Ltda"}, "4867": {"line": "102", "agencyName": "Coop de Trabajo de Tte San Fernando Ltda"}, "4868": {"line": "102 / 109", "agencyName": "Coop de Trabajo de Tte San Fernando Ltda"}, "4869": {"line": "1 / 15 / 23 / 4", "agencyName": "ERSA URBANO SA"}, "4870": {"line": "4", "agencyName": "ERSA URBANO SA"}, "4871": {"line": "117 / 161", "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."}, "4872": {"line": "5", "agencyName": "ERSA URBANO SA"}, "4873": {"line": "10 / 12 / 17 / 5", "agencyName": "ERSA URBANO SA"}, "4874": {"line": "2 / 7 / 9", "agencyName": "TRANSPORTE MARIANO MORENO SRL"}, "4875": {"line": "10 / 12 / 17 / 20 / 5 / 6", "agencyName": "ERSA URBANO SA"}, "4876": {"line": "10 / 12 / 17 / 20 / 6", "agencyName": "ERSA URBANO SA"}, "4877": {"line": "22 / 24", "agencyName": "ERSA URBANO SA"}, "4878": {"line": "22", "agencyName": "ERSA URBANO SA"}, "4879": {"line": "276", "agencyName": "COMPAÃ‘IA ISLEÃ‘A S.R.L."}, "4880": {"line": "276", "agencyName": "COMPAÃ‘IA ISLEÃ‘A S.R.L."}, "4881": {"line": "12", "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."}, "4882": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "4883": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "4884": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "4885": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "4886": {"line": "12", "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."}, "4887": {"line": "28", "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"}, "4888": {"line": "194 / 195", "agencyName": "LA NUEVA METROPOL S.A."}, "4889": {"line": "365", "agencyName": "LA NUEVA METROPOL S.A."}, "4890": {"line": "56 / 91", "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."}, "4891": {"line": "271 / 299 / 570", "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."}, "4893": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4894": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4895": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4896": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4903": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4904": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4905": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4906": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4907": {"line": "21", "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"}, "4910": {"line": "61 / 62", "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."}, "4912": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4913": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4914": {"line": "505 / 506", "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"}, "4915": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4916": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4917": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4918": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4919": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4920": {"line": "203", "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"}, "4921": {"line": "166", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "4922": {"line": "166", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "4923": {"line": "269", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "4925": {"line": "269", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "4926": {"line": "269", "agencyName": "EMPRESA LINEA 216 S.A.T."}, "4933": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4934": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4935": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4936": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4937": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4939": {"line": "96", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4941": {"line": "185", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4942": {"line": "185", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4944": {"line": "185", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}, "4945": {"line": "185", "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."}}
+{
+  "70": {
+    "line": "620",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C.",
+    "allObservedLines": [
+      "620",
+      "721"
+    ]
+  },
+  "301": {
+    "line": "276",
+    "agencyName": "Empresa ID 301",
+    "allObservedLines": [
+      "276",
+      "108"
+    ]
+  },
+  "321": {
+    "line": "276",
+    "agencyName": "Empresa ID 321",
+    "allObservedLines": [
+      "276",
+      "108"
+    ]
+  },
+  "60": {
+    "line": "410",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A.",
+    "allObservedLines": [
+      "410",
+      "429"
+    ]
+  },
+  "378": {
+    "line": "80",
+    "agencyName": "Empresa ID 378",
+    "allObservedLines": [
+      "80"
+    ]
+  },
+  "303": {
+    "line": "107",
+    "agencyName": "Empresa ID 303",
+    "allObservedLines": [
+      "107"
+    ]
+  },
+  "300": {
+    "line": "107",
+    "agencyName": "Empresa ID 300",
+    "allObservedLines": [
+      "107"
+    ]
+  },
+  "231": {
+    "line": "80",
+    "agencyName": "EMPRESA BATAN S.A.",
+    "allObservedLines": [
+      "80",
+      "503"
+    ]
+  },
+  "362": {
+    "line": "80",
+    "agencyName": "Empresa ID 362",
+    "allObservedLines": [
+      "80",
+      "503"
+    ]
+  },
+  "360": {
+    "line": "107",
+    "agencyName": "EMPRESA VERCELLI HNOS S.A",
+    "allObservedLines": [
+      "107",
+      "276"
+    ]
+  },
+  "272": {
+    "line": "503",
+    "agencyName": "Empresa ID 272",
+    "allObservedLines": [
+      "503"
+    ]
+  },
+  "78": {
+    "line": "172",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA",
+    "allObservedLines": [
+      "172",
+      "166"
+    ]
+  },
+  "247": {
+    "line": "96",
+    "agencyName": "Empresa ID 247",
+    "allObservedLines": [
+      "96"
+    ]
+  },
+  "83": {
+    "line": "505",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F.",
+    "allObservedLines": [
+      "505"
+    ]
+  },
+  "269": {
+    "line": "95",
+    "agencyName": "Empresa ID 269",
+    "allObservedLines": [
+      "95"
+    ]
+  },
+  "267": {
+    "line": "102",
+    "agencyName": "Empresa ID 267",
+    "allObservedLines": [
+      "102",
+      "95"
+    ]
+  },
+  "268": {
+    "line": "95",
+    "agencyName": "Empresa ID 268",
+    "allObservedLines": [
+      "95"
+    ]
+  },
+  "110": {
+    "line": "132",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL",
+    "allObservedLines": [
+      "132"
+    ]
+  },
+  "284": {
+    "line": "148",
+    "agencyName": "Empresa ID 284",
+    "allObservedLines": [
+      "148",
+      "5"
+    ]
+  },
+  "119": {
+    "line": "159",
+    "agencyName": "EMRESA MONTERREY S.R.L. ",
+    "allObservedLines": [
+      "159",
+      "236",
+      "315",
+      "271"
+    ]
+  },
+  "383": {
+    "line": "720",
+    "agencyName": "Empresa ID 383",
+    "allObservedLines": [
+      "720",
+      "298"
+    ]
+  },
+  "250": {
+    "line": "622",
+    "agencyName": "Empresa ID 250",
+    "allObservedLines": [
+      "622"
+    ]
+  },
+  "248": {
+    "line": "622",
+    "agencyName": "Empresa ID 248",
+    "allObservedLines": [
+      "622",
+      "720"
+    ]
+  },
+  "626": {
+    "line": "503",
+    "agencyName": "Empresa ID 626",
+    "allObservedLines": [
+      "503",
+      "80"
+    ]
+  },
+  "379": {
+    "line": "228",
+    "agencyName": "Empresa ID 379",
+    "allObservedLines": [
+      "228"
+    ]
+  },
+  "517": {
+    "line": "295",
+    "agencyName": "Empresa ID 517",
+    "allObservedLines": [
+      "295"
+    ]
+  },
+  "629": {
+    "line": "247",
+    "agencyName": "Empresa ID 629",
+    "allObservedLines": [
+      "247"
+    ]
+  },
+  "346": {
+    "line": "295",
+    "agencyName": "Empresa ID 346",
+    "allObservedLines": [
+      "295",
+      "722"
+    ]
+  },
+  "294": {
+    "line": "306",
+    "agencyName": "Empresa ID 294",
+    "allObservedLines": [
+      "306",
+      "33",
+      "372",
+      "46",
+      "422",
+      "723",
+      "300",
+      "247",
+      "720"
+    ]
+  },
+  "342": {
+    "line": "247",
+    "agencyName": "Empresa ID 342",
+    "allObservedLines": [
+      "247",
+      "372",
+      "306",
+      "300",
+      "422"
+    ]
+  },
+  "359": {
+    "line": "159",
+    "agencyName": "Empresa ID 359",
+    "allObservedLines": [
+      "159",
+      "140",
+      "133",
+      "6",
+      "429",
+      "184"
+    ]
+  },
+  "316": {
+    "line": "159",
+    "agencyName": "Empresa ID 316",
+    "allObservedLines": [
+      "159",
+      "429"
+    ]
+  },
+  "320": {
+    "line": "140",
+    "agencyName": "NUEVO BUS DE OLAVARRÍA SRL",
+    "allObservedLines": [
+      "140",
+      "133"
+    ]
+  },
+  "319": {
+    "line": "140",
+    "agencyName": "Empresa ID 319",
+    "allObservedLines": [
+      "140",
+      "133"
+    ]
+  },
+  "317": {
+    "line": "159",
+    "agencyName": "Empresa ID 317",
+    "allObservedLines": [
+      "159",
+      "6",
+      "140"
+    ]
+  },
+  "318": {
+    "line": "184",
+    "agencyName": "Empresa ID 318",
+    "allObservedLines": [
+      "184",
+      "140"
+    ]
+  },
+  "249": {
+    "line": "720",
+    "agencyName": "Empresa ID 249",
+    "allObservedLines": [
+      "720",
+      "622"
+    ]
+  },
+  "123": {
+    "line": "174",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L.",
+    "allObservedLines": [
+      "174"
+    ]
+  },
+  "254": {
+    "line": "263",
+    "agencyName": "Empresa ID 254",
+    "allObservedLines": [
+      "263",
+      "382"
+    ]
+  },
+  "257": {
+    "line": "263",
+    "agencyName": "Empresa ID 257",
+    "allObservedLines": [
+      "263",
+      "382"
+    ]
+  },
+  "256": {
+    "line": "107",
+    "agencyName": "Empresa ID 256",
+    "allObservedLines": [
+      "107"
+    ]
+  },
+  "63": {
+    "line": "441",
+    "agencyName": "EL NUEVO HALCON S.A.",
+    "allObservedLines": [
+      "441"
+    ]
+  },
+  "81": {
+    "line": "328",
+    "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I.",
+    "allObservedLines": [
+      "328",
+      "31",
+      "257",
+      "45"
+    ]
+  },
+  "519": {
+    "line": "133",
+    "agencyName": "Empresa ID 519",
+    "allObservedLines": [
+      "133"
+    ]
+  },
+  "85": {
+    "line": "293",
+    "agencyName": "TRANSPORTES DEL TEJAR S.A.",
+    "allObservedLines": [
+      "293",
+      "422",
+      "92",
+      "505"
+    ]
+  },
+  "68": {
+    "line": "23",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES",
+    "allObservedLines": [
+      "23",
+      "133"
+    ]
+  },
+  "252": {
+    "line": "10",
+    "agencyName": "Empresa ID 252",
+    "allObservedLines": [
+      "10",
+      "228",
+      "9",
+      "580"
+    ]
+  },
+  "337": {
+    "line": "373",
+    "agencyName": "EMPRESA EL LEON S.R.L.",
+    "allObservedLines": [
+      "373",
+      "276"
+    ]
+  },
+  "253": {
+    "line": "10",
+    "agencyName": "Empresa ID 253",
+    "allObservedLines": [
+      "10",
+      "276",
+      "17",
+      "580"
+    ]
+  },
+  "150": {
+    "line": "324",
+    "agencyName": "PILAR BUS S.A",
+    "allObservedLines": [
+      "324",
+      "740",
+      "386",
+      "33"
+    ]
+  },
+  "105": {
+    "line": "39",
+    "agencyName": "Empresa ID 105",
+    "allObservedLines": [
+      "39",
+      "37"
+    ]
+  },
+  "188": {
+    "line": "42",
+    "agencyName": "Empresa ID 188",
+    "allObservedLines": [
+      "42",
+      "OE27",
+      "107",
+      "OE85",
+      "263"
+    ]
+  },
+  "338": {
+    "line": "276",
+    "agencyName": "INTERISLEÑA S.A.C.I.",
+    "allObservedLines": [
+      "276",
+      "580",
+      "271",
+      "17"
+    ]
+  },
+  "275": {
+    "line": "318",
+    "agencyName": "Empresa ID 275",
+    "allObservedLines": [
+      "318",
+      "395",
+      "17",
+      "580",
+      "276"
+    ]
+  },
+  "381": {
+    "line": "OE85",
+    "agencyName": "Empresa ID 381",
+    "allObservedLines": [
+      "OE85",
+      "107",
+      "276",
+      "373"
+    ]
+  },
+  "380": {
+    "line": "276",
+    "agencyName": "Empresa ID 380",
+    "allObservedLines": [
+      "276"
+    ]
+  },
+  "793": {
+    "line": "203",
+    "agencyName": "Empresa ID 793",
+    "allObservedLines": [
+      "203",
+      "544",
+      "333",
+      "53",
+      "318"
+    ]
+  },
+  "805": {
+    "line": "203",
+    "agencyName": "Empresa ID 805",
+    "allObservedLines": [
+      "203"
+    ]
+  },
+  "74": {
+    "line": "65",
+    "agencyName": "LA CABAÑA S.A.",
+    "allObservedLines": [
+      "65"
+    ]
+  },
+  "76": {
+    "line": "243",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS",
+    "allObservedLines": [
+      "243",
+      "205",
+      "242"
+    ]
+  },
+  "127": {
+    "line": "132",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A.",
+    "allObservedLines": [
+      "132"
+    ]
+  },
+  "94": {
+    "line": "62",
+    "agencyName": "Empresa ID 94",
+    "allObservedLines": [
+      "62",
+      "114",
+      "136",
+      "620"
+    ]
+  },
+  "80": {
+    "line": "153",
+    "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I.",
+    "allObservedLines": [
+      "153",
+      "322",
+      "550",
+      "540"
+    ]
+  },
+  "535": {
+    "line": "7",
+    "agencyName": "Empresa ID 535",
+    "allObservedLines": [
+      "7",
+      "12"
+    ]
+  },
+  "73": {
+    "line": "ROJA",
+    "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA",
+    "allObservedLines": [
+      "ROJA",
+      "AZUL2",
+      "VERDE",
+      "AZUL1",
+      "620",
+      "62"
+    ]
+  },
+  "90": {
+    "line": "500",
+    "agencyName": "TRANSPORTES 1º SEPTIEMBRE S.A.",
+    "allObservedLines": [
+      "500",
+      "440",
+      "278"
+    ]
+  },
+  "95": {
+    "line": "440",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA",
+    "allObservedLines": [
+      "440",
+      "278"
+    ]
+  },
+  "93": {
+    "line": "278",
+    "agencyName": "TRANSPORTES SOL DE MAYO C.I.S.A.",
+    "allObservedLines": [
+      "278"
+    ]
+  },
+  "91": {
+    "line": "500",
+    "agencyName": "EXPRESO LOMAS S.A.",
+    "allObservedLines": [
+      "500"
+    ]
+  },
+  "37": {
+    "line": "740",
+    "agencyName": "TTES.AUTOMOTORES DE PASAJEROS SIGLO XXI SA",
+    "allObservedLines": [
+      "740",
+      "88",
+      "338",
+      "406"
+    ]
+  },
+  "97": {
+    "line": "440",
+    "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA",
+    "allObservedLines": [
+      "440"
+    ]
+  },
+  "72": {
+    "line": "620",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F.",
+    "allObservedLines": [
+      "620",
+      "328",
+      "114",
+      "ROJA"
+    ]
+  },
+  "65": {
+    "line": "129",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A.",
+    "allObservedLines": [
+      "129"
+    ]
+  },
+  "196": {
+    "line": "71",
+    "agencyName": "COOPERATIVA DE TRABAJO 6 DE JULIO LIMITADA",
+    "allObservedLines": [
+      "71",
+      "585",
+      "106",
+      "117"
+    ]
+  },
+  "199": {
+    "line": "22",
+    "agencyName": "Empresa ID 199",
+    "allObservedLines": [
+      "22",
+      "371"
+    ]
+  },
+  "197": {
+    "line": "109",
+    "agencyName": "Empresa ID 197",
+    "allObservedLines": [
+      "109",
+      "275",
+      "117"
+    ]
+  },
+  "195": {
+    "line": "106",
+    "agencyName": "LA PRIMERA DE LA ESCONDIDA SRL",
+    "allObservedLines": [
+      "106"
+    ]
+  },
+  "194": {
+    "line": "117",
+    "agencyName": "Empresa ID 194",
+    "allObservedLines": [
+      "117",
+      "181",
+      "281",
+      "22",
+      "109",
+      "106"
+    ]
+  },
+  "107": {
+    "line": "50",
+    "agencyName": "Empresa ID 107",
+    "allObservedLines": [
+      "50",
+      "8",
+      "520",
+      "435",
+      "403",
+      "325"
+    ]
+  },
+  "198": {
+    "line": "281",
+    "agencyName": "SERGIO A. Rivas S.R.L.",
+    "allObservedLines": [
+      "281",
+      "278"
+    ]
+  },
+  "109": {
+    "line": "506",
+    "agencyName": "EMPRESA CINCO DE AGOSTO S.R.L.",
+    "allObservedLines": [
+      "506"
+    ]
+  },
+  "69": {
+    "line": "552",
+    "agencyName": "MICRO OMNIBUS NORTE S.A.",
+    "allObservedLines": [
+      "552",
+      "504"
+    ]
+  },
+  "262": {
+    "line": "621",
+    "agencyName": "Empresa ID 262",
+    "allObservedLines": [
+      "621",
+      "219",
+      "720",
+      "4",
+      "336",
+      "59",
+      "300"
+    ]
+  },
+  "264": {
+    "line": "336",
+    "agencyName": "Empresa ID 264",
+    "allObservedLines": [
+      "336",
+      "59",
+      "621",
+      "624",
+      "521",
+      "526"
+    ]
+  },
+  "120": {
+    "line": "5",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T.",
+    "allObservedLines": [
+      "5"
+    ]
+  },
+  "489": {
+    "line": "178",
+    "agencyName": "Empresa ID 489",
+    "allObservedLines": [
+      "178",
+      "176",
+      "168"
+    ]
+  },
+  "61": {
+    "line": "276",
+    "agencyName": "BUS DEL OESTE S.A.",
+    "allObservedLines": [
+      "276",
+      "108"
+    ]
+  },
+  "191": {
+    "line": "670",
+    "agencyName": "Empresa ID 191",
+    "allObservedLines": [
+      "670",
+      "47",
+      "64"
+    ]
+  },
+  "192": {
+    "line": "47",
+    "agencyName": "Empresa ID 192",
+    "allObservedLines": [
+      "47",
+      "670",
+      "51",
+      "31"
+    ]
+  },
+  "133": {
+    "line": "143",
+    "agencyName": "LA PRIMERA DE MARTINEZ S.A",
+    "allObservedLines": [
+      "143",
+      "193"
+    ]
+  },
+  "180": {
+    "line": "194",
+    "agencyName": "Empresa ID 180",
+    "allObservedLines": [
+      "194",
+      "7"
+    ]
+  },
+  "182": {
+    "line": "194",
+    "agencyName": "Empresa ID 182",
+    "allObservedLines": [
+      "194",
+      "7"
+    ]
+  },
+  "183": {
+    "line": "OE27",
+    "agencyName": "LA PRIMERA DE MALVINAS ARGENTINAS UTE",
+    "allObservedLines": [
+      "OE27",
+      "OE18",
+      "OE66",
+      "194"
+    ]
+  },
+  "181": {
+    "line": "42",
+    "agencyName": "Empresa ID 181",
+    "allObservedLines": [
+      "42",
+      "OE85"
+    ]
+  },
+  "193": {
+    "line": "51",
+    "agencyName": "Empresa ID 193",
+    "allObservedLines": [
+      "51",
+      "64",
+      "670"
+    ]
+  },
+  "125": {
+    "line": "621",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES",
+    "allObservedLines": [
+      "621"
+    ]
+  },
+  "243": {
+    "line": "620",
+    "agencyName": "Empresa ID 243",
+    "allObservedLines": [
+      "620",
+      "7",
+      "271"
+    ]
+  },
+  "412": {
+    "line": "620",
+    "agencyName": "Empresa ID 412",
+    "allObservedLines": [
+      "620",
+      "7",
+      "271",
+      "OE18"
+    ]
+  },
+  "414": {
+    "line": "620",
+    "agencyName": "Empresa ID 414",
+    "allObservedLines": [
+      "620"
+    ]
+  },
+  "619": {
+    "line": "318",
+    "agencyName": "Empresa ID 619",
+    "allObservedLines": [
+      "318",
+      "53",
+      "407",
+      "333"
+    ]
+  },
+  "416": {
+    "line": "620",
+    "agencyName": "Empresa ID 416",
+    "allObservedLines": [
+      "620",
+      "7"
+    ]
+  },
+  "101": {
+    "line": "44",
+    "agencyName": "COMPAÑIA NOROESTE S.A.T.",
+    "allObservedLines": [
+      "44"
+    ]
+  },
+  "223": {
+    "line": "283",
+    "agencyName": "Empresa ID 223",
+    "allObservedLines": [
+      "283",
+      "630"
+    ]
+  },
+  "228": {
+    "line": "283",
+    "agencyName": "EMPRESA DE TRANSPORTES 12 DE OCTUBRE SRL",
+    "allObservedLines": [
+      "283",
+      "721"
+    ]
+  },
+  "227": {
+    "line": "283",
+    "agencyName": "EL LIBERTADOR SRL",
+    "allObservedLines": [
+      "283",
+      "721",
+      "630",
+      "53",
+      "247"
+    ]
+  },
+  "438": {
+    "line": "283",
+    "agencyName": "RESERVA - SEMTUR",
+    "allObservedLines": [
+      "283",
+      "523",
+      "53"
+    ]
+  },
+  "224": {
+    "line": "283",
+    "agencyName": "Empresa ID 224",
+    "allObservedLines": [
+      "283"
+    ]
+  },
+  "220": {
+    "line": "53",
+    "agencyName": "Empresa ID 220",
+    "allObservedLines": [
+      "53",
+      "283",
+      "247"
+    ]
+  },
+  "437": {
+    "line": "271",
+    "agencyName": "Empresa ID 437",
+    "allObservedLines": [
+      "271"
+    ]
+  },
+  "226": {
+    "line": "283",
+    "agencyName": "Empresa ID 226",
+    "allObservedLines": [
+      "283"
+    ]
+  },
+  "385": {
+    "line": "622",
+    "agencyName": "Empresa ID 385",
+    "allObservedLines": [
+      "622"
+    ]
+  },
+  "634": {
+    "line": "624",
+    "agencyName": "Empresa ID 634",
+    "allObservedLines": [
+      "624"
+    ]
+  },
+  "225": {
+    "line": "283",
+    "agencyName": "Empresa ID 225",
+    "allObservedLines": [
+      "283"
+    ]
+  },
+  "423": {
+    "line": "620",
+    "agencyName": "Empresa ID 423",
+    "allObservedLines": [
+      "620"
+    ]
+  },
+  "130": {
+    "line": "238",
+    "agencyName": "Empresa ID 130",
+    "allObservedLines": [
+      "238",
+      "46",
+      "720",
+      "624"
+    ]
+  },
+  "388": {
+    "line": "160",
+    "agencyName": "Empresa ID 388",
+    "allObservedLines": [
+      "160",
+      "720",
+      "298"
+    ]
+  },
+  "212": {
+    "line": "47",
+    "agencyName": "UTENOR SA L 722",
+    "allObservedLines": [
+      "47"
+    ]
+  },
+  "136": {
+    "line": "194",
+    "agencyName": "Empresa ID 136",
+    "allObservedLines": [
+      "194",
+      "6",
+      "28"
+    ]
+  },
+  "104": {
+    "line": "628",
+    "agencyName": "COOPERATIVA DE TRABAJO 3 DE JULIO LIMITADA",
+    "allObservedLines": [
+      "628",
+      "8"
+    ]
+  },
+  "308": {
+    "line": "437",
+    "agencyName": "Empresa ID 308",
+    "allObservedLines": [
+      "437"
+    ]
+  },
+  "285": {
+    "line": "266",
+    "agencyName": "Empresa ID 285",
+    "allObservedLines": [
+      "266",
+      "257",
+      "90",
+      "OE61V",
+      "228"
+    ]
+  },
+  "420": {
+    "line": "266",
+    "agencyName": "Empresa ID 420",
+    "allObservedLines": [
+      "266",
+      "OE61V",
+      "257"
+    ]
+  },
+  "357": {
+    "line": "266",
+    "agencyName": "Empresa ID 357",
+    "allObservedLines": [
+      "266"
+    ]
+  },
+  "366": {
+    "line": "228",
+    "agencyName": "Empresa ID 366",
+    "allObservedLines": [
+      "228",
+      "266",
+      "257",
+      "OE61V"
+    ]
+  },
+  "238": {
+    "line": "128",
+    "agencyName": "COOP. PROV. OB. Y S.P. SAN CLEMENTE DEL TUYU",
+    "allObservedLines": [
+      "128",
+      "514",
+      "101",
+      "34",
+      "146",
+      "68",
+      "152",
+      "42"
+    ]
+  },
+  "258": {
+    "line": "101",
+    "agencyName": "Empresa ID 258",
+    "allObservedLines": [
+      "101",
+      "128",
+      "514",
+      "68",
+      "203"
+    ]
+  },
+  "102": {
+    "line": "720",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278",
+    "allObservedLines": [
+      "720",
+      "723"
+    ]
+  },
+  "296": {
+    "line": "26",
+    "agencyName": "Empresa ID 296",
+    "allObservedLines": [
+      "26",
+      "299",
+      "634",
+      "570",
+      "160",
+      "314"
+    ]
+  },
+  "298": {
+    "line": "26",
+    "agencyName": "Empresa ID 298",
+    "allObservedLines": [
+      "26",
+      "9"
+    ]
+  },
+  "339": {
+    "line": "50",
+    "agencyName": "Empresa ID 339",
+    "allObservedLines": [
+      "50",
+      "148"
+    ]
+  },
+  "341": {
+    "line": "148",
+    "agencyName": "Empresa ID 341",
+    "allObservedLines": [
+      "148",
+      "50"
+    ]
+  },
+  "261": {
+    "line": "148",
+    "agencyName": "EMPRESA DE TRANSPORTE PARQUE COSTERO DEL SUR S.R.L",
+    "allObservedLines": [
+      "148"
+    ]
+  },
+  "251": {
+    "line": "29",
+    "agencyName": "Empresa ID 251",
+    "allObservedLines": [
+      "29"
+    ]
+  },
+  "270": {
+    "line": "15",
+    "agencyName": "Empresa ID 270",
+    "allObservedLines": [
+      "15",
+      "29",
+      "707"
+    ]
+  },
+  "118": {
+    "line": "440",
+    "agencyName": "EMPRESA MONTE GRANDE S.A. LINEA 501",
+    "allObservedLines": [
+      "440"
+    ]
+  },
+  "271": {
+    "line": "29",
+    "agencyName": "Empresa ID 271",
+    "allObservedLines": [
+      "29"
+    ]
+  },
+  "332": {
+    "line": "338",
+    "agencyName": "MICRO ÓMNIBUS NUEVA POMPEYA S.R.L.",
+    "allObservedLines": [
+      "338",
+      "343"
+    ]
+  },
+  "131": {
+    "line": "37",
+    "agencyName": "LA CENTRAL DE ESCOBAR SA",
+    "allObservedLines": [
+      "37",
+      "29"
+    ]
+  },
+  "330": {
+    "line": "118",
+    "agencyName": "Empresa ID 330",
+    "allObservedLines": [
+      "118",
+      "126",
+      "500"
+    ]
+  },
+  "324": {
+    "line": "126",
+    "agencyName": "UNION TRANSITORIA COSA CIA TRANSPORTE VECINAL U.T.",
+    "allObservedLines": [
+      "126",
+      "174"
+    ]
+  },
+  "312": {
+    "line": "74",
+    "agencyName": "Empresa ID 312",
+    "allObservedLines": [
+      "74",
+      "79",
+      "64",
+      "310"
+    ]
+  },
+  "864": {
+    "line": "302",
+    "agencyName": "Empresa ID 864",
+    "allObservedLines": [
+      "302"
+    ]
+  },
+  "510": {
+    "line": "527",
+    "agencyName": "Empresa ID 510",
+    "allObservedLines": [
+      "527",
+      "343",
+      "522",
+      "118",
+      "102",
+      "338"
+    ]
+  },
+  "108": {
+    "line": "28",
+    "agencyName": "EMPRESA 501 SA",
+    "allObservedLines": [
+      "28"
+    ]
+  },
+  "387": {
+    "line": "298",
+    "agencyName": "Empresa ID 387",
+    "allObservedLines": [
+      "298"
+    ]
+  },
+  "143": {
+    "line": "276",
+    "agencyName": "MICRO OMNIBUS MITRE S.A.",
+    "allObservedLines": [
+      "276",
+      "541",
+      "88"
+    ]
+  },
+  "145": {
+    "line": "28",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A",
+    "allObservedLines": [
+      "28",
+      "441",
+      "548"
+    ]
+  },
+  "522": {
+    "line": "15",
+    "agencyName": "Empresa ID 522",
+    "allObservedLines": [
+      "15"
+    ]
+  },
+  "1135": {
+    "line": "707",
+    "agencyName": "Empresa ID 1135",
+    "allObservedLines": [
+      "707",
+      "29"
+    ]
+  },
+  "523": {
+    "line": "29",
+    "agencyName": "Empresa ID 523",
+    "allObservedLines": [
+      "29"
+    ]
+  },
+  "930": {
+    "line": "15",
+    "agencyName": "Empresa ID 930",
+    "allObservedLines": [
+      "15",
+      "204",
+      "88"
+    ]
+  },
+  "929": {
+    "line": "228",
+    "agencyName": "Empresa ID 929",
+    "allObservedLines": [
+      "228",
+      "88",
+      "204"
+    ]
+  },
+  "111": {
+    "line": "500",
+    "agencyName": "Empresa ID 111",
+    "allObservedLines": [
+      "500",
+      "440",
+      "154",
+      "624"
+    ]
+  },
+  "154": {
+    "line": "132",
+    "agencyName": "Empresa ID 154",
+    "allObservedLines": [
+      "132",
+      "392",
+      "204",
+      "430"
+    ]
+  },
+  "140": {
+    "line": "500",
+    "agencyName": "MICRO OMNIBUS ESTE S.A",
+    "allObservedLines": [
+      "500",
+      "440"
+    ]
+  },
+  "121": {
+    "line": "129",
+    "agencyName": "Empresa ID 121",
+    "allObservedLines": [
+      "129"
+    ]
+  },
+  "161": {
+    "line": "28",
+    "agencyName": "TRANSPORTES LA PERLITA S.A. ",
+    "allObservedLines": [
+      "28",
+      "65"
+    ]
+  },
+  "265": {
+    "line": "98",
+    "agencyName": "Empresa ID 265",
+    "allObservedLines": [
+      "98"
+    ]
+  },
+  "173": {
+    "line": "98",
+    "agencyName": "Empresa ID 173",
+    "allObservedLines": [
+      "98"
+    ]
+  },
+  "177": {
+    "line": "312",
+    "agencyName": "Empresa ID 177",
+    "allObservedLines": [
+      "312",
+      "98",
+      "329",
+      "306",
+      "97"
+    ]
+  },
+  "176": {
+    "line": "97",
+    "agencyName": "Empresa ID 176",
+    "allObservedLines": [
+      "97",
+      "98",
+      "96",
+      "306"
+    ]
+  },
+  "1143": {
+    "line": "707",
+    "agencyName": "Empresa ID 1143",
+    "allObservedLines": [
+      "707",
+      "365"
+    ]
+  },
+  "1144": {
+    "line": "365",
+    "agencyName": "Empresa ID 1144",
+    "allObservedLines": [
+      "365",
+      "707"
+    ]
+  },
+  "214": {
+    "line": "365",
+    "agencyName": "Empresa ID 214",
+    "allObservedLines": [
+      "365",
+      "707"
+    ]
+  },
+  "282": {
+    "line": "101",
+    "agencyName": "Empresa ID 282",
+    "allObservedLines": [
+      "101",
+      "6",
+      "12"
+    ]
+  },
+  "241": {
+    "line": "80",
+    "agencyName": "Empresa ID 241",
+    "allObservedLines": [
+      "80",
+      "503"
+    ]
+  },
+  "355": {
+    "line": "80",
+    "agencyName": "Empresa ID 355",
+    "allObservedLines": [
+      "80",
+      "57",
+      "95",
+      "503"
+    ]
+  },
+  "242": {
+    "line": "80",
+    "agencyName": "Empresa ID 242",
+    "allObservedLines": [
+      "80",
+      "57",
+      "95"
+    ]
+  },
+  "327": {
+    "line": "371",
+    "agencyName": "BAHIA TRANSPORTE SAPEN",
+    "allObservedLines": [
+      "371",
+      "9",
+      "22",
+      "278"
+    ]
+  },
+  "246": {
+    "line": "105",
+    "agencyName": "Empresa ID 246",
+    "allObservedLines": [
+      "105",
+      "123",
+      "124",
+      "90",
+      "98"
+    ]
+  },
+  "273": {
+    "line": "39",
+    "agencyName": "Empresa ID 273",
+    "allObservedLines": [
+      "39"
+    ]
+  },
+  "376": {
+    "line": "41",
+    "agencyName": "LA NUEVA PERLA SRL",
+    "allObservedLines": [
+      "41",
+      "39"
+    ]
+  },
+  "175": {
+    "line": "96",
+    "agencyName": "Empresa ID 175",
+    "allObservedLines": [
+      "96",
+      "97"
+    ]
+  },
+  "213": {
+    "line": "365",
+    "agencyName": "Empresa ID 213",
+    "allObservedLines": [
+      "365"
+    ]
+  },
+  "174": {
+    "line": "96",
+    "agencyName": "EL URBANO SRL",
+    "allObservedLines": [
+      "96",
+      "306"
+    ]
+  },
+  "865": {
+    "line": "302",
+    "agencyName": "Empresa ID 865",
+    "allObservedLines": [
+      "302"
+    ]
+  },
+  "178": {
+    "line": "740",
+    "agencyName": "Empresa ID 178",
+    "allObservedLines": [
+      "740",
+      "406"
+    ]
+  },
+  "106": {
+    "line": "166",
+    "agencyName": "Empresa ID 106",
+    "allObservedLines": [
+      "166",
+      "8"
+    ]
+  },
+  "142": {
+    "line": "624",
+    "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL",
+    "allObservedLines": [
+      "624",
+      "85",
+      "307"
+    ]
+  },
+  "276": {
+    "line": "252",
+    "agencyName": "Empresa ID 276",
+    "allObservedLines": [
+      "252"
+    ]
+  },
+  "347": {
+    "line": "252",
+    "agencyName": "Empresa ID 347",
+    "allObservedLines": [
+      "252"
+    ]
+  },
+  "141": {
+    "line": "174",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC",
+    "allObservedLines": [
+      "174",
+      "136",
+      "635"
+    ]
+  },
+  "928": {
+    "line": "204",
+    "agencyName": "Empresa ID 928",
+    "allObservedLines": [
+      "204",
+      "88"
+    ]
+  },
+  "740": {
+    "line": "42",
+    "agencyName": "Empresa ID 740",
+    "allObservedLines": [
+      "42"
+    ]
+  },
+  "741": {
+    "line": "OE85",
+    "agencyName": "Empresa ID 741",
+    "allObservedLines": [
+      "OE85"
+    ]
+  },
+  "309": {
+    "line": "59",
+    "agencyName": "Empresa ID 309",
+    "allObservedLines": [
+      "59",
+      "437"
+    ]
+  },
+  "311": {
+    "line": "79",
+    "agencyName": "EXPRESO LA PLATA BUENOS AIRES S.A.",
+    "allObservedLines": [
+      "79",
+      "506"
+    ]
+  },
+  "245": {
+    "line": "98",
+    "agencyName": "Empresa ID 245",
+    "allObservedLines": [
+      "98"
+    ]
+  },
+  "353": {
+    "line": "378",
+    "agencyName": "Empresa ID 353",
+    "allObservedLines": [
+      "378",
+      "218",
+      "622",
+      "RTr1",
+      "105",
+      "284",
+      "160",
+      "720"
+    ]
+  },
+  "323": {
+    "line": "124",
+    "agencyName": "OLA BUS SRL",
+    "allObservedLines": [
+      "124",
+      "90",
+      "105",
+      "123"
+    ]
+  },
+  "326": {
+    "line": "105",
+    "agencyName": "Empresa ID 326",
+    "allObservedLines": [
+      "105",
+      "123"
+    ]
+  },
+  "315": {
+    "line": "105",
+    "agencyName": "Empresa ID 315",
+    "allObservedLines": [
+      "105",
+      "103"
+    ]
+  },
+  "924": {
+    "line": "102",
+    "agencyName": "Empresa ID 924",
+    "allObservedLines": [
+      "102",
+      "95"
+    ]
+  },
+  "1264": {
+    "line": "15",
+    "agencyName": "Empresa ID 1264",
+    "allObservedLines": [
+      "15",
+      "204",
+      "88"
+    ]
+  },
+  "1260": {
+    "line": "15",
+    "agencyName": "Empresa ID 1260",
+    "allObservedLines": [
+      "15",
+      "88",
+      "204"
+    ]
+  },
+  "331": {
+    "line": "102",
+    "agencyName": "Empresa ID 331",
+    "allObservedLines": [
+      "102"
+    ]
+  },
+  "368": {
+    "line": "228",
+    "agencyName": "Empresa ID 368",
+    "allObservedLines": [
+      "228"
+    ]
+  },
+  "931": {
+    "line": "88",
+    "agencyName": "Empresa ID 931",
+    "allObservedLines": [
+      "88",
+      "204"
+    ]
+  },
+  "1266": {
+    "line": "2",
+    "agencyName": "Empresa ID 1266",
+    "allObservedLines": [
+      "2",
+      "45",
+      "328"
+    ]
+  },
+  "520": {
+    "line": "500",
+    "agencyName": "Empresa ID 520",
+    "allObservedLines": [
+      "500",
+      "118"
+    ]
+  },
+  "1259": {
+    "line": "88",
+    "agencyName": "Empresa ID 1259",
+    "allObservedLines": [
+      "88"
+    ]
+  },
+  "263": {
+    "line": "300",
+    "agencyName": "Empresa ID 263",
+    "allObservedLines": [
+      "300",
+      "219",
+      "336",
+      "4"
+    ]
+  },
+  "216": {
+    "line": "41",
+    "agencyName": "Empresa ID 216",
+    "allObservedLines": [
+      "41",
+      "670"
+    ]
+  },
+  "1115": {
+    "line": "543",
+    "agencyName": "Empresa ID 1115",
+    "allObservedLines": [
+      "543"
+    ]
+  },
+  "1126": {
+    "line": "532",
+    "agencyName": "Empresa ID 1126",
+    "allObservedLines": [
+      "532"
+    ]
+  },
+  "1132": {
+    "line": "532",
+    "agencyName": "Empresa ID 1132",
+    "allObservedLines": [
+      "532"
+    ]
+  },
+  "1127": {
+    "line": "532",
+    "agencyName": "Empresa ID 1127",
+    "allObservedLines": [
+      "532"
+    ]
+  },
+  "1282": {
+    "line": "136",
+    "agencyName": "Empresa ID 1282",
+    "allObservedLines": [
+      "136"
+    ]
+  },
+  "184": {
+    "line": "314",
+    "agencyName": "LA FLOR DE LUJAN SRL",
+    "allObservedLines": [
+      "314"
+    ]
+  },
+  "185": {
+    "line": "314",
+    "agencyName": "Empresa ID 185",
+    "allObservedLines": [
+      "314",
+      "R8/99",
+      "242",
+      "R333/9"
+    ]
+  },
+  "155": {
+    "line": "302",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA",
+    "allObservedLines": [
+      "302",
+      "244"
+    ]
+  },
+  "1350": {
+    "line": "180",
+    "agencyName": "Empresa ID 1350",
+    "allObservedLines": [
+      "180",
+      "179"
+    ]
+  },
+  "1321": {
+    "line": "178",
+    "agencyName": "Empresa ID 1321",
+    "allObservedLines": [
+      "178"
+    ]
+  },
+  "1347": {
+    "line": "119",
+    "agencyName": "Empresa ID 1347",
+    "allObservedLines": [
+      "119",
+      "135"
+    ]
+  },
+  "1336": {
+    "line": "115",
+    "agencyName": "Empresa ID 1336",
+    "allObservedLines": [
+      "115",
+      "236",
+      "28"
+    ]
+  },
+  "1348": {
+    "line": "185",
+    "agencyName": "Empresa ID 1348",
+    "allObservedLines": [
+      "185",
+      "182"
+    ]
+  },
+  "1335": {
+    "line": "236",
+    "agencyName": "Empresa ID 1335",
+    "allObservedLines": [
+      "236",
+      "269"
+    ]
+  },
+  "1349": {
+    "line": "182",
+    "agencyName": "Empresa ID 1349",
+    "allObservedLines": [
+      "182",
+      "180"
+    ]
+  },
+  "1345": {
+    "line": "145",
+    "agencyName": "Empresa ID 1345",
+    "allObservedLines": [
+      "145",
+      "70"
+    ]
+  },
+  "1343": {
+    "line": "115",
+    "agencyName": "Empresa ID 1343",
+    "allObservedLines": [
+      "115",
+      "151",
+      "421",
+      "446"
+    ]
+  },
+  "1346": {
+    "line": "242",
+    "agencyName": "Empresa ID 1346",
+    "allObservedLines": [
+      "242",
+      "164",
+      "150"
+    ]
+  },
+  "1338": {
+    "line": "532",
+    "agencyName": "Empresa ID 1338",
+    "allObservedLines": [
+      "532",
+      "84"
+    ]
+  },
+  "1340": {
+    "line": "84",
+    "agencyName": "Empresa ID 1340",
+    "allObservedLines": [
+      "84",
+      "25"
+    ]
+  },
+  "3824": {
+    "line": "25",
+    "agencyName": "Empresa ID 3824",
+    "allObservedLines": [
+      "25"
+    ]
+  },
+  "3826": {
+    "line": "84",
+    "agencyName": "Empresa ID 3826",
+    "allObservedLines": [
+      "84"
+    ]
+  },
+  "1129": {
+    "line": "544",
+    "agencyName": "Empresa ID 1129",
+    "allObservedLines": [
+      "544"
+    ]
+  },
+  "86": {
+    "line": "129",
+    "agencyName": "TRANSPORTES 270 S.A.",
+    "allObservedLines": [
+      "129"
+    ]
+  },
+  "96": {
+    "line": "440",
+    "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL",
+    "allObservedLines": [
+      "440",
+      "237",
+      "129",
+      "341"
+    ]
+  },
+  "77": {
+    "line": "237",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE",
+    "allObservedLines": [
+      "237"
+    ]
+  },
+  "3031": {
+    "line": "242",
+    "agencyName": "Empresa ID 3031",
+    "allObservedLines": [
+      "242"
+    ]
+  },
+  "3034": {
+    "line": "145",
+    "agencyName": "Empresa ID 3034",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "3030": {
+    "line": "150",
+    "agencyName": "Empresa ID 3030",
+    "allObservedLines": [
+      "150"
+    ]
+  },
+  "3036": {
+    "line": "150",
+    "agencyName": "Empresa ID 3036",
+    "allObservedLines": [
+      "150"
+    ]
+  },
+  "3033": {
+    "line": "145",
+    "agencyName": "Empresa ID 3033",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "3035": {
+    "line": "145",
+    "agencyName": "Empresa ID 3035",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "3037": {
+    "line": "145",
+    "agencyName": "Empresa ID 3037",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "4040": {
+    "line": "145",
+    "agencyName": "Empresa ID 4040",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "4075": {
+    "line": "9",
+    "agencyName": "Empresa ID 4075",
+    "allObservedLines": [
+      "9",
+      "26"
+    ]
+  },
+  "848": {
+    "line": "203",
+    "agencyName": "Empresa ID 848",
+    "allObservedLines": [
+      "203",
+      "101",
+      "514"
+    ]
+  },
+  "3836": {
+    "line": "520",
+    "agencyName": "Empresa ID 3836",
+    "allObservedLines": [
+      "520",
+      "277",
+      "542"
+    ]
+  },
+  "3838": {
+    "line": "84",
+    "agencyName": "Empresa ID 3838",
+    "allObservedLines": [
+      "84",
+      "277",
+      "542"
+    ]
+  },
+  "3840": {
+    "line": "395",
+    "agencyName": "Empresa ID 3840",
+    "allObservedLines": [
+      "395"
+    ]
+  },
+  "3828": {
+    "line": "236",
+    "agencyName": "Empresa ID 3828",
+    "allObservedLines": [
+      "236"
+    ]
+  },
+  "4246": {
+    "line": "544",
+    "agencyName": "Empresa ID 4246",
+    "allObservedLines": [
+      "544"
+    ]
+  },
+  "4245": {
+    "line": "544",
+    "agencyName": "Empresa ID 4245",
+    "allObservedLines": [
+      "544"
+    ]
+  },
+  "4534": {
+    "line": "257",
+    "agencyName": "Empresa ID 4534",
+    "allObservedLines": [
+      "257",
+      "266"
+    ]
+  },
+  "4535": {
+    "line": "266",
+    "agencyName": "Empresa ID 4535",
+    "allObservedLines": [
+      "266",
+      "90",
+      "228"
+    ]
+  },
+  "1054": {
+    "line": "28",
+    "agencyName": "Empresa ID 1054",
+    "allObservedLines": [
+      "28"
+    ]
+  },
+  "1172": {
+    "line": "520",
+    "agencyName": "Empresa ID 1172",
+    "allObservedLines": [
+      "520"
+    ]
+  },
+  "116": {
+    "line": "148",
+    "agencyName": "EMPRESA J.M. EZEIZA S.R.L.",
+    "allObservedLines": [
+      "148"
+    ]
+  },
+  "4839": {
+    "line": "10",
+    "agencyName": "Empresa ID 4839",
+    "allObservedLines": [
+      "10",
+      "17"
+    ]
+  },
+  "4863": {
+    "line": "60",
+    "agencyName": "Empresa ID 4863",
+    "allObservedLines": [
+      "60"
+    ]
+  },
+  "4888": {
+    "line": "31",
+    "agencyName": "Empresa ID 4888",
+    "allObservedLines": [
+      "31",
+      "148",
+      "34"
+    ]
+  },
+  "4939": {
+    "line": "67",
+    "agencyName": "Empresa ID 4939",
+    "allObservedLines": [
+      "67",
+      "59",
+      "70"
+    ]
+  },
+  "4910": {
+    "line": "57",
+    "agencyName": "Empresa ID 4910",
+    "allObservedLines": [
+      "57",
+      "75",
+      "78",
+      "86"
+    ]
+  },
+  "4912": {
+    "line": "96",
+    "agencyName": "Empresa ID 4912",
+    "allObservedLines": [
+      "96",
+      "78"
+    ]
+  },
+  "4890": {
+    "line": "56",
+    "agencyName": "Empresa ID 4890",
+    "allObservedLines": [
+      "56",
+      "180",
+      "92",
+      "NORTE15",
+      "NORTE18"
+    ]
+  },
+  "4889": {
+    "line": "NORTE11",
+    "agencyName": "Empresa ID 4889",
+    "allObservedLines": [
+      "NORTE11",
+      "31",
+      "34",
+      "NORTE12"
+    ]
+  },
+  "4860": {
+    "line": "371",
+    "agencyName": "Empresa ID 4860",
+    "allObservedLines": [
+      "371",
+      "188"
+    ]
+  },
+  "4893": {
+    "line": "160",
+    "agencyName": "Empresa ID 4893",
+    "allObservedLines": [
+      "160",
+      "75",
+      "55"
+    ]
+  },
+  "4859": {
+    "line": "188",
+    "agencyName": "Empresa ID 4859",
+    "allObservedLines": [
+      "188",
+      "195",
+      "371"
+    ]
+  },
+  "4933": {
+    "line": "68",
+    "agencyName": "Empresa ID 4933",
+    "allObservedLines": [
+      "68",
+      "181"
+    ]
+  },
+  "4934": {
+    "line": "19",
+    "agencyName": "Empresa ID 4934",
+    "allObservedLines": [
+      "19"
+    ]
+  },
+  "4849": {
+    "line": "110",
+    "agencyName": "Empresa ID 4849",
+    "allObservedLines": [
+      "110"
+    ]
+  },
+  "4928": {
+    "line": "158",
+    "agencyName": "Empresa ID 4928",
+    "allObservedLines": [
+      "158",
+      "127",
+      "88",
+      "57"
+    ]
+  },
+  "4862": {
+    "line": "60",
+    "agencyName": "Empresa ID 4862",
+    "allObservedLines": [
+      "60"
+    ]
+  },
+  "4879": {
+    "line": "1",
+    "agencyName": "Empresa ID 4879",
+    "allObservedLines": [
+      "1",
+      "21"
+    ]
+  },
+  "4877": {
+    "line": "463",
+    "agencyName": "Empresa ID 4877",
+    "allObservedLines": [
+      "463",
+      "461",
+      "390"
+    ]
+  },
+  "4881": {
+    "line": "21",
+    "agencyName": "Empresa ID 4881",
+    "allObservedLines": [
+      "21",
+      "177",
+      "51",
+      "79",
+      "109",
+      "29"
+    ]
+  },
+  "4882": {
+    "line": "24",
+    "agencyName": "Empresa ID 4882",
+    "allObservedLines": [
+      "24",
+      "169",
+      "91",
+      "21",
+      "32"
+    ]
+  },
+  "4872": {
+    "line": "134",
+    "agencyName": "Empresa ID 4872",
+    "allObservedLines": [
+      "134",
+      "303"
+    ]
+  },
+  "4886": {
+    "line": "21",
+    "agencyName": "Empresa ID 4886",
+    "allObservedLines": [
+      "21",
+      "79"
+    ]
+  },
+  "4883": {
+    "line": "24",
+    "agencyName": "Empresa ID 4883",
+    "allObservedLines": [
+      "24",
+      "32",
+      "169"
+    ]
+  },
+  "4873": {
+    "line": "303",
+    "agencyName": "Empresa ID 4873",
+    "allObservedLines": [
+      "303",
+      "161"
+    ]
+  },
+  "4884": {
+    "line": "71",
+    "agencyName": "Empresa ID 4884",
+    "allObservedLines": [
+      "71",
+      "32",
+      "21",
+      "24"
+    ]
+  },
+  "4861": {
+    "line": "60",
+    "agencyName": "Empresa ID 4861",
+    "allObservedLines": [
+      "60",
+      "188"
+    ]
+  },
+  "4878": {
+    "line": "161",
+    "agencyName": "Empresa ID 4878",
+    "allObservedLines": [
+      "161",
+      "169",
+      "175",
+      "464",
+      "463",
+      "443"
+    ]
+  },
+  "4885": {
+    "line": "76",
+    "agencyName": "Empresa ID 4885",
+    "allObservedLines": [
+      "76",
+      "24"
+    ]
+  },
+  "4921": {
+    "line": "176",
+    "agencyName": "Empresa ID 4921",
+    "allObservedLines": [
+      "176",
+      "182"
+    ]
+  },
+  "4887": {
+    "line": "76",
+    "agencyName": "Empresa ID 4887",
+    "allObservedLines": [
+      "76",
+      "24"
+    ]
+  },
+  "4855": {
+    "line": "273",
+    "agencyName": "Empresa ID 4855",
+    "allObservedLines": [
+      "273",
+      "188",
+      "177",
+      "418",
+      "179"
+    ]
+  },
+  "4851": {
+    "line": "146",
+    "agencyName": "Empresa ID 4851",
+    "allObservedLines": [
+      "146",
+      "202"
+    ]
+  },
+  "4937": {
+    "line": "59",
+    "agencyName": "Empresa ID 4937",
+    "allObservedLines": [
+      "59"
+    ]
+  },
+  "4891": {
+    "line": "34",
+    "agencyName": "Empresa ID 4891",
+    "allObservedLines": [
+      "34",
+      "33",
+      "92",
+      "56"
+    ]
+  },
+  "4865": {
+    "line": "354",
+    "agencyName": "Empresa ID 4865",
+    "allObservedLines": [
+      "354",
+      "20",
+      "60"
+    ]
+  },
+  "4867": {
+    "line": "63",
+    "agencyName": "Empresa ID 4867",
+    "allObservedLines": [
+      "63",
+      "354"
+    ]
+  },
+  "4866": {
+    "line": "20",
+    "agencyName": "Empresa ID 4866",
+    "allObservedLines": [
+      "20",
+      "63",
+      "354"
+    ]
+  },
+  "4941": {
+    "line": "85",
+    "agencyName": "Empresa ID 4941",
+    "allObservedLines": [
+      "85",
+      "86",
+      "93"
+    ]
+  },
+  "4905": {
+    "line": "57",
+    "agencyName": "Empresa ID 4905",
+    "allObservedLines": [
+      "57"
+    ]
+  },
+  "4936": {
+    "line": "59",
+    "agencyName": "Empresa ID 4936",
+    "allObservedLines": [
+      "59",
+      "55",
+      "53",
+      "19"
+    ]
+  },
+  "4880": {
+    "line": "180",
+    "agencyName": "Empresa ID 4880",
+    "allObservedLines": [
+      "180",
+      "21",
+      "79"
+    ]
+  },
+  "4906": {
+    "line": "57",
+    "agencyName": "Empresa ID 4906",
+    "allObservedLines": [
+      "57"
+    ]
+  },
+  "4904": {
+    "line": "57",
+    "agencyName": "Empresa ID 4904",
+    "allObservedLines": [
+      "57"
+    ]
+  },
+  "4907": {
+    "line": "57",
+    "agencyName": "Empresa ID 4907",
+    "allObservedLines": [
+      "57"
+    ]
+  },
+  "4943": {
+    "line": "93",
+    "agencyName": "Empresa ID 4943",
+    "allObservedLines": [
+      "93"
+    ]
+  },
+  "4848": {
+    "line": "110",
+    "agencyName": "Empresa ID 4848",
+    "allObservedLines": [
+      "110"
+    ]
+  },
+  "4846": {
+    "line": "109",
+    "agencyName": "Empresa ID 4846",
+    "allObservedLines": [
+      "109",
+      "110"
+    ]
+  },
+  "4857": {
+    "line": "179",
+    "agencyName": "Empresa ID 4857",
+    "allObservedLines": [
+      "179"
+    ]
+  },
+  "4858": {
+    "line": "195",
+    "agencyName": "Empresa ID 4858",
+    "allObservedLines": [
+      "195"
+    ]
+  },
+  "4914": {
+    "line": "99",
+    "agencyName": "Empresa ID 4914",
+    "allObservedLines": [
+      "99",
+      "129",
+      "114",
+      "506",
+      "61"
+    ]
+  },
+  "4756": {
+    "line": "276",
+    "agencyName": "Empresa ID 4756",
+    "allObservedLines": [
+      "276",
+      "108"
+    ]
+  },
+  "4869": {
+    "line": "130",
+    "agencyName": "Empresa ID 4869",
+    "allObservedLines": [
+      "130",
+      "100",
+      "113",
+      "384",
+      "215",
+      "OE62"
+    ]
+  },
+  "4850": {
+    "line": "202",
+    "agencyName": "Empresa ID 4850",
+    "allObservedLines": [
+      "202"
+    ]
+  },
+  "4854": {
+    "line": "214",
+    "agencyName": "Empresa ID 4854",
+    "allObservedLines": [
+      "214",
+      "273",
+      "152"
+    ]
+  },
+  "4843": {
+    "line": "106",
+    "agencyName": "Empresa ID 4843",
+    "allObservedLines": [
+      "106"
+    ]
+  },
+  "4844": {
+    "line": "71",
+    "agencyName": "Empresa ID 4844",
+    "allObservedLines": [
+      "71",
+      "106"
+    ]
+  },
+  "4944": {
+    "line": "93",
+    "agencyName": "Empresa ID 4944",
+    "allObservedLines": [
+      "93"
+    ]
+  },
+  "4842": {
+    "line": "71",
+    "agencyName": "Empresa ID 4842",
+    "allObservedLines": [
+      "71"
+    ]
+  },
+  "4845": {
+    "line": "106",
+    "agencyName": "Empresa ID 4845",
+    "allObservedLines": [
+      "106",
+      "109"
+    ]
+  },
+  "4868": {
+    "line": "63",
+    "agencyName": "Empresa ID 4868",
+    "allObservedLines": [
+      "63",
+      "100"
+    ]
+  },
+  "4922": {
+    "line": "176",
+    "agencyName": "Empresa ID 4922",
+    "allObservedLines": [
+      "176",
+      "87"
+    ]
+  },
+  "4841": {
+    "line": "9",
+    "agencyName": "Empresa ID 4841",
+    "allObservedLines": [
+      "9",
+      "371",
+      "585",
+      "22",
+      "281",
+      "278"
+    ]
+  },
+  "4840": {
+    "line": "228",
+    "agencyName": "Empresa ID 4840",
+    "allObservedLines": [
+      "228",
+      "17",
+      "9"
+    ]
+  },
+  "4945": {
+    "line": "93",
+    "agencyName": "Empresa ID 4945",
+    "allObservedLines": [
+      "93",
+      "86",
+      "85"
+    ]
+  },
+  "4870": {
+    "line": "130",
+    "agencyName": "Empresa ID 4870",
+    "allObservedLines": [
+      "130"
+    ]
+  },
+  "4874": {
+    "line": "161",
+    "agencyName": "Empresa ID 4874",
+    "allObservedLines": [
+      "161",
+      "320"
+    ]
+  },
+  "4871": {
+    "line": "134",
+    "agencyName": "Empresa ID 4871",
+    "allObservedLines": [
+      "134"
+    ]
+  },
+  "4852": {
+    "line": "146",
+    "agencyName": "Empresa ID 4852",
+    "allObservedLines": [
+      "146",
+      "202"
+    ]
+  },
+  "4925": {
+    "line": "111",
+    "agencyName": "Empresa ID 4925",
+    "allObservedLines": [
+      "111",
+      "383",
+      "91",
+      "500",
+      "87",
+      "561"
+    ]
+  },
+  "4927": {
+    "line": "127",
+    "agencyName": "Empresa ID 4927",
+    "allObservedLines": [
+      "127"
+    ]
+  },
+  "4876": {
+    "line": "303",
+    "agencyName": "Empresa ID 4876",
+    "allObservedLines": [
+      "303",
+      "161"
+    ]
+  },
+  "4896": {
+    "line": "57",
+    "agencyName": "Empresa ID 4896",
+    "allObservedLines": [
+      "57",
+      "55"
+    ]
+  },
+  "4895": {
+    "line": "55",
+    "agencyName": "Empresa ID 4895",
+    "allObservedLines": [
+      "55",
+      "57",
+      "75"
+    ]
+  },
+  "4935": {
+    "line": "19",
+    "agencyName": "Empresa ID 4935",
+    "allObservedLines": [
+      "19",
+      "45",
+      "49",
+      "86",
+      "57"
+    ]
+  },
+  "4875": {
+    "line": "303",
+    "agencyName": "Empresa ID 4875",
+    "allObservedLines": [
+      "303",
+      "161",
+      "320"
+    ]
+  },
+  "4853": {
+    "line": "152",
+    "agencyName": "Empresa ID 4853",
+    "allObservedLines": [
+      "152",
+      "202"
+    ]
+  },
+  "4919": {
+    "line": "185",
+    "agencyName": "Empresa ID 4919",
+    "allObservedLines": [
+      "185",
+      "87",
+      "193",
+      "107",
+      "96"
+    ]
+  },
+  "4918": {
+    "line": "185",
+    "agencyName": "Empresa ID 4918",
+    "allObservedLines": [
+      "185",
+      "107"
+    ]
+  },
+  "4923": {
+    "line": "91",
+    "agencyName": "Empresa ID 4923",
+    "allObservedLines": [
+      "91",
+      "562",
+      "500",
+      "561",
+      "111",
+      "SUR10",
+      "SUR19",
+      "176",
+      "87",
+      "503"
+    ]
+  },
+  "4924": {
+    "line": "503",
+    "agencyName": "Empresa ID 4924",
+    "allObservedLines": [
+      "503",
+      "383",
+      "111",
+      "506"
+    ]
+  },
+  "4916": {
+    "line": "87",
+    "agencyName": "Empresa ID 4916",
+    "allObservedLines": [
+      "87",
+      "96",
+      "193",
+      "78",
+      "185"
+    ]
+  },
+  "4917": {
+    "line": "193",
+    "agencyName": "Empresa ID 4917",
+    "allObservedLines": [
+      "193",
+      "107"
+    ]
+  },
+  "4920": {
+    "line": "87",
+    "agencyName": "Empresa ID 4920",
+    "allObservedLines": [
+      "87",
+      "185",
+      "96",
+      "193"
+    ]
+  },
+  "4942": {
+    "line": "86",
+    "agencyName": "Empresa ID 4942",
+    "allObservedLines": [
+      "86"
+    ]
+  },
+  "4947": {
+    "line": "93",
+    "agencyName": "Empresa ID 4947",
+    "allObservedLines": [
+      "93"
+    ]
+  },
+  "4894": {
+    "line": "55",
+    "agencyName": "Empresa ID 4894",
+    "allObservedLines": [
+      "55"
+    ]
+  },
+  "4903": {
+    "line": "57",
+    "agencyName": "Empresa ID 4903",
+    "allObservedLines": [
+      "57"
+    ]
+  },
+  "4926": {
+    "line": "117",
+    "agencyName": "Empresa ID 4926",
+    "allObservedLines": [
+      "117",
+      "127",
+      "91"
+    ]
+  },
+  "4915": {
+    "line": "87",
+    "agencyName": "Empresa ID 4915",
+    "allObservedLines": [
+      "87",
+      "193",
+      "107",
+      "185"
+    ]
+  },
+  "3516": {
+    "line": "28",
+    "agencyName": "Empresa ID 3516",
+    "allObservedLines": [
+      "28"
+    ]
+  },
+  "410": {
+    "line": "514",
+    "agencyName": "AUTOBUSES BS AS SRL- TTE LARRAZABAL SRL- UT",
+    "allObservedLines": [
+      "514"
+    ]
+  },
+  "11": {
+    "line": "570",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F.",
+    "allObservedLines": [
+      "570",
+      "9",
+      "25",
+      "84",
+      "164",
+      "271",
+      "299",
+      "373",
+      "384"
+    ]
+  },
+  "215": {
+    "line": "500",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A.",
+    "allObservedLines": [
+      "500",
+      "503",
+      "506",
+      "383"
+    ]
+  },
+  "75": {
+    "line": "505",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI",
+    "allObservedLines": [
+      "505",
+      "178"
+    ]
+  },
+  "98": {
+    "line": "670",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L.",
+    "allObservedLines": [
+      "670",
+      "237",
+      "276",
+      "310"
+    ]
+  },
+  "54": {
+    "line": "504",
+    "agencyName": "EMPRESA LINEA 216 S.A.T.",
+    "allObservedLines": [
+      "504",
+      "634",
+      "166",
+      "236",
+      "269",
+      "395",
+      "441",
+      "443"
+    ]
+  },
+  "446": {
+    "line": "AZUL1",
+    "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A.",
+    "allObservedLines": [
+      "AZUL1",
+      "AZUL2",
+      "ROJA",
+      "VERDE"
+    ]
+  },
+  "139": {
+    "line": "520",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A.",
+    "allObservedLines": [
+      "520",
+      "405"
+    ]
+  },
+  "322": {
+    "line": "540",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL",
+    "allObservedLines": [
+      "540",
+      "550",
+      "552"
+    ]
+  },
+  "203": {
+    "line": "541",
+    "agencyName": "YITOS S.A.",
+    "allObservedLines": [
+      "541",
+      "543",
+      "544",
+      "549",
+      "561",
+      "562"
+    ]
+  },
+  "99": {
+    "line": "548",
+    "agencyName": "EMPRESA MICROOMNIBUS LARROQUE LINEA 548 SRL",
+    "allObservedLines": [
+      "548"
+    ]
+  },
+  "149": {
+    "line": "620",
+    "agencyName": "NUEVO IDEAL S.A.",
+    "allObservedLines": [
+      "620",
+      "382"
+    ]
+  },
+  "171": {
+    "line": "622",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I",
+    "allObservedLines": [
+      "622",
+      "628",
+      "RTr1",
+      "218",
+      "284",
+      "325",
+      "378"
+    ]
+  },
+  "129": {
+    "line": "506",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I.",
+    "allObservedLines": [
+      "506",
+      "275"
+    ]
+  },
+  "165": {
+    "line": "520",
+    "agencyName": "UNION PLATENSE SRL",
+    "allObservedLines": [
+      "520",
+      "NORTE12",
+      "NORTE15",
+      "NORTE11",
+      "NORTE18",
+      "SUR10",
+      "SUR19",
+      "214",
+      "273",
+      "418"
+    ]
+  },
+  "162": {
+    "line": "500",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I.",
+    "allObservedLines": [
+      "500",
+      "238"
+    ]
+  },
+  "128": {
+    "line": "580",
+    "agencyName": "EXPRESO VILLA NUEVA S.A.",
+    "allObservedLines": [
+      "580",
+      "257"
+    ]
+  },
+  "132": {
+    "line": "740",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A.",
+    "allObservedLines": [
+      "740",
+      "315",
+      "440"
+    ]
+  },
+  "146": {
+    "line": "720",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A.",
+    "allObservedLines": [
+      "720",
+      "204",
+      "228"
+    ]
+  },
+  "148": {
+    "line": "723",
+    "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS",
+    "allObservedLines": [
+      "723"
+    ]
+  },
+  "34": {
+    "line": "1",
+    "agencyName": "TRANSPORTES SAN CAYETANO S.A.C.",
+    "allObservedLines": [
+      "1"
+    ]
+  },
+  "40": {
+    "line": "2",
+    "agencyName": "TRANPORTES VEINTIDOS DE SETIEMBRE S.A.C.",
+    "allObservedLines": [
+      "2"
+    ]
+  },
+  "5": {
+    "line": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F.",
+    "allObservedLines": [
+      "5",
+      "8",
+      "23"
+    ]
+  },
+  "4": {
+    "line": "6",
+    "agencyName": "NUDO S.A.",
+    "allObservedLines": [
+      "6",
+      "50",
+      "107",
+      "150"
+    ]
+  },
+  "14": {
+    "line": "7",
+    "agencyName": "TRANSP. AUTOMOTORES 12 DE OCTUBRE S.A.C.",
+    "allObservedLines": [
+      "7"
+    ]
+  },
+  "17": {
+    "line": "10",
+    "agencyName": "LINEA 10 S.A.",
+    "allObservedLines": [
+      "10"
+    ]
+  },
+  "6": {
+    "line": "12",
+    "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A.",
+    "allObservedLines": [
+      "12",
+      "124"
+    ]
+  },
+  "55": {
+    "line": "15",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A.",
+    "allObservedLines": [
+      "15"
+    ]
+  },
+  "18": {
+    "line": "17",
+    "agencyName": "LINEA 17 S.A.",
+    "allObservedLines": [
+      "17"
+    ]
+  },
+  "82": {
+    "line": "19",
+    "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I.",
+    "allObservedLines": [
+      "19",
+      "153",
+      "253",
+      "321"
+    ]
+  },
+  "21": {
+    "line": "20",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A.",
+    "allObservedLines": [
+      "20",
+      "117",
+      "161",
+      "188",
+      "421"
+    ]
+  },
+  "16": {
+    "line": "21",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A",
+    "allObservedLines": [
+      "21",
+      "108"
+    ]
+  },
+  "26": {
+    "line": "22",
+    "agencyName": "LINEA 22 S.A.",
+    "allObservedLines": [
+      "22"
+    ]
+  },
+  "35": {
+    "line": "24",
+    "agencyName": "EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F.",
+    "allObservedLines": [
+      "24"
+    ]
+  },
+  "13": {
+    "line": "26",
+    "agencyName": "17 DE AGOSTO S.A.",
+    "allObservedLines": [
+      "26"
+    ]
+  },
+  "3": {
+    "line": "28",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR",
+    "allObservedLines": [
+      "28",
+      "44",
+      "101"
+    ]
+  },
+  "47": {
+    "line": "29",
+    "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A.",
+    "allObservedLines": [
+      "29"
+    ]
+  },
+  "23": {
+    "line": "31",
+    "agencyName": "ROCARAZA S.A.",
+    "allObservedLines": [
+      "31",
+      "146"
+    ]
+  },
+  "31": {
+    "line": "32",
+    "agencyName": "EL PUENTE S.A.T.",
+    "allObservedLines": [
+      "32",
+      "75",
+      "128",
+      "158"
+    ]
+  },
+  "87": {
+    "line": "33",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A.",
+    "allObservedLines": [
+      "33"
+    ]
+  },
+  "36": {
+    "line": "34",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I.",
+    "allObservedLines": [
+      "34"
+    ]
+  },
+  "51": {
+    "line": "37",
+    "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P.",
+    "allObservedLines": [
+      "37"
+    ]
+  },
+  "56": {
+    "line": "39",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I.",
+    "allObservedLines": [
+      "39"
+    ]
+  },
+  "49": {
+    "line": "41",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR",
+    "allObservedLines": [
+      "41",
+      "203"
+    ]
+  },
+  "15": {
+    "line": "42",
+    "agencyName": "TRANSPORTES COLEGIALES S.A.C.I.",
+    "allObservedLines": [
+      "42"
+    ]
+  },
+  "52": {
+    "line": "47",
+    "agencyName": "LINEA DE MICROOMNIBUS 47 S.A.T.C.F.I.",
+    "allObservedLines": [
+      "47"
+    ]
+  },
+  "57": {
+    "line": "49",
+    "agencyName": "BUENOS AIRES BUS SOCIEDAD ANONIMA",
+    "allObservedLines": [
+      "49"
+    ]
+  },
+  "58": {
+    "line": "53",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE",
+    "allObservedLines": [
+      "53"
+    ]
+  },
+  "88": {
+    "line": "55",
+    "agencyName": "ALMAFUERTE S.A.T.A.C.I.",
+    "allObservedLines": [
+      "55"
+    ]
+  },
+  "10": {
+    "line": "56",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I.",
+    "allObservedLines": [
+      "56",
+      "76",
+      "91",
+      "135"
+    ]
+  },
+  "84": {
+    "line": "59",
+    "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I",
+    "allObservedLines": [
+      "59"
+    ]
+  },
+  "25": {
+    "line": "61",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A.",
+    "allObservedLines": [
+      "61",
+      "62",
+      "114",
+      "129",
+      "143"
+    ]
+  },
+  "30": {
+    "line": "63",
+    "agencyName": "BERNARDINO RIVADAVIA S.A.T.A.",
+    "allObservedLines": [
+      "63",
+      "113"
+    ]
+  },
+  "41": {
+    "line": "64",
+    "agencyName": "VUELTA DE ROCHA S.A.T.C.I.",
+    "allObservedLines": [
+      "64"
+    ]
+  },
+  "9": {
+    "line": "65",
+    "agencyName": "LA NUEVA METROPOL S.A.",
+    "allObservedLines": [
+      "65",
+      "194",
+      "195",
+      "228",
+      "365"
+    ]
+  },
+  "39": {
+    "line": "68",
+    "agencyName": "TRANSPORTES SESENTA Y OCHO S.R.L.",
+    "allObservedLines": [
+      "68"
+    ]
+  },
+  "27": {
+    "line": "71",
+    "agencyName": "LINEA 71 S.A.",
+    "allObservedLines": [
+      "71"
+    ]
+  },
+  "22": {
+    "line": "78",
+    "agencyName": "LOS CONSTITUYENTES S.A.T.",
+    "allObservedLines": [
+      "78",
+      "87",
+      "111",
+      "127"
+    ]
+  },
+  "53": {
+    "line": "80",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A.",
+    "allObservedLines": [
+      "80"
+    ]
+  },
+  "59": {
+    "line": "85",
+    "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE",
+    "allObservedLines": [
+      "85"
+    ]
+  },
+  "79": {
+    "line": "88",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C.",
+    "allObservedLines": [
+      "88"
+    ]
+  },
+  "8": {
+    "line": "90",
+    "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR",
+    "allObservedLines": [
+      "90",
+      "151"
+    ]
+  },
+  "89": {
+    "line": "92",
+    "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L.",
+    "allObservedLines": [
+      "92"
+    ]
+  },
+  "50": {
+    "line": "95",
+    "agencyName": "EMPRESA ANTARTIDA ARGENTINA S.A.T.",
+    "allObservedLines": [
+      "95"
+    ]
+  },
+  "62": {
+    "line": "98",
+    "agencyName": "EXPRESO QUILMES S.A.",
+    "allObservedLines": [
+      "98"
+    ]
+  },
+  "29": {
+    "line": "99",
+    "agencyName": "COLECTIVEROS UNIDOS S.A.",
+    "allObservedLines": [
+      "99",
+      "106"
+    ]
+  },
+  "7": {
+    "line": "100",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A.",
+    "allObservedLines": [
+      "100",
+      "115",
+      "134",
+      "446"
+    ]
+  },
+  "2": {
+    "line": "102",
+    "agencyName": "TRANSP. SGTO. CABRAL",
+    "allObservedLines": [
+      "102"
+    ]
+  },
+  "71": {
+    "line": "105",
+    "agencyName": "EMPRESA DE TRANSPORTES AMERICA S.A.C.I.",
+    "allObservedLines": [
+      "105"
+    ]
+  },
+  "24": {
+    "line": "109",
+    "agencyName": "TRANSPORTE NUEVE DE JULIO SAC.",
+    "allObservedLines": [
+      "109"
+    ]
+  },
+  "19": {
+    "line": "110",
+    "agencyName": "GENERAL PUEYRREDON S.A.T.C.I.",
+    "allObservedLines": [
+      "110"
+    ]
+  },
+  "42": {
+    "line": "118",
+    "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A.",
+    "allObservedLines": [
+      "118"
+    ]
+  },
+  "92": {
+    "line": "123",
+    "agencyName": "TRANSPORTES LINEA 123 S.A.C.I.",
+    "allObservedLines": [
+      "123"
+    ]
+  },
+  "43": {
+    "line": "126",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES",
+    "allObservedLines": [
+      "126"
+    ]
+  },
+  "32": {
+    "line": "130",
+    "agencyName": "TRANSPORTES AVENIDA BERNARDO ADER S.A.",
+    "allObservedLines": [
+      "130"
+    ]
+  },
+  "12": {
+    "line": "132",
+    "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I.",
+    "allObservedLines": [
+      "132"
+    ]
+  },
+  "430": {
+    "line": "133",
+    "agencyName": "ERSA URBANO",
+    "allObservedLines": [
+      "133",
+      "140",
+      "184"
+    ]
+  },
+  "505": {
+    "line": "145",
+    "agencyName": "NUESTRA SEÑORA DEL ROSARIO S.A. UNION TRANSITORIA",
+    "allObservedLines": [
+      "145"
+    ]
+  },
+  "20": {
+    "line": "152",
+    "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S.",
+    "allObservedLines": [
+      "152"
+    ]
+  },
+  "64": {
+    "line": "160",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C.",
+    "allObservedLines": [
+      "160"
+    ]
+  },
+  "33": {
+    "line": "169",
+    "agencyName": "TRANSPORTE ESCALADA S.A.T.",
+    "allObservedLines": [
+      "169",
+      "175"
+    ]
+  },
+  "66": {
+    "line": "179",
+    "agencyName": "GRUPO LINEA 179 S.A.",
+    "allObservedLines": [
+      "179"
+    ]
+  },
+  "158": {
+    "line": "202",
+    "agencyName": "TRANSPORTE LA UNION SA",
+    "allObservedLines": [
+      "202"
+    ]
+  },
+  "138": {
+    "line": "204",
+    "agencyName": "LINEA SESENTA SA",
+    "allObservedLines": [
+      "204",
+      "228",
+      "430"
+    ]
+  },
+  "115": {
+    "line": "244",
+    "agencyName": "EMPRESA DEL OESTE SAT",
+    "allObservedLines": [
+      "244",
+      "302",
+      "303",
+      "320",
+      "390",
+      "443",
+      "461",
+      "462",
+      "463",
+      "464"
+    ]
+  },
+  "124": {
+    "line": "247",
+    "agencyName": "EXPRESO NUEVE DE JULIO S.A.",
+    "allObservedLines": [
+      "247"
+    ]
+  },
+  "157": {
+    "line": "252",
+    "agencyName": "TRANSPORTE JOSE HERNANDEZ S.A.C.I.",
+    "allObservedLines": [
+      "252"
+    ]
+  },
+  "144": {
+    "line": "295",
+    "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T.",
+    "allObservedLines": [
+      "295"
+    ]
+  },
+  "117": {
+    "line": "307",
+    "agencyName": "EMPRESA LINEA SIETE SAT",
+    "allObservedLines": [
+      "307"
+    ]
+  },
+  "135": {
+    "line": "322",
+    "agencyName": "LIBERTADOR SAN MARTIN SAT",
+    "allObservedLines": [
+      "322",
+      "336",
+      "392"
+    ]
+  },
+  "172": {
+    "line": "326",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A.",
+    "allObservedLines": [
+      "326",
+      "386"
+    ]
+  },
+  "163": {
+    "line": "328",
+    "agencyName": "TRANSPORTES VILLA BOSCH SAC el",
+    "allObservedLines": [
+      "328"
+    ]
+  },
+  "160": {
+    "line": "354",
+    "agencyName": "TRANSPORTES AUTOMOTORES  LANUS ESTE S.A.",
+    "allObservedLines": [
+      "354"
+    ]
+  }
+}
