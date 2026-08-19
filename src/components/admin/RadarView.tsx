@@ -59,6 +59,7 @@ function createBusVehicleIcon(label: string, linea: string, speed?: number) {
       box-shadow: 0 4px 14px rgba(2, 132, 199, 0.65);
       white-space: nowrap;
       cursor: pointer;
+      pointer-events: auto;
     ">
       <span style="font-size: 13px;">🚍</span>
       <span>${linea || 'SUBE'}</span>
@@ -68,6 +69,14 @@ function createBusVehicleIcon(label: string, linea: string, speed?: number) {
     iconSize: [85, 26],
     iconAnchor: [42, 13]
   });
+}
+
+function MapInstanceCapture({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    onMapReady(map);
+  }, [map, onMapReady]);
+  return null;
 }
 
 function createWaypointIcon(orderNum: number, isStart: boolean, isEnd: boolean, isSelected: boolean = false, showNumbers: boolean = true) {
@@ -809,6 +818,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   }, []);
 
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
+  const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
   const [isRouting, setIsRouting] = useState<boolean>(false);
@@ -2630,6 +2641,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               maxZoom={19}
             />
 
+            <MapInstanceCapture onMapReady={setMapInstance} />
+
             <LeafletStreetSearch onSelectLocation={handleSelectSearchedStreet} />
 
             {searchedLocation && (
@@ -2867,8 +2880,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 <Marker
                   key={`telemetry_veh_${veh.id || idx}`}
                   position={[veh.lat, veh.lng]}
-                  zIndexOffset={6000}
+                  zIndexOffset={7000}
                   icon={createBusVehicleIcon(veh.intern, veh.linea, veh.speed)}
+                  eventHandlers={{
+                    click(e) {
+                      if (e.originalEvent) {
+                        L.DomEvent.stopPropagation(e.originalEvent);
+                      }
+                      setSelectedVehicle(veh);
+                    }
+                  }}
                 >
                   <Popup>
                     <div style={{
@@ -3014,6 +3035,216 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               />
             )}
           </MapContainer>
+
+          {/* Ventana Flotante de Detalle de Unidad GTFS */}
+          {selectedVehicle && (
+            <div style={{
+              position: 'absolute',
+              bottom: '24px',
+              left: '24px',
+              zIndex: 1100,
+              width: '350px',
+              backgroundColor: 'rgba(15, 23, 42, 0.97)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid rgba(56, 189, 248, 0.4)',
+              borderRadius: '16px',
+              boxShadow: '0 20px 45px rgba(0, 0, 0, 0.75), 0 0 24px rgba(2, 132, 199, 0.3)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Header */}
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: 'rgba(2, 132, 199, 0.18)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '20px' }}>🚍</span>
+                  <div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#38bdf8', lineHeight: 1.1 }}>
+                      Línea {selectedVehicle.linea || selectedVehicle.route_short_name}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 600 }}>
+                      GTFS Route ID: {selectedVehicle.route_id || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{
+                    backgroundColor: '#0284c7',
+                    color: '#ffffff',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    padding: '3px 8px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 6px rgba(2, 132, 199, 0.4)'
+                  }}>
+                    #{selectedVehicle.intern}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVehicle(null)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {/* Empresa */}
+                {selectedVehicle.agency_name && (
+                  <div style={{
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '8px 10px',
+                    fontSize: '0.78rem',
+                    color: '#cbd5e1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span style={{ fontSize: '14px' }}>🏢</span>
+                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                      {selectedVehicle.agency_name}
+                    </div>
+                  </div>
+                )}
+
+                {/* Headsign / Destino GTFS */}
+                <div style={{
+                  backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '8px',
+                  padding: '8px 10px'
+                }}>
+                  <span style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
+                    Destino Oficial (Headsign)
+                  </span>
+                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>🏁</span>
+                    <span>{selectedVehicle.trip_headsign || 'Sin especificar'}</span>
+                  </div>
+                </div>
+
+                {/* Grid de Métricas */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '8px 10px'
+                  }}>
+                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                      Velocidad en Vivo
+                    </span>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#4ade80' }}>
+                      {Math.round(selectedVehicle.speed || 0)} <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>km/h</span>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '8px 10px'
+                  }}>
+                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                      Sentido GTFS
+                    </span>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: selectedVehicle.direction === 0 ? '#38bdf8' : '#fb7185' }}>
+                      {selectedVehicle.direction === 0 ? 'Ida (0)' : selectedVehicle.direction === 1 ? 'Vuelta (1)' : 'Ida'}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '8px 10px'
+                  }}>
+                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                      Rumbo
+                    </span>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc' }}>
+                      🧭 {Math.round(selectedVehicle.bearing || 0)}°
+                    </div>
+                  </div>
+
+                  <div style={{
+                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    padding: '8px 10px'
+                  }}>
+                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                      Última Señal GPS
+                    </span>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                      🕒 {selectedVehicle.timestamp ? (typeof selectedVehicle.timestamp === 'number' && selectedVehicle.timestamp < 2000000000 ? new Date(selectedVehicle.timestamp * 1000).toLocaleTimeString() : new Date(selectedVehicle.timestamp).toLocaleTimeString()) : 'En vivo'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coordenadas GPS y Botón Centrar */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingTop: '6px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                  fontSize: '0.7rem',
+                  color: '#64748b',
+                  fontFamily: 'monospace'
+                }}>
+                  <span>Lat: {selectedVehicle.lat?.toFixed(5)}, Lng: {selectedVehicle.lng?.toFixed(5)}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (mapInstance && typeof selectedVehicle.lat === 'number') {
+                        mapInstance.setView([selectedVehicle.lat, selectedVehicle.lng], 16, { animate: true });
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#1e293b',
+                      border: '1px solid rgba(56, 189, 248, 0.4)',
+                      color: '#38bdf8',
+                      borderRadius: '6px',
+                      padding: '3px 8px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <LocateFixed size={13} /> Enfocar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Botón flotante Mirita para centrar/enfocar el recorrido */}
           <button
