@@ -10,3 +10,5 @@ dist
 # temp
 *.log
 .DS_Store
+temp_*.sql
+
