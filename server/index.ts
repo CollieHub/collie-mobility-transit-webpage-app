@@ -40,7 +40,7 @@ for (const [routeId, r] of Object.entries(gtfsRoutesFull as Record<string, any>)
 }
 
 // Búsqueda ultrarrápida binaria O(log N) de Trip ID a Ruta Oficial GTFS
-function lookupTripId(tripId: string): { routeId: string; headsign: string; directionId: number } | null {
+function lookupTripId(tripId: string): { routeId: string } | null {
   if (!tripId) return null;
   const match = tripId.match(/^(\d+)-/);
   if (!match) return null;
@@ -57,9 +57,7 @@ function lookupTripId(tripId: string): { routeId: string; headsign: string; dire
     
     if (num >= start && num <= end) {
       return {
-        routeId: String(r[2]),
-        headsign: r[3] || '',
-        directionId: typeof r[4] === 'number' ? r[4] : 0
+        routeId: String(r[2])
       };
     } else if (num < start) {
       high = mid - 1;
@@ -2638,10 +2636,7 @@ app.get('/v1/redsube/vehicles', async (c) => {
             linea = candidate.lineCode;
             routeShortName = candidate.shortName;
             agencyName = candidate.agencyName || agencyName;
-            tripHeadsign = tripLookup.headsign || (direction === 0 ? (candidate.headsignIda || candidate.longName || '') : (candidate.headsignVuelta || candidate.longName || ''));
-            if (direction === undefined) {
-              direction = tripLookup.directionId;
-            }
+            tripHeadsign = direction === 0 ? (candidate.headsignIda || candidate.longName || '') : (candidate.headsignVuelta || candidate.longName || '');
           }
         }
 
