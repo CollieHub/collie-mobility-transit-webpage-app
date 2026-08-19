@@ -46,37 +46,39 @@ const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
 const createBusTopDownSvg = (color = '#0284c7', lineText = '') => {
   const cleanLine = lineText.trim();
-  const fontSize = cleanLine.length > 3 ? '7.5' : (cleanLine.length > 2 ? '8.5' : '9.5');
+  const fontSize = cleanLine.length > 4 ? '9' : (cleanLine.length > 3 ? '10' : '11.5');
 
   return `
-  <svg width="20" height="44" viewBox="0 0 24 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-    <!-- Cuerpo del Colectivo -->
-    <rect x="2" y="2" width="20" height="48" rx="4" fill="${color}" stroke="#0f172a" stroke-width="2"/>
+  <svg width="22" height="54" viewBox="0 0 24 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+    <!-- Cuerpo del Colectivo Alargado -->
+    <rect x="2" y="2" width="20" height="56" rx="4" fill="${color}" stroke="#0f172a" stroke-width="2"/>
     <!-- Techo / Detalles superiores -->
-    <rect x="4" y="10" width="16" height="28" rx="2" fill="rgba(255, 255, 255, 0.22)"/>
+    <rect x="4" y="9" width="16" height="38" rx="2.5" fill="rgba(255, 255, 255, 0.22)"/>
     <!-- Parabrisas delantero (Frente del Colectivo) -->
-    <rect x="4" y="5" width="16" height="3.5" rx="1" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
+    <rect x="4" y="4.5" width="16" height="3.5" rx="1" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
     <!-- Luneta trasera -->
-    <rect x="4" y="44" width="16" height="2.5" rx="0.5" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
+    <rect x="4" y="52" width="16" height="2.5" rx="0.5" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
     
     ${cleanLine ? `
-      <!-- Número de Línea en el Techo -->
-      <rect x="3.5" y="17" width="17" height="15" rx="2" fill="rgba(15, 23, 42, 0.45)" stroke="#ffffff" stroke-width="0.8"/>
+      <!-- Placa y Número de Línea Atravesado a lo Largo del Techo -->
+      <rect x="4" y="11" width="16" height="34" rx="2" fill="rgba(15, 23, 42, 0.55)" stroke="#ffffff" stroke-width="0.8"/>
       <text 
+        transform="rotate(-90 12 28)"
         x="12" 
-        y="28" 
+        y="31.8" 
         text-anchor="middle" 
         font-family="'Inter', -apple-system, sans-serif" 
         font-size="${fontSize}" 
         font-weight="900" 
         fill="#ffffff"
-        style="letter-spacing: -0.3px;"
+        style="letter-spacing: 0.6px;"
       >
         ${cleanLine}
       </text>
     ` : `
-      <!-- Escotilla / Aire acondicionado estándar si no tiene línea -->
-      <rect x="7.5" y="19" width="9" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+      <!-- Escotillas / Aire acondicionado estándar si no tiene línea -->
+      <rect x="7" y="15" width="10" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+      <rect x="7" y="32" width="10" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
     `}
 
     <!-- Faros delanteros amarillos -->
@@ -97,21 +99,21 @@ function createBusVehicleIcon(
   const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? Math.round(bearing) : 0;
   const busColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#10b981' : '#0284c7');
 
-  const lineTextOnRoof = isUndefinedLine ? '' : cleanLine.slice(0, 5);
+  const lineTextOnRoof = isUndefinedLine ? '' : cleanLine.slice(0, 6);
 
   const htmlCode = `
-    <div style="position: relative; width: 20px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-      <!-- Colectivo con rotación (mirando al frente según el rumbo de avance) -->
+    <div style="position: relative; width: 22px; height: 54px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+      <!-- Colectivo con rotación exacta según el rumbo del recorrido -->
       <div style="
         transform: rotate(${safeBearing}deg);
-        transform-origin: 50% 37.5%;
-        width: 20px;
-        height: 44px;
+        transform-origin: 50% 35%;
+        width: 22px;
+        height: 54px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 2000;
-        filter: ${isSelected ? 'drop-shadow(0 0 12px rgba(245, 158, 11, 0.95))' : 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55))'};
+        filter: ${isSelected ? 'drop-shadow(0 0 14px rgba(245, 158, 11, 0.95))' : 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6))'};
       ">
         ${createBusTopDownSvg(busColor, lineTextOnRoof)}
       </div>
@@ -121,8 +123,8 @@ function createBusVehicleIcon(
   return L.divIcon({
     className: 'topdown-bus-vehicle-marker',
     html: htmlCode,
-    iconSize: [20, 44],
-    iconAnchor: [10, 16]
+    iconSize: [22, 54],
+    iconAnchor: [11, 19]
   });
 }
 
