@@ -73,7 +73,7 @@ export default function RedSubeV3Panel({
   activeRamal,
   mapBounds
 }: RedSubeV3PanelProps) {
-  const [unitsLimit, setUnitsLimit] = useState<number>(500);
+  const [unitsLimit, setUnitsLimit] = useState<number>(100);
   const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('free');
   const [selectedCompany, setSelectedCompany] = useState<string>('228');
   const [companies, setCompanies] = useState<any[]>([

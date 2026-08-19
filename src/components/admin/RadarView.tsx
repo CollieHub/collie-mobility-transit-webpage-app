@@ -931,7 +931,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [vehicleModalTab, setVehicleModalTab] = useState<'info' | 'raw_gtfs' | 'json'>('info');
   const [vehicleJsonCopied, setVehicleJsonCopied] = useState<boolean>(false);
   const [rawGtfsCopied, setRawGtfsCopied] = useState<boolean>(false);
-  const [showGpsTraces, setShowGpsTraces] = useState<boolean>(true);
+  const [showGpsTraces, setShowGpsTraces] = useState<boolean>(false);
   const [showRawGpsPoints, setShowRawGpsPoints] = useState<boolean>(false);
   const [gpsTraces, setGpsTraces] = useState<Record<string, {
     points: Array<{
