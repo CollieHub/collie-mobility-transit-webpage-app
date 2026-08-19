@@ -312,6 +312,11 @@ function calculateBearing(lat1: number, lng1: number, lat2: number, lng2: number
   return Math.round((brng + 360) % 360);
 }
 
+function angleDifference(a: number, b: number): number {
+  const diff = ((a - b + 180) % 360 + 360) % 360 - 180;
+  return diff;
+}
+
 function findRouteHeading(lat: number, lng: number, routePoints: [number, number][], isReverse: boolean = false): number | null {
   if (!routePoints || routePoints.length < 2) return null;
   let minDist = Infinity;
@@ -323,7 +328,7 @@ function findRouteHeading(lat: number, lng: number, routePoints: [number, number
     const midLat = (p1[0] + p2[0]) / 2;
     const midLng = (p1[1] + p2[1]) / 2;
     const d = calculateDistanceKm(lat, lng, midLat, midLng);
-    if (d < minDist && d < 0.6) {
+    if (d < minDist && d < 1.5) {
       minDist = d;
       bestIdx = i;
     }
@@ -3300,36 +3305,43 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               const isSelected = selectedVehicle && (String(selectedVehicle.intern) === String(veh.intern) || String(selectedVehicle.id) === String(veh.id));
               const vehKey = String(veh.intern || veh.id || veh.vehicle_id);
 
-              let vehBearing = typeof veh.bearing === 'number' && !isNaN(veh.bearing) && veh.bearing > 0 ? veh.bearing : 0;
-
-              // 1. Si no tiene rumbo del feed, calcular desde el historial de movimiento de la unidad
-              if (vehBearing === 0 && gpsTraces[vehKey]?.points && gpsTraces[vehKey].points.length >= 2) {
+              // 1. Obtener rumbo base (desde telemetría del feed o historial de avance GPS)
+              let initialBearing = typeof veh.bearing === 'number' && !isNaN(veh.bearing) && veh.bearing > 0 ? veh.bearing : 0;
+              if (initialBearing === 0 && gpsTraces[vehKey]?.points && gpsTraces[vehKey].points.length >= 2) {
                 const pts = gpsTraces[vehKey].points;
                 const pPrev = pts[pts.length - 2];
                 const pCur = pts[pts.length - 1];
-                if (pPrev && pCur && calculateDistanceKm(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng) > 0.003) {
-                  vehBearing = calculateBearing(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng);
+                if (pPrev && pCur && calculateDistanceKm(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng) > 0.002) {
+                  initialBearing = calculateBearing(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng);
                 }
               }
 
-              // 2. Si sigue en 0, calcular desde el trazado de la ruta activa en pantalla o paradas
-              if (vehBearing === 0) {
-                const isReverse = veh.direction === 1 || (veh.direction === undefined && direction === 'vuelta');
-                const activePath = isReverse 
-                  ? (vueltaPolylinePath.length > 1 ? vueltaPolylinePath : displayPolylinePath) 
-                  : (idaPolylinePath.length > 1 ? idaPolylinePath : displayPolylinePath);
+              // 2. Considerar el sentido y dirección del recorrido (geometría de calle / trazado de ruta)
+              const isReverse = veh.direction === 1 || (veh.direction === undefined && direction === 'vuelta');
+              const activePath = isReverse 
+                ? (vueltaPolylinePath.length > 1 ? vueltaPolylinePath : displayPolylinePath) 
+                : (idaPolylinePath.length > 1 ? idaPolylinePath : displayPolylinePath);
 
-                if (activePath && activePath.length >= 2) {
-                  const routeHeading = findRouteHeading(veh.lat, veh.lng, activePath, isReverse);
-                  if (routeHeading !== null) {
+              let routeHeading: number | null = null;
+              if (activePath && activePath.length >= 2) {
+                routeHeading = findRouteHeading(veh.lat, veh.lng, activePath, isReverse);
+              } else if (stops && stops.length >= 2) {
+                const stopCoords: [number, number][] = stops.map(s => [s.lat, s.lng]);
+                routeHeading = findRouteHeading(veh.lat, veh.lng, stopCoords, isReverse);
+              }
+
+              // 3. Resolver el rumbo final combinando dirección base con sentido del recorrido
+              let vehBearing = initialBearing;
+              if (routeHeading !== null) {
+                if (initialBearing > 0) {
+                  const diff = Math.abs(angleDifference(initialBearing, routeHeading));
+                  if (diff > 85) {
+                    vehBearing = routeHeading;
+                  } else {
                     vehBearing = routeHeading;
                   }
-                } else if (stops && stops.length >= 2) {
-                  const stopCoords: [number, number][] = stops.map(s => [s.lat, s.lng]);
-                  const routeHeading = findRouteHeading(veh.lat, veh.lng, stopCoords, isReverse);
-                  if (routeHeading !== null) {
-                    vehBearing = routeHeading;
-                  }
+                } else {
+                  vehBearing = routeHeading;
                 }
               }
 
