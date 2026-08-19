@@ -4,6 +4,7 @@ import GtfsRealtimeBindings from 'gtfs-realtime-bindings';
 import allGtfsLines from '../src/lib/redsube/all_gtfs_lines.json';
 import agenciesMap from '../src/lib/redsube/agencies_map.json';
 import gtfsRoutesFull from '../src/lib/redsube/gtfs_routes_full.json';
+import gtfsTripRanges from '../src/lib/redsube/gtfs_trip_ranges.json';
 import agencyToLineFull from '../src/lib/redsube/agency_to_line_full.json';
 
 const routeIdToGtfsMap: Record<string, { lineCode: string; shortName: string; agencyName: string; headsignIda?: string; headsignVuelta?: string; longName?: string }> = {};
@@ -38,14 +39,47 @@ for (const [routeId, r] of Object.entries(gtfsRoutesFull as Record<string, any>)
   }
 }
 
+// Búsqueda ultrarrápida binaria O(log N) de Trip ID a Ruta Oficial GTFS
+function lookupTripId(tripId: string): { routeId: string; headsign: string; directionId: number } | null {
+  if (!tripId) return null;
+  const match = tripId.match(/^(\d+)-/);
+  if (!match) return null;
+  const num = parseInt(match[1], 10);
+  
+  let low = 0;
+  let high = (gtfsTripRanges as any[]).length - 1;
+  
+  while (low <= high) {
+    const mid = (low + high) >> 1;
+    const r = (gtfsTripRanges as any[])[mid];
+    const start = r[0];
+    const end = r[1];
+    
+    if (num >= start && num <= end) {
+      return {
+        routeId: String(r[2]),
+        headsign: r[3] || '',
+        directionId: typeof r[4] === 'number' ? r[4] : 0
+      };
+    } else if (num < start) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+  return null;
+}
+
 // 3. Mapeo de agencias a líneas
 const agencyToLineMap: Record<string, { line: string; agencyName: string }> = {
   ...(agencyToLineFull as Record<string, { line: string; agencyName: string }>),
-  '4854': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '231': { line: '194', agencyName: 'LA NUEVA METROPOL S.A. (Línea 194)' },
+  '368': { line: '228C', agencyName: 'MICRO OMNIBUS TIGRE S.A. (Línea 228C)' },
+  '379': { line: '204', agencyName: 'MICRO OMNIBUS TIGRE S.A. (Línea 204)' },
+  '4854': { line: '194', agencyName: 'LA NUEVA METROPOL S.A. (Línea 194)' },
   '709': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
-  '710': { line: '228', agencyName: 'LA NUEVA METROPOL S.A.' },
+  '710': { line: '228', agencyName: 'LA NUEVA METROPOL S.A. (Línea 228)' },
   '9': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
-  '379': { line: '204', agencyName: 'MICRO OMNIBUS TIGRE S.A.' },
   '27': { line: '71', agencyName: 'LINEA 71 S.A.' },
   '6': { line: '60', agencyName: 'LINEA SESENTA SA' },
   '18': { line: '57', agencyName: 'TRANSPORTES ATLANTIDA S.A.C.' },
@@ -2578,8 +2612,9 @@ app.get('/v1/redsube/vehicles', async (c) => {
         const labelParts = label.split('-');
         const intern = labelParts[0] || v.vehicle?.id || entity.id;
         const agencyId = labelParts[1] || '';
-        const routeId = v.trip?.routeId ? String(v.trip.routeId) : '';
-        const direction = typeof v.trip?.directionId === 'number' ? v.trip.directionId : undefined;
+        const tripId = v.trip?.tripId ? String(v.trip.tripId) : '';
+        let routeId = v.trip?.routeId ? String(v.trip.routeId) : '';
+        let direction = typeof v.trip?.directionId === 'number' ? v.trip.directionId : undefined;
         const rawSpeed = v.position.speed || 0;
         const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
 
@@ -2588,25 +2623,51 @@ app.get('/v1/redsube/vehicles', async (c) => {
         let agencyName = (agenciesMap as any)[agencyId] || '';
         let tripHeadsign = '';
 
-        if (routeId && routeIdToGtfsMap[routeId]) {
+        // 1. Prioridad Máxima: Resolución determinística exacta por Trip ID (Catálogo oficial GTFS / SUBE)
+        const tripLookup = lookupTripId(tripId);
+        if (tripLookup) {
+          routeId = tripLookup.routeId;
+          tripHeadsign = tripLookup.headsign || tripHeadsign;
+          if (direction === undefined) {
+            direction = tripLookup.directionId;
+          }
+          if (routeIdToGtfsMap[routeId]) {
+            const g = routeIdToGtfsMap[routeId];
+            linea = g.lineCode;
+            routeShortName = g.shortName;
+            agencyName = g.agencyName || agencyName;
+            if (!tripHeadsign) {
+              tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
+            }
+          }
+        }
+
+        // 2. Fallback: Resolución por Route ID
+        if (!linea && routeId && routeIdToGtfsMap[routeId]) {
           const g = routeIdToGtfsMap[routeId];
           linea = g.lineCode;
           routeShortName = g.shortName;
           agencyName = g.agencyName || agencyName;
-          tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
-        } else if (agencyId && agencyToLineMap[agencyId]) {
+          tripHeadsign = tripHeadsign || (direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || ''));
+        }
+
+        // 3. Fallback: Resolución por Agencia / Empresa / Operador
+        if (!linea && agencyId && agencyToLineMap[agencyId]) {
           const a = agencyToLineMap[agencyId];
           linea = a.line;
           routeShortName = a.line;
           agencyName = a.agencyName || agencyName;
-          tripHeadsign = 'En Circulación';
-        } else if (agencyName) {
+          tripHeadsign = tripHeadsign || 'En Circulación';
+        }
+
+        // 4. Fallback: Regex en nombre de agencia
+        if (!linea && agencyName) {
           const matchLine = agencyName.match(/LINEA\s+(\d+)/i);
           if (matchLine) {
             linea = matchLine[1];
             routeShortName = matchLine[1];
           }
-          tripHeadsign = 'En Circulación';
+          tripHeadsign = tripHeadsign || 'En Circulación';
         }
 
         const licensePlate = (v.vehicle?.licensePlate || '').trim();
