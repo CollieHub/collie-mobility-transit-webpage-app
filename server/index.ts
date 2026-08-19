@@ -2637,50 +2637,17 @@ app.get('/v1/redsube/vehicles', async (c) => {
           trip_headsign: tripHeadsign,
           agency_name: agencyName,
           agency_id: agencyId,
-          latitude: lat,
-          longitude: lng,
-          lat: lat,
-          lng: lng,
+          lat: Number(lat.toFixed(5)),
+          lng: Number(lng.toFixed(5)),
+          latitude: Number(lat.toFixed(5)),
+          longitude: Number(lng.toFixed(5)),
           speed: speedKmH,
           bearing: Math.round(v.position.bearing || 0),
           direction: direction,
           direction_label: direction === 0 ? 'Ida (0)' : direction === 1 ? 'Vuelta (1)' : 'Sin definir',
           odometer: odometer,
           timestamp: tsSec,
-          timestamp_iso: new Date(tsSec * 1000).toISOString(),
-          timestamp_formatted: new Date(tsSec * 1000).toLocaleTimeString(),
-          raw_gtfs: {
-            id: entity.id,
-            isDeleted: entity.isDeleted,
-            vehicle: {
-              trip: v.trip ? {
-                tripId: v.trip.tripId,
-                routeId: v.trip.routeId,
-                directionId: v.trip.directionId,
-                startDate: v.trip.startDate,
-                startTime: v.trip.startTime,
-                scheduleRelationship: v.trip.scheduleRelationship
-              } : undefined,
-              position: v.position ? {
-                latitude: v.position.latitude,
-                longitude: v.position.longitude,
-                bearing: v.position.bearing,
-                odometer: v.position.odometer,
-                speed: v.position.speed
-              } : undefined,
-              timestamp: v.timestamp ? String(v.timestamp) : undefined,
-              congestionLevel: v.congestionLevel,
-              stopId: v.stopId,
-              currentStopSequence: v.currentStopSequence,
-              currentStatus: v.currentStatus,
-              occupancyStatus: v.occupancyStatus,
-              vehicle: v.vehicle ? {
-                id: v.vehicle.id,
-                label: v.vehicle.label,
-                licensePlate: v.vehicle.licensePlate
-              } : undefined
-            }
-          }
+          timestamp_formatted: new Date(tsSec * 1000).toLocaleTimeString()
         });
       }
     } else {
@@ -2717,7 +2684,6 @@ app.get('/v1/redsube/vehicles', async (c) => {
             agency_name: v.agency_name || '',
             agency_id: v.agency_id || '',
             timestamp: ts,
-            timestamp_iso: new Date(ts * 1000).toISOString(),
             timestamp_formatted: new Date(ts * 1000).toLocaleTimeString()
           };
         }).filter((v: any) => !isNaN(v.lat) && !isNaN(v.lng));
@@ -2726,8 +2692,8 @@ app.get('/v1/redsube/vehicles', async (c) => {
 
     // Filtrar por bounding box si se proporcionó
     if (hasBounds) {
-      const latPad = Math.abs(neLat - swLat) * 0.15;
-      const lngPad = Math.abs(neLng - swLng) * 0.15;
+      const latPad = Math.abs(neLat - swLat) * 0.2;
+      const lngPad = Math.abs(neLng - swLng) * 0.2;
       const minLat = Math.min(swLat, neLat) - latPad;
       const maxLat = Math.max(swLat, neLat) + latPad;
       const minLng = Math.min(swLng, neLng) - lngPad;

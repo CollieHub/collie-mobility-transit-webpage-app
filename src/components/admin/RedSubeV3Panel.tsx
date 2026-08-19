@@ -142,7 +142,7 @@ export default function RedSubeV3Panel({
     if (mode === 'free') {
       // Filtrar todas las unidades que caen dentro del viewport/zoom del mapa con tolerancia de bordes
       if (mapBounds && typeof mapBounds.contains === 'function') {
-        const paddedBounds = typeof (mapBounds as any).pad === 'function' ? (mapBounds as any).pad(0.08) : mapBounds;
+        const paddedBounds = typeof (mapBounds as any).pad === 'function' ? (mapBounds as any).pad(0.15) : mapBounds;
         result = result.filter((v: any) => {
           const lat = v.latitude || v.lat;
           const lng = v.longitude || v.lng;
@@ -176,7 +176,7 @@ export default function RedSubeV3Panel({
       if (mode === 'free' && mapBounds && typeof mapBounds.getSouth === 'function') {
         boundsParams = `&sw_lat=${mapBounds.getSouth()}&sw_lng=${mapBounds.getWest()}&ne_lat=${mapBounds.getNorth()}&ne_lng=${mapBounds.getEast()}`;
       }
-      const fetchLimit = mode === 'free' ? 20000 : 1000;
+      const fetchLimit = mode === 'free' ? 2500 : 500;
       const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(targetComp)}&limit=${fetchLimit}${boundsParams}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.vehicles)) {
