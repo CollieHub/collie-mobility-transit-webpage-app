@@ -548,17 +548,22 @@ function LeafletStreetSearch({
 function MapFocusController({ focusCoords, bounds }: { focusCoords: [number, number] | null; bounds?: [number, number][] | null }) {
   const map = useMap();
   useEffect(() => {
-    if (focusCoords) {
-      map.flyTo(focusCoords, 16, { duration: 1 });
+    if (focusCoords && Array.isArray(focusCoords) && typeof focusCoords[0] === 'number' && typeof focusCoords[1] === 'number' && !isNaN(focusCoords[0]) && !isNaN(focusCoords[1])) {
+      try {
+        map.flyTo(focusCoords, 16, { duration: 1 });
+      } catch (_) {}
     }
   }, [focusCoords, map]);
 
   useEffect(() => {
-    if (bounds && bounds.length >= 2) {
+    if (bounds && Array.isArray(bounds) && bounds.length >= 2) {
       try {
-        const lBounds = L.latLngBounds(bounds.map(p => L.latLng(p[0], p[1])));
-        if (lBounds.isValid()) {
-          map.fitBounds(lBounds, { padding: [60, 60], maxZoom: 15, duration: 1 });
+        const validBounds = bounds.filter(p => Array.isArray(p) && p.length >= 2 && typeof p[0] === 'number' && typeof p[1] === 'number' && !isNaN(p[0]) && !isNaN(p[1]));
+        if (validBounds.length >= 2) {
+          const lBounds = L.latLngBounds(validBounds.map(p => L.latLng(p[0], p[1])));
+          if (lBounds.isValid()) {
+            map.fitBounds(lBounds, { padding: [60, 60], maxZoom: 15, duration: 1 });
+          }
         }
       } catch (_) {}
     }
@@ -1056,11 +1061,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         if (idaMatch && idaMatch.coordinates_json) {
           try {
             const parsed = JSON.parse(idaMatch.coordinates_json);
-            parsedIdaCoords = parsed.map((pt: any) => {
-              if (Array.isArray(pt)) return [pt[0], pt[1]];
-              if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
-              return pt;
-            });
+            parsedIdaCoords = (Array.isArray(parsed) ? parsed : []).map((pt: any) => {
+              if (Array.isArray(pt) && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])) return [pt[0], pt[1]] as [number, number];
+              if (typeof pt === 'object' && pt && typeof pt.lat === 'number' && typeof pt.lng === 'number' && !isNaN(pt.lat) && !isNaN(pt.lng)) return [pt.lat, pt.lng] as [number, number];
+              return null;
+            }).filter(Boolean) as [number, number][];
             setIdaPolylinePath(parsedIdaCoords);
             setIdaWaypointsCount(parsedIdaCoords.length);
           } catch (_) { setIdaPolylinePath([]); setIdaWaypointsCount(0); }
@@ -1069,11 +1074,11 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
         if (vueltaMatch && vueltaMatch.coordinates_json) {
           try {
             const parsed = JSON.parse(vueltaMatch.coordinates_json);
-            parsedVueltaCoords = parsed.map((pt: any) => {
-              if (Array.isArray(pt)) return [pt[0], pt[1]];
-              if (typeof pt === 'object' && pt.lat && pt.lng) return [pt.lat, pt.lng];
-              return pt;
-            });
+            parsedVueltaCoords = (Array.isArray(parsed) ? parsed : []).map((pt: any) => {
+              if (Array.isArray(pt) && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])) return [pt[0], pt[1]] as [number, number];
+              if (typeof pt === 'object' && pt && typeof pt.lat === 'number' && typeof pt.lng === 'number' && !isNaN(pt.lat) && !isNaN(pt.lng)) return [pt.lat, pt.lng] as [number, number];
+              return null;
+            }).filter(Boolean) as [number, number][];
             setVueltaPolylinePath(parsedVueltaCoords);
             setVueltaWaypointsCount(parsedVueltaCoords.length);
           } catch (_) { setVueltaPolylinePath([]); setVueltaWaypointsCount(0); }
@@ -2625,7 +2630,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             )}
 
             {/* Control Waypoint Markers: Render key control handles with numbers matching the Recorrido list */}
-            {waypoints.map((pt, idx) => {
+            {waypoints.filter(pt => Array.isArray(pt) && pt.length >= 2 && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])).map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
               const isSelected = selectedWaypointIdx === idx;
@@ -2662,7 +2667,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             })}
 
             {/* Stop Draggable Markers: Render active and other direction stops */}
-            {stopIconSize > 0 && allBranchStops.map((st, idx) => {
+            {stopIconSize > 0 && allBranchStops.filter(st => st && typeof st.lat === 'number' && typeof st.lng === 'number' && !isNaN(st.lat) && !isNaN(st.lng)).map((st, idx) => {
               const isActiveDir = st.direction === direction;
               const isIda = st.direction !== 'vuelta';
               const displayNum = (st.stop_order ?? (idx + 1));
@@ -2723,7 +2728,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             })}
 
             {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría V3) */}
-            {telemetryVehicles.map((veh, idx) => (
+            {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => (
               <Marker
                 key={`telemetry_veh_${veh.id || idx}`}
                 position={[veh.lat, veh.lng]}

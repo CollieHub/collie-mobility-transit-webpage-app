@@ -181,11 +181,58 @@ VALUES ('${l.id}', '${escapeSql(l.lineCode)}', '${escapeSql(l.displayName)}', '$
     sqlBranches.push(`INSERT INTO "arg.redsube.branches" (id, line_id, code, name, agency_id, headsign_ida, headsign_vuelta, color, description)
 VALUES ('${b.id}', '${b.lineId}', '${escapeSql(b.shortName)}', '${escapeSql(branchName)}', '${escapeSql(b.agencyId)}', '${escapeSql(headsignIda || 'Ida')}', '${escapeSql(headsignVuelta || 'Vuelta')}', '${b.color}', '${escapeSql(b.description)}');`);
 
+function decodePolyline(str) {
+  if (!str || typeof str !== 'string') return [];
+  let index = 0, lat = 0, lng = 0, coordinates = [];
+  while (index < str.length) {
+    let b, shift = 0, result = 0;
+    do {
+      b = str.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    let dlat = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = str.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    let dlng = ((result & 1) !== 0 ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    coordinates.push([Math.round(lat * 1e-5 * 1e6) / 1e6, Math.round(lng * 1e-5 * 1e6) / 1e6]);
+  }
+  return coordinates;
+}
+
+function extractCoordsFromPoly(polyData) {
+  if (!polyData) return [];
+  if (Array.isArray(polyData) && polyData.length > 0) {
+    if (typeof polyData[0] === 'string') {
+      return decodePolyline(polyData[0]);
+    }
+    if (polyData[0].points) {
+      return decodePolyline(polyData[0].points);
+    }
+    if (Array.isArray(polyData[0])) {
+      return polyData.filter(p => Array.isArray(p) && typeof p[0] === 'number' && !isNaN(p[0]));
+    }
+    if (typeof polyData[0].lat === 'number' && typeof polyData[0].lon === 'number') {
+      return polyData.map(p => [p.lat, p.lon]);
+    }
+  }
+  return [];
+}
+
     // Shape Ida
     if (routeIda) {
       const polyIda = polys[routeIda.id];
-      if (Array.isArray(polyIda) && polyIda.length > 0) {
-        const coords = polyIda.map(pt => [pt.lat, pt.lon]);
+      const coords = extractCoordsFromPoly(polyIda);
+      if (coords.length > 0) {
         sqlShapes.push(`INSERT INTO "arg.redsube.route_shapes" (id, branch_id, direction, coordinates_json, total_distance_km)
 VALUES ('${uuidv5(`shape_ida_${b.id}`)}', '${b.id}', 'ida', '${escapeSql(JSON.stringify(coords))}', 0);`);
       }
@@ -194,7 +241,7 @@ VALUES ('${uuidv5(`shape_ida_${b.id}`)}', '${b.id}', 'ida', '${escapeSql(JSON.st
       const stopIdsIda = rp[routeIda.id] || [];
       stopIdsIda.forEach((sid, idx) => {
         const st = stopMap.get(String(sid));
-        if (st) {
+        if (st && typeof st.lat === 'number' && typeof st.lon === 'number' && !isNaN(st.lat) && !isNaN(st.lon)) {
           sqlStops.push(`INSERT INTO "arg.redsube.stops" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, stop_desc)
 VALUES ('${uuidv5(`stop_ida_${b.id}_${idx}`)}', '${b.id}', 'ida', ${idx + 1}, '${escapeSql(st.name || 'Parada')}', ${st.lat}, ${st.lon}, ${st.lat}, ${st.lon}, '${escapeSql(st.desc || '')}');`);
         }
@@ -204,8 +251,8 @@ VALUES ('${uuidv5(`stop_ida_${b.id}_${idx}`)}', '${b.id}', 'ida', ${idx + 1}, '$
     // Shape Vuelta
     if (routeVuelta) {
       const polyVuelta = polys[routeVuelta.id];
-      if (Array.isArray(polyVuelta) && polyVuelta.length > 0) {
-        const coords = polyVuelta.map(pt => [pt.lat, pt.lon]);
+      const coords = extractCoordsFromPoly(polyVuelta);
+      if (coords.length > 0) {
         sqlShapes.push(`INSERT INTO "arg.redsube.route_shapes" (id, branch_id, direction, coordinates_json, total_distance_km)
 VALUES ('${uuidv5(`shape_vuelta_${b.id}`)}', '${b.id}', 'vuelta', '${escapeSql(JSON.stringify(coords))}', 0);`);
       }
@@ -214,7 +261,7 @@ VALUES ('${uuidv5(`shape_vuelta_${b.id}`)}', '${b.id}', 'vuelta', '${escapeSql(J
       const stopIdsVuelta = rp[routeVuelta.id] || [];
       stopIdsVuelta.forEach((sid, idx) => {
         const st = stopMap.get(String(sid));
-        if (st) {
+        if (st && typeof st.lat === 'number' && typeof st.lon === 'number' && !isNaN(st.lat) && !isNaN(st.lon)) {
           sqlStops.push(`INSERT INTO "arg.redsube.stops" (id, branch_id, direction, stop_order, name, lat, lng, proj_lat, proj_lng, stop_desc)
 VALUES ('${uuidv5(`stop_vuelta_${b.id}_${idx}`)}', '${b.id}', 'vuelta', ${idx + 1}, '${escapeSql(st.name || 'Parada')}', ${st.lat}, ${st.lon}, ${st.lat}, ${st.lon}, '${escapeSql(st.desc || '')}');`);
         }
