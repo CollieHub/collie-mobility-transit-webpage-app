@@ -44,8 +44,12 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-const createBusTopDownSvg = (color = '#0284c7') => `
-  <svg width="18" height="40" viewBox="0 0 24 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+const createBusTopDownSvg = (color = '#0284c7', lineText = '') => {
+  const cleanLine = lineText.trim();
+  const fontSize = cleanLine.length > 3 ? '7.5' : (cleanLine.length > 2 ? '8.5' : '9.5');
+
+  return `
+  <svg width="20" height="44" viewBox="0 0 24 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
     <!-- Cuerpo del Colectivo -->
     <rect x="2" y="2" width="20" height="48" rx="4" fill="${color}" stroke="#0f172a" stroke-width="2"/>
     <!-- Techo / Detalles superiores -->
@@ -54,80 +58,62 @@ const createBusTopDownSvg = (color = '#0284c7') => `
     <rect x="4" y="5" width="16" height="3.5" rx="1" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
     <!-- Luneta trasera -->
     <rect x="4" y="44" width="16" height="2.5" rx="0.5" fill="#93c5fd" stroke="#0f172a" stroke-width="1"/>
-    <!-- Escotilla / Aire acondicionado -->
-    <rect x="7.5" y="19" width="9" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+    
+    ${cleanLine ? `
+      <!-- Número de Línea en el Techo -->
+      <rect x="3.5" y="17" width="17" height="15" rx="2" fill="rgba(15, 23, 42, 0.45)" stroke="#ffffff" stroke-width="0.8"/>
+      <text 
+        x="12" 
+        y="28" 
+        text-anchor="middle" 
+        font-family="'Inter', -apple-system, sans-serif" 
+        font-size="${fontSize}" 
+        font-weight="900" 
+        fill="#ffffff"
+        style="letter-spacing: -0.3px;"
+      >
+        ${cleanLine}
+      </text>
+    ` : `
+      <!-- Escotilla / Aire acondicionado estándar si no tiene línea -->
+      <rect x="7.5" y="19" width="9" height="9" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+    `}
+
     <!-- Faros delanteros amarillos -->
     <circle cx="5.5" cy="3" r="1.3" fill="#fbbf24"/>
     <circle cx="18.5" cy="3" r="1.3" fill="#fbbf24"/>
   </svg>
-`;
+  `;
+};
 
 function createBusVehicleIcon(
   linea?: string, 
   bearing: number = 0, 
-  isSelected: boolean = false,
-  intern?: string,
-  tripHeadsign?: string
+  isSelected: boolean = false
 ) {
   let cleanLine = (linea || '').replace(/^(l[ií]nea\s*)/i, '').trim();
   const isUndefinedLine = !cleanLine || cleanLine.toLowerCase() === 'a definir' || cleanLine.toLowerCase() === 'bus' || cleanLine.toLowerCase() === 'sube';
 
   const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? Math.round(bearing) : 0;
-
   const busColor = isSelected ? '#f59e0b' : (isUndefinedLine ? '#10b981' : '#0284c7');
 
-  // Construcción del label superior
-  const labelLine1 = isUndefinedLine ? 'Línea a definir' : `Línea ${cleanLine}`;
-  const labelLine2 = tripHeadsign && tripHeadsign.trim() !== '' && tripHeadsign !== 'En Circulación'
-    ? `-> ${tripHeadsign.trim()}`
-    : (intern ? `# ${intern}` : '');
-
-  const labelHtml = `
-    <div style="
-      position: absolute;
-      bottom: 46px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: ${busColor};
-      border: 1.5px solid #ffffff;
-      color: #ffffff;
-      font-family: 'Inter', -apple-system, sans-serif;
-      padding: 3px 8px;
-      border-radius: 6px;
-      text-align: center;
-      white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-      z-index: 3000;
-      line-height: 1.2;
-      pointer-events: auto;
-    ">
-      <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;">
-        ${labelLine1}
-      </div>
-      ${labelLine2 ? `
-        <div style="font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95); margin-top: 1px;">
-          ${labelLine2}
-        </div>
-      ` : ''}
-    </div>
-  `;
+  const lineTextOnRoof = isUndefinedLine ? '' : cleanLine.slice(0, 5);
 
   const htmlCode = `
-    <div style="position: relative; width: 18px; height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
-      ${labelHtml}
+    <div style="position: relative; width: 20px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
       <!-- Colectivo con rotación (mirando al frente según el rumbo de avance) -->
       <div style="
         transform: rotate(${safeBearing}deg);
         transform-origin: 50% 37.5%;
-        width: 18px;
-        height: 40px;
+        width: 20px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 2000;
-        filter: ${isSelected ? 'drop-shadow(0 0 10px rgba(245, 158, 11, 0.9))' : 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5))'};
+        filter: ${isSelected ? 'drop-shadow(0 0 12px rgba(245, 158, 11, 0.95))' : 'drop-shadow(0 2px 5px rgba(0, 0, 0, 0.55))'};
       ">
-        ${createBusTopDownSvg(busColor)}
+        ${createBusTopDownSvg(busColor, lineTextOnRoof)}
       </div>
     </div>
   `;
@@ -135,8 +121,8 @@ function createBusVehicleIcon(
   return L.divIcon({
     className: 'topdown-bus-vehicle-marker',
     html: htmlCode,
-    iconSize: [18, 40],
-    iconAnchor: [9, 15]
+    iconSize: [20, 44],
+    iconAnchor: [10, 16]
   });
 }
 
@@ -3356,9 +3342,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   icon={createBusVehicleIcon(
                     veh.linea || veh.route_short_name, 
                     vehBearing, 
-                    isSelected, 
-                    veh.intern || veh.id, 
-                    veh.trip_headsign
+                    isSelected
                   )}
                   eventHandlers={{
                     click(e) {
