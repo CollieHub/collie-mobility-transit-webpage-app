@@ -546,11 +546,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       }
     }
 
-    // 4. Check companiesList
-    const foundComp = companiesList.find(c => String(c.id) === String(val) || String(c.agency_id) === String(val));
-    if (foundComp?.name || foundComp?.agency_name) return foundComp.name || foundComp.agency_name;
+    if (row.company_name) return row.company_name;
+    if (row.agency_name) return row.agency_name;
 
-    return `Empresa ${val}`;
+    return `Empresa ${val || row.agency_id}`;
   };
 
   const availableBranchesForFilter = branchesList.filter(b => {
