@@ -137,19 +137,9 @@ export default function RedSubeV3Panel({
   }, []);
 
   const filterAndEmitVehicles = useCallback((rawVehicles: any[], mode: 'ramal' | 'free', limit: number) => {
-    let result = rawVehicles;
+    let result = Array.isArray(rawVehicles) ? rawVehicles : [];
 
-    if (mode === 'free') {
-      // Filtrar todas las unidades que caen dentro del viewport/zoom del mapa con tolerancia de bordes
-      if (mapBounds && typeof mapBounds.contains === 'function') {
-        const paddedBounds = typeof (mapBounds as any).pad === 'function' ? (mapBounds as any).pad(0.15) : mapBounds;
-        result = result.filter((v: any) => {
-          const lat = v.latitude || v.lat;
-          const lng = v.longitude || v.lng;
-          return typeof lat === 'number' && typeof lng === 'number' && paddedBounds.contains([lat, lng]);
-        });
-      }
-    } else {
+    if (mode === 'ramal' && selectedCompany !== 'TODAS') {
       // Filtrar por sub-ramales seleccionados de la empresa actual
       if (selectedRamales.size > 0) {
         result = result.filter((v: any) => {
@@ -161,7 +151,7 @@ export default function RedSubeV3Panel({
 
     setActiveUnitsCount(result.length);
     onUnitsUpdateRef.current?.(result.slice(0, limit));
-  }, [mapBounds, selectedRamales]);
+  }, [selectedCompany, selectedRamales]);
 
   // Fetch live telemetry vehicles
   const loadVehicles = useCallback(async (comp: string, limit: number, mode: 'ramal' | 'free') => {
