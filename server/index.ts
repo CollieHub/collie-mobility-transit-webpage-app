@@ -2548,16 +2548,22 @@ app.get('/v1/redsube/line-routes', async (c) => {
 app.get('/v1/redsube/vehicles', async (c) => {
   const company = c.req.query('company') || '';
   const ramal = c.req.query('ramal') || '';
-  const limit = parseInt(c.req.query('limit') || '5000', 10);
+  const limit = parseInt(c.req.query('limit') || '20000', 10);
+  const swLat = parseFloat(c.req.query('sw_lat') || '');
+  const swLng = parseFloat(c.req.query('sw_lng') || '');
+  const neLat = parseFloat(c.req.query('ne_lat') || '');
+  const neLng = parseFloat(c.req.query('ne_lng') || '');
+  const hasBounds = !isNaN(swLat) && !isNaN(swLng) && !isNaN(neLat) && !isNaN(neLng);
+
   const clientId = c.env.REDSUBE_CLIENT_ID || '6dbd9c5c729e4bbf89b904cbdddd4efd';
   const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '5314C00834B54ba6A860e3C28dF6cA18';
 
-  const cacheKey = `cache:redsube:vehicles_proto:${company}:${ramal}:${limit}`;
+  const cacheKey = `cache:redsube:vehicles_proto:${company}:${ramal}:${limit}:${hasBounds ? `${swLat.toFixed(3)}_${swLng.toFixed(3)}_${neLat.toFixed(3)}_${neLng.toFixed(3)}` : 'all'}`;
   if (c.env.FLEET_KV) {
     try {
       const cached = await c.env.FLEET_KV.get(cacheKey);
       if (cached) {
-        c.header('Cache-Control', 'public, max-age=8, s-maxage=8');
+        c.header('Cache-Control', 'public, max-age=6, s-maxage=6');
         c.header('X-Cache-Status', 'HIT-KV');
         return c.json(JSON.parse(cached));
       }
@@ -2698,6 +2704,18 @@ app.get('/v1/redsube/vehicles', async (c) => {
       }
     }
 
+    // Filtrar por bounding box si se proporcionó
+    if (hasBounds) {
+      const latPad = Math.abs(neLat - swLat) * 0.15;
+      const lngPad = Math.abs(neLng - swLng) * 0.15;
+      const minLat = Math.min(swLat, neLat) - latPad;
+      const maxLat = Math.max(swLat, neLat) + latPad;
+      const minLng = Math.min(swLng, neLng) - lngPad;
+      const maxLng = Math.max(swLng, neLng) + lngPad;
+
+      mappedVehicles = mappedVehicles.filter(v => v.lat >= minLat && v.lat <= maxLat && v.lng >= minLng && v.lng <= maxLng);
+    }
+
     // Filtrar por línea / empresa si se especificó
     if (company && company !== 'TODAS') {
       const cleanComp = company.replace(/^(Línea\s+|Linea\s+)/i, '').trim().toUpperCase();
@@ -2722,11 +2740,11 @@ app.get('/v1/redsube/vehicles', async (c) => {
 
     if (c.env.FLEET_KV) {
       try {
-        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 8 });
+        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 6 });
       } catch (_) {}
     }
 
-    c.header('Cache-Control', 'public, max-age=8, s-maxage=8');
+    c.header('Cache-Control', 'public, max-age=6, s-maxage=6');
     return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);

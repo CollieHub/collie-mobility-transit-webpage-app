@@ -73,7 +73,7 @@ export default function RedSubeV3Panel({
   activeRamal,
   mapBounds
 }: RedSubeV3PanelProps) {
-  const [unitsLimit, setUnitsLimit] = useState<number>(50);
+  const [unitsLimit, setUnitsLimit] = useState<number>(500);
   const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('free');
   const [selectedCompany, setSelectedCompany] = useState<string>('228');
   const [companies, setCompanies] = useState<any[]>([
@@ -140,12 +140,13 @@ export default function RedSubeV3Panel({
     let result = rawVehicles;
 
     if (mode === 'free') {
-      // Filtrar todas las unidades que caen dentro del viewport/zoom del mapa
+      // Filtrar todas las unidades que caen dentro del viewport/zoom del mapa con tolerancia de bordes
       if (mapBounds && typeof mapBounds.contains === 'function') {
+        const paddedBounds = typeof (mapBounds as any).pad === 'function' ? (mapBounds as any).pad(0.08) : mapBounds;
         result = result.filter((v: any) => {
           const lat = v.latitude || v.lat;
           const lng = v.longitude || v.lng;
-          return typeof lat === 'number' && typeof lng === 'number' && mapBounds.contains([lat, lng]);
+          return typeof lat === 'number' && typeof lng === 'number' && paddedBounds.contains([lat, lng]);
         });
       }
     } else {
@@ -171,15 +172,19 @@ export default function RedSubeV3Panel({
     }
     try {
       const targetComp = mode === 'free' ? 'TODAS' : comp;
-      const fetchLimit = mode === 'free' ? 5000 : 500;
-      const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(targetComp)}&limit=${fetchLimit}`);
+      let boundsParams = '';
+      if (mode === 'free' && mapBounds && typeof mapBounds.getSouth === 'function') {
+        boundsParams = `&sw_lat=${mapBounds.getSouth()}&sw_lng=${mapBounds.getWest()}&ne_lat=${mapBounds.getNorth()}&ne_lng=${mapBounds.getEast()}`;
+      }
+      const fetchLimit = mode === 'free' ? 20000 : 1000;
+      const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(targetComp)}&limit=${fetchLimit}${boundsParams}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.vehicles)) {
         allVehiclesCacheRef.current = data.vehicles;
         filterAndEmitVehicles(data.vehicles, mode, limit);
       }
     } catch (_) {}
-  }, [filterAndEmitVehicles]);
+  }, [filterAndEmitVehicles, mapBounds]);
 
   // Re-filtrar cuando cambia mapBounds, selectedRamales o unitsMode
   useEffect(() => {
@@ -286,12 +291,11 @@ export default function RedSubeV3Panel({
           }}
         >
           <option value={0}>No mostrar unidades</option>
-          <option value={10}>Hasta 10 unidades</option>
-          <option value={25}>Hasta 25 unidades</option>
           <option value={50}>Hasta 50 unidades</option>
           <option value={100}>Hasta 100 unidades</option>
           <option value={200}>Hasta 200 unidades</option>
           <option value={500}>Hasta 500 unidades</option>
+          <option value={2000}>Todas las unidades visibles (Sin límite)</option>
         </select>
 
         <div
