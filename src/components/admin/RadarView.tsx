@@ -2858,68 +2858,160 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               );
             })}
 
-            {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría V3) */}
-            {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => (
-              <Marker
-                key={`telemetry_veh_${veh.id || idx}`}
-                position={[veh.lat, veh.lng]}
-                zIndexOffset={4500}
-                icon={createBusVehicleIcon(veh.intern, veh.linea, veh.speed)}
-              >
-                <Popup>
-                  <div style={{ color: '#111827', fontSize: '0.8rem', fontWeight: 600, minWidth: '170px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '15px' }}>🚍</span>
-                      <strong style={{ fontSize: '0.92rem', color: '#0284c7' }}>Línea {veh.linea}</strong>
-                      <span style={{ fontSize: '0.7rem', backgroundColor: '#e2e8f0', padding: '1px 5px', borderRadius: '4px', color: '#475569' }}>
-                        #{veh.intern}
-                      </span>
-                    </div>
-                    {veh.agency_name && (
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', marginBottom: '4px' }}>
-                        🏢 {veh.agency_name}
+            {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría GTFS V3) */}
+            {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => {
+              const dirLabel = veh.direction === 0 ? 'Ida (Hacia Destino)' : veh.direction === 1 ? 'Vuelta (Hacia Cabecera)' : (direction === 'ida' ? 'Ida' : 'Vuelta');
+              const formattedTime = veh.timestamp ? (typeof veh.timestamp === 'number' && veh.timestamp < 2000000000 ? new Date(veh.timestamp * 1000).toLocaleTimeString() : new Date(veh.timestamp).toLocaleTimeString()) : 'En vivo';
+              
+              return (
+                <Marker
+                  key={`telemetry_veh_${veh.id || idx}`}
+                  position={[veh.lat, veh.lng]}
+                  zIndexOffset={6000}
+                  icon={createBusVehicleIcon(veh.intern, veh.linea, veh.speed)}
+                >
+                  <Popup>
+                    <div style={{
+                      color: '#0f172a',
+                      fontSize: '0.8rem',
+                      minWidth: '220px',
+                      maxWidth: '280px',
+                      padding: '2px'
+                    }}>
+                      {/* Cabecera Colectivo */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderBottom: '2px solid #0284c7',
+                        paddingBottom: '6px',
+                        marginBottom: '8px'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '18px' }}>🚍</span>
+                          <div>
+                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0284c7', lineHeight: 1.1 }}>
+                              Línea {veh.linea || veh.route_short_name}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
+                              GTFS Route: {veh.route_id || 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                        <span style={{
+                          backgroundColor: '#0284c7',
+                          color: '#ffffff',
+                          fontSize: '0.75rem',
+                          fontWeight: 800,
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          boxShadow: '0 2px 4px rgba(2, 132, 199, 0.3)'
+                        }}>
+                          #{veh.intern}
+                        </span>
                       </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#334155', borderTop: '1px solid #e2e8f0', paddingTop: '4px' }}>
-                      <span>Velocidad: <strong>{Math.round(veh.speed)} km/h</strong></span>
-                      {veh.direction !== undefined && (
-                        <span>Sentido: <strong>{veh.direction === 0 ? 'Ida' : 'Vuelta'}</strong></span>
+
+                      {/* Empresa / Concesionaria */}
+                      {veh.agency_name && (
+                        <div style={{
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '6px',
+                          padding: '4px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          color: '#334155',
+                          marginBottom: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          <span>🏢</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {veh.agency_name}
+                          </span>
+                        </div>
                       )}
+
+                      {/* Destino / Headsign GTFS */}
+                      {veh.trip_headsign && (
+                        <div style={{
+                          marginBottom: '6px',
+                          fontSize: '0.75rem',
+                          color: '#1e293b'
+                        }}>
+                          <span style={{ color: '#64748b', fontSize: '0.7rem' }}>Destino (Headsign):</span>
+                          <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                            🏁 {veh.trip_headsign}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Grid de Telemetría */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '6px',
+                        backgroundColor: '#f1f5f9',
+                        padding: '6px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        marginBottom: '6px'
+                      }}>
+                        <div>
+                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>VELOCIDAD</span>
+                          <strong style={{ color: '#16a34a', fontSize: '0.85rem' }}>{Math.round(veh.speed)} km/h</strong>
+                        </div>
+                        <div>
+                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>SENTIDO</span>
+                          <strong style={{ color: '#0284c7' }}>{dirLabel}</strong>
+                        </div>
+                        {veh.bearing !== undefined && veh.bearing !== null && (
+                          <div>
+                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>RUMBO</span>
+                            <strong>{Math.round(veh.bearing)}°</strong>
+                          </div>
+                        )}
+                        <div>
+                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>ÚLTIMO GPS</span>
+                          <strong>{formattedTime}</strong>
+                        </div>
+                      </div>
+
+                      {/* Coordenadas GPS */}
+                      <div style={{
+                        fontSize: '0.65rem',
+                        color: '#94a3b8',
+                        textAlign: 'right',
+                        fontFamily: 'monospace'
+                      }}>
+                        GPS: {veh.lat.toFixed(5)}, {veh.lng.toFixed(5)}
+                      </div>
                     </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                  </Popup>
+                </Marker>
+              );
+            })}
 
             {/* Terminales de Inicio y Fin (Cabeceras) */}
             {terminalStart && (
               <Marker
                 key={`terminal_start_${direction}_${terminalStart.pos[0]}_${terminalStart.pos[1]}`}
                 position={terminalStart.pos}
-                zIndexOffset={4200}
+                zIndexOffset={3800}
                 icon={createTerminalIcon(terminalStart.name, true, '#f59e0b')}
-              >
-                <Popup>
-                  <div style={{ color: '#111827', fontSize: '0.82rem', fontWeight: 700 }}>
-                    🚩 Terminal de Inicio: {terminalStart.name}
-                  </div>
-                </Popup>
-              </Marker>
+                interactive={false}
+              />
             )}
 
             {terminalEnd && (
               <Marker
                 key={`terminal_end_${direction}_${terminalEnd.pos[0]}_${terminalEnd.pos[1]}`}
                 position={terminalEnd.pos}
-                zIndexOffset={4200}
+                zIndexOffset={3800}
                 icon={createTerminalIcon(terminalEnd.name, false, '#f59e0b')}
-              >
-                <Popup>
-                  <div style={{ color: '#111827', fontSize: '0.82rem', fontWeight: 700 }}>
-                    🏁 Terminal de Fin: {terminalEnd.name}
-                  </div>
-                </Popup>
-              </Marker>
+                interactive={false}
+              />
             )}
           </MapContainer>
 
