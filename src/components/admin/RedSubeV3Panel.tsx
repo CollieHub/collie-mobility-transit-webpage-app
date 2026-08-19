@@ -60,6 +60,7 @@ interface RedSubeV3PanelProps {
   showNotification?: (type: 'success' | 'error', msg: string) => void;
   currentDirection?: 'ida' | 'vuelta';
   activeRamal?: string;
+  mapBounds?: any;
 }
 
 export default function RedSubeV3Panel({
@@ -69,7 +70,8 @@ export default function RedSubeV3Panel({
   onUnitsUpdate,
   showNotification,
   currentDirection,
-  activeRamal
+  activeRamal,
+  mapBounds
 }: RedSubeV3PanelProps) {
   const [unitsLimit, setUnitsLimit] = useState<number>(50);
   const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('ramal');
@@ -88,6 +90,8 @@ export default function RedSubeV3Panel({
   const [expandedDetails, setExpandedDetails] = useState<Set<string>>(new Set());
   const [correctedVersions, setCorrectedVersions] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const allVehiclesCacheRef = useRef<any[]>([]);
 
   const onRouteToggleRef = useRef(onRouteToggle);
   onRouteToggleRef.current = onRouteToggle;
@@ -132,34 +136,69 @@ export default function RedSubeV3Panel({
     }
   }, []);
 
+  const filterAndEmitVehicles = useCallback((rawVehicles: any[], mode: 'ramal' | 'free', limit: number) => {
+    let result = rawVehicles;
+
+    if (mode === 'free') {
+      // Filtrar todas las unidades que caen dentro del viewport/zoom del mapa
+      if (mapBounds && typeof mapBounds.contains === 'function') {
+        result = result.filter((v: any) => {
+          const lat = v.latitude || v.lat;
+          const lng = v.longitude || v.lng;
+          return typeof lat === 'number' && typeof lng === 'number' && mapBounds.contains([lat, lng]);
+        });
+      }
+    } else {
+      // Filtrar por sub-ramales seleccionados de la empresa actual
+      if (selectedRamales.size > 0) {
+        result = result.filter((v: any) => {
+          const shortName = String(v.route_short_name || v.linea || '').toUpperCase().trim();
+          return Array.from(selectedRamales).some(ramal => shortName.includes(ramal.toUpperCase()));
+        });
+      }
+    }
+
+    setActiveUnitsCount(result.length);
+    onUnitsUpdateRef.current?.(result.slice(0, limit));
+  }, [mapBounds, selectedRamales]);
+
   // Fetch live telemetry vehicles
-  const loadVehicles = useCallback(async (comp: string, limit: number) => {
+  const loadVehicles = useCallback(async (comp: string, limit: number, mode: 'ramal' | 'free') => {
     if (limit === 0) {
       setActiveUnitsCount(0);
       onUnitsUpdateRef.current?.([]);
       return;
     }
     try {
-      const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(comp)}&limit=${limit}`);
+      const targetComp = mode === 'free' ? 'TODAS' : comp;
+      const fetchLimit = mode === 'free' ? 5000 : 500;
+      const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(targetComp)}&limit=${fetchLimit}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.vehicles)) {
-        setActiveUnitsCount(data.total || data.vehicles.length);
-        onUnitsUpdateRef.current?.(data.vehicles);
+        allVehiclesCacheRef.current = data.vehicles;
+        filterAndEmitVehicles(data.vehicles, mode, limit);
       }
     } catch (_) {}
-  }, []);
+  }, [filterAndEmitVehicles]);
+
+  // Re-filtrar cuando cambia mapBounds, selectedRamales o unitsMode
+  useEffect(() => {
+    if (allVehiclesCacheRef.current.length > 0) {
+      filterAndEmitVehicles(allVehiclesCacheRef.current, unitsMode, unitsLimit);
+    }
+  }, [mapBounds, selectedRamales, unitsMode, unitsLimit, filterAndEmitVehicles]);
 
   useEffect(() => {
     loadRoutes(selectedCompany);
   }, [selectedCompany, loadRoutes]);
 
   useEffect(() => {
-    loadVehicles(selectedCompany, unitsLimit);
+    loadVehicles(selectedCompany, unitsLimit, unitsMode);
     const interval = setInterval(() => {
-      loadVehicles(selectedCompany, unitsLimit);
-    }, 15000);
+      loadVehicles(selectedCompany, unitsLimit, unitsMode);
+    }, 12000);
     return () => clearInterval(interval);
-  }, [selectedCompany, unitsLimit, loadVehicles]);
+  }, [selectedCompany, unitsLimit, unitsMode, loadVehicles]);
 
   const handleToggleAll = (checked: boolean) => {
     if (checked) {
@@ -251,6 +290,8 @@ export default function RedSubeV3Panel({
           <option value={25}>Hasta 25 unidades</option>
           <option value={50}>Hasta 50 unidades</option>
           <option value={100}>Hasta 100 unidades</option>
+          <option value={200}>Hasta 200 unidades</option>
+          <option value={500}>Hasta 500 unidades</option>
         </select>
 
         <div
@@ -272,7 +313,7 @@ export default function RedSubeV3Panel({
               onChange={() => setUnitsMode('ramal')}
               style={{ accentColor: '#e65100', cursor: 'pointer' }}
             />
-            Sub-ramales seleccionados
+            Línea seleccionada
           </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.7rem', color: '#cbd5e1', cursor: 'pointer' }}>
             <input
@@ -283,7 +324,7 @@ export default function RedSubeV3Panel({
               onChange={() => setUnitsMode('free')}
               style={{ accentColor: '#e65100', cursor: 'pointer' }}
             />
-            Todas en el mapa
+            Todas dentro del zoom
           </label>
         </div>
       </div>

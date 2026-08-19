@@ -79,6 +79,22 @@ function MapInstanceCapture({ onMapReady }: { onMapReady: (map: L.Map) => void }
   return null;
 }
 
+function MapBoundsListener({ onBoundsChange }: { onBoundsChange: (bounds: L.LatLngBounds) => void }) {
+  const map = useMap();
+  useMapEvents({
+    moveend() {
+      onBoundsChange(map.getBounds());
+    },
+    zoomend() {
+      onBoundsChange(map.getBounds());
+    }
+  });
+  useEffect(() => {
+    onBoundsChange(map.getBounds());
+  }, [map, onBoundsChange]);
+  return null;
+}
+
 function createWaypointIcon(orderNum: number, isStart: boolean, isEnd: boolean, isSelected: boolean = false, showNumbers: boolean = true) {
   const size = isSelected ? 30 : 26;
   const bgColor = isStart ? '#10b981' : isEnd ? '#ef4444' : '#0284c7';
@@ -820,6 +836,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
+  const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
   const [stopIconMode, setStopIconMode] = useState<'icon' | 'number'>('icon');
   const [isRouting, setIsRouting] = useState<boolean>(false);
@@ -2134,19 +2151,25 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 }}
                 onUnitsUpdate={(units) => {
                   setTelemetryVehicles(units.map((u: any) => ({
-                    id: u.id || u.vehicle_id || Math.random().toString(),
+                    id: String(u.id || u.vehicle_id || u.intern || Math.random()),
+                    intern: String(u.intern || u.id || u.vehicle_id || 'Unidad'),
+                    linea: u.linea || u.route_short_name || 'SUBE',
+                    route_short_name: u.route_short_name || u.linea || '',
+                    route_id: u.route_id || '',
+                    trip_headsign: u.trip_headsign || '',
+                    agency_name: u.agency_name || '',
                     lat: u.latitude || u.lat || -34.0970,
                     lng: u.longitude || u.lng || -59.0300,
                     bearing: u.bearing || u.heading || 0,
                     speed: u.speed || 0,
-                    intern: u.label || u.agency_name || 'RedSUBE',
-                    linea: u.route_short_name || u.linea || '228',
+                    direction: u.direction,
                     delayMinutes: 0,
                     status: 'running',
                     timestamp: u.timestamp || Date.now()
                   })));
                 }}
                 currentDirection={direction}
+                mapBounds={mapBounds}
               />
             </div>
           ) : (
@@ -2642,6 +2665,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             />
 
             <MapInstanceCapture onMapReady={setMapInstance} />
+            <MapBoundsListener onBoundsChange={setMapBounds} />
 
             <LeafletStreetSearch onSelectLocation={handleSelectSearchedStreet} />
 
