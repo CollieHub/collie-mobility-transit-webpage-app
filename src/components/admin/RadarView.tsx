@@ -378,6 +378,44 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   return R * c;
 }
 
+function calculateBearing(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const lat1Rad = lat1 * Math.PI / 180;
+  const lat2Rad = lat2 * Math.PI / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2Rad);
+  const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
+  let brng = Math.atan2(y, x) * 180 / Math.PI;
+  return Math.round((brng + 360) % 360);
+}
+
+function findRouteHeading(lat: number, lng: number, routePoints: [number, number][], isReverse: boolean = false): number | null {
+  if (!routePoints || routePoints.length < 2) return null;
+  let minDist = Infinity;
+  let bestIdx = -1;
+
+  for (let i = 0; i < routePoints.length - 1; i++) {
+    const p1 = routePoints[i];
+    const p2 = routePoints[i + 1];
+    const midLat = (p1[0] + p2[0]) / 2;
+    const midLng = (p1[1] + p2[1]) / 2;
+    const d = calculateDistanceKm(lat, lng, midLat, midLng);
+    if (d < minDist && d < 0.6) {
+      minDist = d;
+      bestIdx = i;
+    }
+  }
+
+  if (bestIdx !== -1) {
+    const p1 = routePoints[bestIdx];
+    const p2 = routePoints[bestIdx + 1];
+    if (isReverse) {
+      return calculateBearing(p2[0], p2[1], p1[0], p1[1]);
+    }
+    return calculateBearing(p1[0], p1[1], p2[0], p2[1]);
+  }
+  return null;
+}
+
 function projectPointOnPolyline(pt: [number, number], path: [number, number][]): [number, number] {
   if (!path || path.length === 0) return pt;
   if (path.length === 1) return path[0];
@@ -3336,7 +3374,41 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
             {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría GTFS V3) */}
             {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => {
               const isSelected = selectedVehicle && (String(selectedVehicle.intern) === String(veh.intern) || String(selectedVehicle.id) === String(veh.id));
-              const vehBearing = typeof veh.bearing === 'number' && !isNaN(veh.bearing) ? veh.bearing : (parseFloat(veh.bearing) || 0);
+              const vehKey = String(veh.intern || veh.id || veh.vehicle_id);
+
+              let vehBearing = typeof veh.bearing === 'number' && !isNaN(veh.bearing) && veh.bearing > 0 ? veh.bearing : 0;
+
+              // 1. Si no tiene rumbo del feed, calcular desde el historial de movimiento de la unidad
+              if (vehBearing === 0 && gpsTraces[vehKey]?.points && gpsTraces[vehKey].points.length >= 2) {
+                const pts = gpsTraces[vehKey].points;
+                const pPrev = pts[pts.length - 2];
+                const pCur = pts[pts.length - 1];
+                if (pPrev && pCur && calculateDistanceKm(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng) > 0.003) {
+                  vehBearing = calculateBearing(pPrev.lat, pPrev.lng, pCur.lat, pCur.lng);
+                }
+              }
+
+              // 2. Si sigue en 0, calcular desde el trazado de la ruta activa en pantalla o paradas
+              if (vehBearing === 0) {
+                const isReverse = veh.direction === 1 || (veh.direction === undefined && direction === 'vuelta');
+                const activePath = isReverse 
+                  ? (vueltaPolylinePath.length > 1 ? vueltaPolylinePath : displayPolylinePath) 
+                  : (idaPolylinePath.length > 1 ? idaPolylinePath : displayPolylinePath);
+
+                if (activePath && activePath.length >= 2) {
+                  const routeHeading = findRouteHeading(veh.lat, veh.lng, activePath, isReverse);
+                  if (routeHeading !== null) {
+                    vehBearing = routeHeading;
+                  }
+                } else if (stops && stops.length >= 2) {
+                  const stopCoords: [number, number][] = stops.map(s => [s.lat, s.lng]);
+                  const routeHeading = findRouteHeading(veh.lat, veh.lng, stopCoords, isReverse);
+                  if (routeHeading !== null) {
+                    vehBearing = routeHeading;
+                  }
+                }
+              }
+
               const dirLabel = veh.direction === 0 ? 'Ida (Hacia Destino)' : veh.direction === 1 ? 'Vuelta (Hacia Cabecera)' : (direction === 'ida' ? 'Ida' : 'Vuelta');
               const formattedTime = veh.timestamp ? (typeof veh.timestamp === 'number' && veh.timestamp < 2000000000 ? new Date(veh.timestamp * 1000).toLocaleTimeString() : new Date(veh.timestamp).toLocaleTimeString()) : 'En vivo';
 
