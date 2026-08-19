@@ -25,7 +25,8 @@ import {
   Unlock,
   Hash,
   FileCode,
-  LocateFixed
+  LocateFixed,
+  Check
 } from 'lucide-react';
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
 import RedSubeV3Panel, { getBranchColor } from './RedSubeV3Panel';
@@ -834,6 +835,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
+  const [vehicleModalTab, setVehicleModalTab] = useState<'info' | 'json'>('info');
+  const [vehicleJsonCopied, setVehicleJsonCopied] = useState<boolean>(false);
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
@@ -2150,6 +2153,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 }}
                 onUnitsUpdate={(units) => {
                   setTelemetryVehicles(units.map((u: any) => ({
+                    ...u,
                     id: String(u.id || u.vehicle_id || u.intern || Math.random()),
                     intern: String(u.intern || u.id || u.vehicle_id || 'Unidad'),
                     linea: u.linea || u.route_short_name || 'SUBE',
@@ -3128,106 +3132,214 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 </div>
               </div>
 
-              {/* Body */}
-              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* Empresa */}
-                {selectedVehicle.agency_name && (
-                  <div style={{
-                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '8px',
-                    padding: '8px 10px',
-                    fontSize: '0.78rem',
-                    color: '#cbd5e1',
+              {/* Tabs Switcher: Detalle vs JSON */}
+              <div style={{
+                display: 'flex',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+                backgroundColor: 'rgba(0, 0, 0, 0.25)'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => setVehicleModalTab('info')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    borderBottom: vehicleModalTab === 'info' ? '2px solid #38bdf8' : '2px solid transparent',
+                    backgroundColor: vehicleModalTab === 'info' ? 'rgba(56, 189, 248, 0.12)' : 'transparent',
+                    color: vehicleModalTab === 'info' ? '#38bdf8' : '#94a3b8',
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
-                  }}>
-                    <span style={{ fontSize: '14px' }}>🏢</span>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                      {selectedVehicle.agency_name}
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>📊 Telemetría</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVehicleModalTab('json')}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    borderBottom: vehicleModalTab === 'json' ? '2px solid #38bdf8' : '2px solid transparent',
+                    backgroundColor: vehicleModalTab === 'json' ? 'rgba(56, 189, 248, 0.12)' : 'transparent',
+                    color: vehicleModalTab === 'json' ? '#38bdf8' : '#94a3b8',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <FileCode size={13} />
+                  <span>JSON Completo</span>
+                </button>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {vehicleModalTab === 'info' ? (
+                  <>
+                    {/* Empresa */}
+                    {selectedVehicle.agency_name && (
+                      <div style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '8px',
+                        padding: '8px 10px',
+                        fontSize: '0.78rem',
+                        color: '#cbd5e1',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span style={{ fontSize: '14px' }}>🏢</span>
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                          {selectedVehicle.agency_name}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Headsign / Destino GTFS */}
+                    <div style={{
+                      backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '8px',
+                      padding: '8px 10px'
+                    }}>
+                      <span style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
+                        Destino Oficial (Headsign)
+                      </span>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span>🏁</span>
+                        <span>{selectedVehicle.trip_headsign || 'Sin especificar'}</span>
+                      </div>
                     </div>
+
+                    {/* Grid de Métricas */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '8px'
+                    }}>
+                      <div style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '8px',
+                        padding: '8px 10px'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          Velocidad en Vivo
+                        </span>
+                        <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#4ade80' }}>
+                          {Math.round(selectedVehicle.speed || 0)} <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>km/h</span>
+                        </div>
+                      </div>
+
+                      <div style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '8px',
+                        padding: '8px 10px'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          Sentido GTFS
+                        </span>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: selectedVehicle.direction === 0 ? '#38bdf8' : '#fb7185' }}>
+                          {selectedVehicle.direction === 0 ? 'Ida (0)' : selectedVehicle.direction === 1 ? 'Vuelta (1)' : 'Ida'}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '8px',
+                        padding: '8px 10px'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          Rumbo
+                        </span>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc' }}>
+                          🧭 {Math.round(selectedVehicle.bearing || 0)}°
+                        </div>
+                      </div>
+
+                      <div style={{
+                        backgroundColor: 'rgba(30, 41, 59, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: '8px',
+                        padding: '8px 10px'
+                      }}>
+                        <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          Última Señal GPS
+                        </span>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
+                          🕒 {selectedVehicle.timestamp ? (typeof selectedVehicle.timestamp === 'number' && selectedVehicle.timestamp < 2000000000 ? new Date(selectedVehicle.timestamp * 1000).toLocaleTimeString() : new Date(selectedVehicle.timestamp).toLocaleTimeString()) : 'En vivo'}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  /* Pestaña JSON Raw Completo */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>
+                        Datos completos de la unidad
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(selectedVehicle, null, 2));
+                          setVehicleJsonCopied(true);
+                          setTimeout(() => setVehicleJsonCopied(false), 2000);
+                        }}
+                        style={{
+                          backgroundColor: vehicleJsonCopied ? '#16a34a' : 'rgba(56, 189, 248, 0.15)',
+                          border: '1px solid rgba(56, 189, 248, 0.35)',
+                          color: vehicleJsonCopied ? '#ffffff' : '#38bdf8',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {vehicleJsonCopied ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{vehicleJsonCopied ? '¡Copiado!' : 'Copiar JSON'}</span>
+                      </button>
+                    </div>
+                    <pre style={{
+                      backgroundColor: '#090d16',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      fontSize: '0.71rem',
+                      color: '#38bdf8',
+                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                      maxHeight: '220px',
+                      overflowY: 'auto',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      margin: 0,
+                      boxShadow: 'inset 0 2px 6px rgba(0, 0, 0, 0.5)'
+                    }}>
+                      {JSON.stringify(selectedVehicle, null, 2)}
+                    </pre>
                   </div>
                 )}
-
-                {/* Headsign / Destino GTFS */}
-                <div style={{
-                  backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '8px',
-                  padding: '8px 10px'
-                }}>
-                  <span style={{ fontSize: '0.68rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.5px', display: 'block', marginBottom: '2px' }}>
-                    Destino Oficial (Headsign)
-                  </span>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>🏁</span>
-                    <span>{selectedVehicle.trip_headsign || 'Sin especificar'}</span>
-                  </div>
-                </div>
-
-                {/* Grid de Métricas */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '8px'
-                }}>
-                  <div style={{
-                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '8px',
-                    padding: '8px 10px'
-                  }}>
-                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                      Velocidad en Vivo
-                    </span>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#4ade80' }}>
-                      {Math.round(selectedVehicle.speed || 0)} <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>km/h</span>
-                    </div>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '8px',
-                    padding: '8px 10px'
-                  }}>
-                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                      Sentido GTFS
-                    </span>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: selectedVehicle.direction === 0 ? '#38bdf8' : '#fb7185' }}>
-                      {selectedVehicle.direction === 0 ? 'Ida (0)' : selectedVehicle.direction === 1 ? 'Vuelta (1)' : 'Ida'}
-                    </div>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '8px',
-                    padding: '8px 10px'
-                  }}>
-                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                      Rumbo
-                    </span>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#f8fafc' }}>
-                      🧭 {Math.round(selectedVehicle.bearing || 0)}°
-                    </div>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '8px',
-                    padding: '8px 10px'
-                  }}>
-                    <span style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                      Última Señal GPS
-                    </span>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#f8fafc' }}>
-                      🕒 {selectedVehicle.timestamp ? (typeof selectedVehicle.timestamp === 'number' && selectedVehicle.timestamp < 2000000000 ? new Date(selectedVehicle.timestamp * 1000).toLocaleTimeString() : new Date(selectedVehicle.timestamp).toLocaleTimeString()) : 'En vivo'}
-                    </div>
-                  </div>
-                </div>
 
                 {/* Coordenadas GPS y Botón Centrar */}
                 <div style={{

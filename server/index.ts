@@ -2594,12 +2594,22 @@ app.get('/v1/redsube/vehicles', async (c) => {
           routeShortName = 'SUBE';
         }
 
+        const licensePlate = (v.vehicle?.licensePlate || '').trim();
+        const odometer = v.position.odometer || null;
+        const tsSec = v.timestamp ? parseInt(v.timestamp, 10) : Math.floor(Date.now() / 1000);
+
         mappedVehicles.push({
           id: String(v.vehicle?.id || entity.id),
-          route_id: routeId,
-          route_short_name: routeShortName,
-          linea: linea,
+          vehicle_id: String(v.vehicle?.id || entity.id),
           intern: String(intern),
+          license_plate: licensePlate,
+          linea: linea,
+          route_short_name: routeShortName,
+          route_id: routeId,
+          trip_id: routeId ? (v.trip?.tripId ? String(v.trip.tripId) : '') : '',
+          trip_headsign: tripHeadsign,
+          agency_name: agencyName,
+          agency_id: agencyId,
           latitude: lat,
           longitude: lng,
           lat: lat,
@@ -2607,9 +2617,11 @@ app.get('/v1/redsube/vehicles', async (c) => {
           speed: speedKmH,
           bearing: Math.round(v.position.bearing || 0),
           direction: direction,
-          trip_headsign: tripHeadsign,
-          agency_name: agencyName,
-          timestamp: v.timestamp ? parseInt(v.timestamp, 10) : Math.floor(Date.now() / 1000)
+          direction_label: direction === 0 ? 'Ida (0)' : direction === 1 ? 'Vuelta (1)' : 'Sin definir',
+          odometer: odometer,
+          timestamp: tsSec,
+          timestamp_iso: new Date(tsSec * 1000).toISOString(),
+          timestamp_formatted: new Date(tsSec * 1000).toLocaleTimeString()
         });
       }
     } else {
@@ -2624,12 +2636,16 @@ app.get('/v1/redsube/vehicles', async (c) => {
           const lngVal = parseFloat(v.longitude || v.lng);
           const rawSpeed = parseFloat(v.speed || '0');
           const speedKmH = rawSpeed < 45 ? Math.round(rawSpeed * 3.6) : Math.round(rawSpeed);
+          const ts = v.timestamp ? (typeof v.timestamp === 'number' && v.timestamp < 2000000000 ? v.timestamp : Math.floor(v.timestamp / 1000)) : Math.floor(Date.now() / 1000);
           return {
             id: String(v.id || v.vehicle_id || v.trip_id || Math.random()),
-            route_id: v.route_id,
+            vehicle_id: String(v.id || v.vehicle_id || 'N/A'),
+            route_id: v.route_id || '',
             route_short_name: v.route_short_name || v.linea || company,
             linea: v.route_short_name || v.linea || company,
             intern: String(v.id || v.vehicle_id || v.route_short_name || 'Unidad'),
+            license_plate: v.license_plate || '',
+            trip_id: v.tip_id || v.trip_id || '',
             latitude: latVal,
             longitude: lngVal,
             lat: latVal,
@@ -2637,9 +2653,13 @@ app.get('/v1/redsube/vehicles', async (c) => {
             speed: speedKmH,
             bearing: parseFloat(v.bearing || v.heading || '0'),
             direction: v.direction,
+            direction_label: v.direction === 0 ? 'Ida (0)' : v.direction === 1 ? 'Vuelta (1)' : 'Sin definir',
             trip_headsign: v.trip_headsign || '',
             agency_name: v.agency_name || '',
-            timestamp: v.timestamp || Date.now()
+            agency_id: v.agency_id || '',
+            timestamp: ts,
+            timestamp_iso: new Date(ts * 1000).toISOString(),
+            timestamp_formatted: new Date(ts * 1000).toLocaleTimeString()
           };
         }).filter((v: any) => !isNaN(v.lat) && !isNaN(v.lng));
       }
