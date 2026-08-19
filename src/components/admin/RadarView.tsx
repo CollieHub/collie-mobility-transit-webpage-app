@@ -629,31 +629,38 @@ function RouteDirectionArrows({
   });
 
   const arrowPolygons = useMemo(() => {
-    if (!coordinates || coordinates.length < 2 || zoom < 13) return [];
+    if (!coordinates || coordinates.length < 2 || zoom < 9) return [];
+
+    const validCoords = coordinates.filter(p => Array.isArray(p) && typeof p[0] === 'number' && !isNaN(p[0]));
+    if (validCoords.length < 2) return [];
 
     const cumulativeDistances: number[] = [0];
-    for (let i = 1; i < coordinates.length; i++) {
-      const prev = coordinates[i - 1];
-      const curr = coordinates[i];
+    for (let i = 1; i < validCoords.length; i++) {
+      const prev = validCoords[i - 1];
+      const curr = validCoords[i];
       const dist = calculateDistanceKm(prev[0], prev[1], curr[0], curr[1]) * 1000;
       cumulativeDistances.push(cumulativeDistances[i - 1] + dist);
     }
     const totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
     if (totalDistance <= 0) return [];
 
-    const pathData = { coordinates, cumulativeDistances, totalDistance };
+    const pathData = { coordinates: validCoords, cumulativeDistances, totalDistance };
 
-    let spacing = 350; // metros entre flechas para zoom >= 16
-    if (zoom === 15) spacing = 600;
-    else if (zoom === 14) spacing = 1200;
-    else if (zoom === 13) spacing = 2000;
+    let spacing = 350; // metros entre flechas
+    if (zoom >= 16) spacing = 280;
+    else if (zoom === 15) spacing = 450;
+    else if (zoom === 14) spacing = 800;
+    else if (zoom === 13) spacing = 1500;
+    else if (zoom === 12) spacing = 2600;
+    else if (zoom === 11) spacing = 4500;
+    else if (zoom <= 10) spacing = 8000;
 
-    const scaleFactor = Math.pow(2, 16 - Math.min(18, Math.max(10, zoom)));
-    const L = 0.00016 * scaleFactor;
-    const W = 0.00007 * scaleFactor;
+    const scaleFactor = Math.pow(2, 16 - Math.min(18, Math.max(9, zoom)));
+    const L = 0.00018 * scaleFactor;
+    const W = 0.000085 * scaleFactor;
 
     const polygons: any[] = [];
-    for (let d = 40; d < totalDistance - 30; d += spacing) {
+    for (let d = spacing * 0.4; d < totalDistance - spacing * 0.2; d += spacing) {
       const p = getPositionAtDistance(pathData, d);
       const nextP = getPositionAtDistance(pathData, Math.min(d + 4, totalDistance));
 
@@ -665,12 +672,12 @@ function RouteDirectionArrows({
         const norm = { lat: -dirVec.lng, lng: dirVec.lat };
 
         const pTip: [number, number] = [p.lat + dirVec.lat * L, p.lng + dirVec.lng * L];
-        const pLeft: [number, number] = [p.lat - dirVec.lat * L * 0.35 + norm.lat * W, p.lng - dirVec.lng * L * 0.35 + norm.lng * W];
-        const pRight: [number, number] = [p.lat - dirVec.lat * L * 0.35 - norm.lat * W, p.lng - dirVec.lng * L * 0.35 - norm.lng * W];
+        const pLeft: [number, number] = [p.lat - dirVec.lat * L * 0.4 + norm.lat * W, p.lng - dirVec.lng * L * 0.4 + norm.lng * W];
+        const pRight: [number, number] = [p.lat - dirVec.lat * L * 0.4 - norm.lat * W, p.lng - dirVec.lng * L * 0.4 - norm.lng * W];
 
         polygons.push(
           <Polygon
-            key={`route_arrow_${direction}_${d}`}
+            key={`route_arrow_${direction}_${Math.round(d)}`}
             positions={[pTip, pLeft, pRight]}
             pathOptions={{
               color: '#ffffff',
@@ -2565,22 +2572,34 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   }}
                   interactive={false}
                 />
+                <RouteDirectionArrows
+                  coordinates={idaPolylinePath}
+                  color="#0284c7"
+                  direction="ida"
+                />
               </>
             )}
 
             {direction === 'ida' && vueltaPolylinePath.length > 1 && (
-              <Polyline
-                positions={vueltaPolylinePath}
-                pathOptions={{
-                  color: '#e11d48',
-                  weight: 4.5,
-                  opacity: 0.75,
-                  dashArray: '8, 6',
-                  lineJoin: 'round',
-                  lineCap: 'round'
-                }}
-                interactive={false}
-              />
+              <>
+                <Polyline
+                  positions={vueltaPolylinePath}
+                  pathOptions={{
+                    color: '#e11d48',
+                    weight: 4.5,
+                    opacity: 0.75,
+                    dashArray: '8, 6',
+                    lineJoin: 'round',
+                    lineCap: 'round'
+                  }}
+                  interactive={false}
+                />
+                <RouteDirectionArrows
+                  coordinates={vueltaPolylinePath}
+                  color="#e11d48"
+                  direction="vuelta"
+                />
+              </>
             )}
 
             {/* Interactive Polyline: Continuous OSRM street route shape (Dirección Activa) */}
