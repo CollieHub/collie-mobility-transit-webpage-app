@@ -45,7 +45,11 @@ L.Icon.Default.mergeOptions({
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
 function createBusVehicleIcon(linea: string, bearing: number = 0, isSelected: boolean = false) {
-  const lineText = (linea || 'SUBE').slice(0, 7);
+  let cleanLine = (linea || '').replace(/^(l[ií]nea\s*)/i, '').trim();
+  if (!cleanLine || cleanLine.toUpperCase() === 'SUBE') {
+    cleanLine = 'BUS';
+  }
+  const lineText = cleanLine.slice(0, 6);
   const safeBearing = typeof bearing === 'number' && !isNaN(bearing) ? bearing : 0;
   const hasBearing = safeBearing !== 0;
 

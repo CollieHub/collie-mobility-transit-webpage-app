@@ -1,0 +1,7534 @@
+{
+  "12": {
+    "lineCode": "354",
+    "shortName": "354B",
+    "longName": "JPBSAS354",
+    "agencyId": "160",
+    "agencyName": "TRANSPORTES AUTOMOTORES  LANUS ESTE S.A."
+  },
+  "44": {
+    "lineCode": "101",
+    "shortName": "101A",
+    "longName": "JNAMBA101",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "45": {
+    "lineCode": "101",
+    "shortName": "101B",
+    "longName": "JNAMBA101",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "46": {
+    "lineCode": "50",
+    "shortName": "50B",
+    "longName": "JNAMBA050",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "47": {
+    "lineCode": "5",
+    "shortName": "5B",
+    "longName": "JNAMBA005",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "48": {
+    "lineCode": "5",
+    "shortName": "5A",
+    "longName": "JNAMBA005",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "49": {
+    "lineCode": "50",
+    "shortName": "50A",
+    "longName": "JNAMBA050",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "50": {
+    "lineCode": "8",
+    "shortName": "8A",
+    "longName": "JNAMBA008",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "51": {
+    "lineCode": "8",
+    "shortName": "8D",
+    "longName": "JNAMBA008",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "52": {
+    "lineCode": "8",
+    "shortName": "8B",
+    "longName": "JNAMBA008",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "53": {
+    "lineCode": "8",
+    "shortName": "8C",
+    "longName": "JNAMBA008",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "54": {
+    "lineCode": "8",
+    "shortName": "8E",
+    "longName": "JNAMBA008",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "57": {
+    "lineCode": "6",
+    "shortName": "6A",
+    "longName": "JNAMBA006",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "62": {
+    "lineCode": "23",
+    "shortName": "23A",
+    "longName": "JNAMBA023",
+    "agencyId": "5",
+    "agencyName": "TRANSPORTES RIO GRANDE S.A.C.I.F."
+  },
+  "63": {
+    "lineCode": "12",
+    "shortName": "12A",
+    "longName": "JNAMBA012",
+    "agencyId": "6",
+    "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."
+  },
+  "64": {
+    "lineCode": "44",
+    "shortName": "44A",
+    "longName": "JNAMBA044",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "65": {
+    "lineCode": "76",
+    "shortName": "76A",
+    "longName": "JNAMBA076",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "66": {
+    "lineCode": "135",
+    "shortName": "135A",
+    "longName": "JNAMBA135",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "67": {
+    "lineCode": "150",
+    "shortName": "150A",
+    "longName": "JNAMBA150",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "68": {
+    "lineCode": "115",
+    "shortName": "115A",
+    "longName": "JNAMBA115",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "69": {
+    "lineCode": "151",
+    "shortName": "151A",
+    "longName": "JNAMBA151",
+    "agencyId": "8",
+    "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "70": {
+    "lineCode": "25",
+    "shortName": "25A",
+    "longName": "JNAMBA025",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "71": {
+    "lineCode": "84",
+    "shortName": "84A",
+    "longName": "JNAMBA084",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "73": {
+    "lineCode": "150",
+    "shortName": "150B",
+    "longName": "JNAMBA150",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "75": {
+    "lineCode": "115",
+    "shortName": "115B",
+    "longName": "JNAMBA115",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "76": {
+    "lineCode": "28",
+    "shortName": "28A",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "77": {
+    "lineCode": "28",
+    "shortName": "28I",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "78": {
+    "lineCode": "28",
+    "shortName": "28K",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "79": {
+    "lineCode": "28",
+    "shortName": "28H",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "80": {
+    "lineCode": "28",
+    "shortName": "28G",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "81": {
+    "lineCode": "28",
+    "shortName": "28F",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "82": {
+    "lineCode": "28",
+    "shortName": "28E",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "83": {
+    "lineCode": "28",
+    "shortName": "28D",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "84": {
+    "lineCode": "28",
+    "shortName": "28C",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "85": {
+    "lineCode": "28",
+    "shortName": "28B",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "86": {
+    "lineCode": "65",
+    "shortName": "65A",
+    "longName": "JNAMBA065",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "87": {
+    "lineCode": "65",
+    "shortName": "65B",
+    "longName": "JNAMBA065",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "91": {
+    "lineCode": "132",
+    "shortName": "132A",
+    "longName": "JNAMBA132",
+    "agencyId": "12",
+    "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I."
+  },
+  "92": {
+    "lineCode": "132",
+    "shortName": "132C",
+    "longName": "JNAMBA132",
+    "agencyId": "12",
+    "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I."
+  },
+  "93": {
+    "lineCode": "132",
+    "shortName": "132B",
+    "longName": "JNAMBA132",
+    "agencyId": "12",
+    "agencyName": "NUEVOS RUMBOS S.A.T.A.C.I.F.I."
+  },
+  "94": {
+    "lineCode": "26",
+    "shortName": "26A",
+    "longName": "JNAMBA026",
+    "agencyId": "13",
+    "agencyName": "17 DE AGOSTO S.A."
+  },
+  "95": {
+    "lineCode": "194",
+    "shortName": "194G",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "96": {
+    "lineCode": "194",
+    "shortName": "194I",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "97": {
+    "lineCode": "194",
+    "shortName": "194H",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "98": {
+    "lineCode": "194",
+    "shortName": "194J",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "99": {
+    "lineCode": "194",
+    "shortName": "194A",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "100": {
+    "lineCode": "7",
+    "shortName": "7A",
+    "longName": "JNAMBA007",
+    "agencyId": "14",
+    "agencyName": "TRANSP. AUTOMOTORES 12 DE OCTUBRE S.A.C."
+  },
+  "101": {
+    "lineCode": "42",
+    "shortName": "42A",
+    "longName": "JNAMBA042",
+    "agencyId": "15",
+    "agencyName": "TRANSPORTES COLEGIALES S.A.C.I."
+  },
+  "102": {
+    "lineCode": "107",
+    "shortName": "107A",
+    "longName": "JNAMBA107",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "103": {
+    "lineCode": "108",
+    "shortName": "108A",
+    "longName": "JNAMBA108",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "104": {
+    "lineCode": "10",
+    "shortName": "10A",
+    "longName": "JNAMBA010",
+    "agencyId": "17",
+    "agencyName": "LINEA 10 S.A."
+  },
+  "105": {
+    "lineCode": "17",
+    "shortName": "17A",
+    "longName": "JNAMBA017",
+    "agencyId": "18",
+    "agencyName": "LINEA 17 S.A."
+  },
+  "106": {
+    "lineCode": "9",
+    "shortName": "9A",
+    "longName": "JNAMBA009",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "107": {
+    "lineCode": "9",
+    "shortName": "9B",
+    "longName": "JNAMBA009",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "108": {
+    "lineCode": "22",
+    "shortName": "22A",
+    "longName": "JNAMBA022",
+    "agencyId": "26",
+    "agencyName": "LINEA 22 S.A."
+  },
+  "109": {
+    "lineCode": "22",
+    "shortName": "22B",
+    "longName": "JNAMBA022",
+    "agencyId": "26",
+    "agencyName": "LINEA 22 S.A."
+  },
+  "111": {
+    "lineCode": "71",
+    "shortName": "71A",
+    "longName": "JNAMBA071",
+    "agencyId": "27",
+    "agencyName": "LINEA 71 S.A."
+  },
+  "112": {
+    "lineCode": "71",
+    "shortName": "71B",
+    "longName": "JNAMBA071",
+    "agencyId": "27",
+    "agencyName": "LINEA 71 S.A."
+  },
+  "113": {
+    "lineCode": "106",
+    "shortName": "106A",
+    "longName": "JNAMBA106",
+    "agencyId": "29",
+    "agencyName": "COLECTIVEROS UNIDOS S.A."
+  },
+  "114": {
+    "lineCode": "109",
+    "shortName": "109A",
+    "longName": "JNAMBA109",
+    "agencyId": "24",
+    "agencyName": "TRANSPORTE NUEVE DE JULIO SAC."
+  },
+  "115": {
+    "lineCode": "110",
+    "shortName": "110A",
+    "longName": "JNAMBA110",
+    "agencyId": "19",
+    "agencyName": "GENERAL PUEYRREDON S.A.T.C.I."
+  },
+  "116": {
+    "lineCode": "110",
+    "shortName": "110B",
+    "longName": "JNAMBA110",
+    "agencyId": "19",
+    "agencyName": "GENERAL PUEYRREDON S.A.T.C.I."
+  },
+  "117": {
+    "lineCode": "146",
+    "shortName": "146A",
+    "longName": "JNAMBA146",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "118": {
+    "lineCode": "152",
+    "shortName": "152A",
+    "longName": "JNAMBA152",
+    "agencyId": "20",
+    "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."
+  },
+  "120": {
+    "lineCode": "188",
+    "shortName": "188A",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "121": {
+    "lineCode": "188",
+    "shortName": "188B",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "122": {
+    "lineCode": "188",
+    "shortName": "188C",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "123": {
+    "lineCode": "188",
+    "shortName": "188D",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "124": {
+    "lineCode": "188",
+    "shortName": "188E",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "125": {
+    "lineCode": "188",
+    "shortName": "188F",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "126": {
+    "lineCode": "188",
+    "shortName": "188G",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "127": {
+    "lineCode": "188",
+    "shortName": "188H",
+    "longName": "JNAMBA188",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "131": {
+    "lineCode": "20",
+    "shortName": "20A",
+    "longName": "JNAMBA020",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "132": {
+    "lineCode": "20",
+    "shortName": "20B",
+    "longName": "JNAMBA020",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "134": {
+    "lineCode": "63",
+    "shortName": "63A",
+    "longName": "JNAMBA063",
+    "agencyId": "30",
+    "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."
+  },
+  "135": {
+    "lineCode": "63",
+    "shortName": "63B",
+    "longName": "JNAMBA063",
+    "agencyId": "30",
+    "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."
+  },
+  "136": {
+    "lineCode": "100",
+    "shortName": "100A",
+    "longName": "JNAMBA100",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "138": {
+    "lineCode": "100",
+    "shortName": "100C",
+    "longName": "JNAMBA100",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "139": {
+    "lineCode": "100",
+    "shortName": "100B",
+    "longName": "JNAMBA100",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "140": {
+    "lineCode": "113",
+    "shortName": "113A",
+    "longName": "JNAMBA113",
+    "agencyId": "30",
+    "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."
+  },
+  "141": {
+    "lineCode": "113",
+    "shortName": "113B",
+    "longName": "JNAMBA113",
+    "agencyId": "30",
+    "agencyName": "BERNARDINO RIVADAVIA S.A.T.A."
+  },
+  "143": {
+    "lineCode": "130",
+    "shortName": "130A",
+    "longName": "JNAMBA130",
+    "agencyId": "32",
+    "agencyName": "TRANSPORTES AVENIDA BERNARDO ADER S.A."
+  },
+  "144": {
+    "lineCode": "130",
+    "shortName": "130B",
+    "longName": "JNAMBA130",
+    "agencyId": "32",
+    "agencyName": "TRANSPORTES AVENIDA BERNARDO ADER S.A."
+  },
+  "145": {
+    "lineCode": "134",
+    "shortName": "134A",
+    "longName": "JNAMBA134",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "146": {
+    "lineCode": "161",
+    "shortName": "161A",
+    "longName": "JNAMBA161",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "147": {
+    "lineCode": "161",
+    "shortName": "161B",
+    "longName": "JNAMBA161",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "148": {
+    "lineCode": "169",
+    "shortName": "169A",
+    "longName": "JNAMBA169",
+    "agencyId": "33",
+    "agencyName": "TRANSPORTE ESCALADA S.A.T."
+  },
+  "149": {
+    "lineCode": "175",
+    "shortName": "175A",
+    "longName": "JNAMBA175",
+    "agencyId": "33",
+    "agencyName": "TRANSPORTE ESCALADA S.A.T."
+  },
+  "151": {
+    "lineCode": "1",
+    "shortName": "1A",
+    "longName": "JNAMBA001",
+    "agencyId": "34",
+    "agencyName": "TRANSPORTES SAN CAYETANO S.A.C."
+  },
+  "152": {
+    "lineCode": "21",
+    "shortName": "21A",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "153": {
+    "lineCode": "21",
+    "shortName": "21K",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "154": {
+    "lineCode": "21",
+    "shortName": "21J",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "155": {
+    "lineCode": "21",
+    "shortName": "21I",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "156": {
+    "lineCode": "21",
+    "shortName": "21H",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "157": {
+    "lineCode": "21",
+    "shortName": "21G",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "158": {
+    "lineCode": "21",
+    "shortName": "21F",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "159": {
+    "lineCode": "21",
+    "shortName": "21E",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "160": {
+    "lineCode": "21",
+    "shortName": "21D",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "161": {
+    "lineCode": "21",
+    "shortName": "21C",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "162": {
+    "lineCode": "21",
+    "shortName": "21B",
+    "longName": "JNAMBA021",
+    "agencyId": "16",
+    "agencyName": "EMPRESA DE TRANSP. TTE. GRAL. ROCA S.A"
+  },
+  "163": {
+    "lineCode": "24",
+    "shortName": "24A",
+    "longName": "JNAMBA024",
+    "agencyId": "35",
+    "agencyName": "EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F."
+  },
+  "164": {
+    "lineCode": "24",
+    "shortName": "24B",
+    "longName": "JNAMBA024",
+    "agencyId": "35",
+    "agencyName": "EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F."
+  },
+  "165": {
+    "lineCode": "32",
+    "shortName": "32A",
+    "longName": "JNAMBA032",
+    "agencyId": "31",
+    "agencyName": "EL PUENTE S.A.T."
+  },
+  "170": {
+    "lineCode": "34",
+    "shortName": "34A",
+    "longName": "JNAMBA034",
+    "agencyId": "36",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I."
+  },
+  "171": {
+    "lineCode": "56",
+    "shortName": "56A",
+    "longName": "JNAMBA056",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "172": {
+    "lineCode": "56",
+    "shortName": "56C",
+    "longName": "JNAMBA056",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "173": {
+    "lineCode": "56",
+    "shortName": "56B",
+    "longName": "JNAMBA056",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "174": {
+    "lineCode": "75",
+    "shortName": "75A",
+    "longName": "JNAMBA075",
+    "agencyId": "31",
+    "agencyName": "EL PUENTE S.A.T."
+  },
+  "175": {
+    "lineCode": "75",
+    "shortName": "75B",
+    "longName": "JNAMBA075",
+    "agencyId": "31",
+    "agencyName": "EL PUENTE S.A.T."
+  },
+  "176": {
+    "lineCode": "78",
+    "shortName": "78A",
+    "longName": "JNAMBA078",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "177": {
+    "lineCode": "78",
+    "shortName": "78C",
+    "longName": "JNAMBA078",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "178": {
+    "lineCode": "78",
+    "shortName": "78B",
+    "longName": "JNAMBA078",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "179": {
+    "lineCode": "87",
+    "shortName": "87A",
+    "longName": "JNAMBA087",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "180": {
+    "lineCode": "87",
+    "shortName": "87C",
+    "longName": "JNAMBA087",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "181": {
+    "lineCode": "87",
+    "shortName": "87B",
+    "longName": "JNAMBA087",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "182": {
+    "lineCode": "91",
+    "shortName": "91A",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "183": {
+    "lineCode": "91",
+    "shortName": "91C",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "184": {
+    "lineCode": "91",
+    "shortName": "91B",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "185": {
+    "lineCode": "91",
+    "shortName": "91D",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "186": {
+    "lineCode": "111",
+    "shortName": "111A",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "187": {
+    "lineCode": "111",
+    "shortName": "111F",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "188": {
+    "lineCode": "111",
+    "shortName": "111E",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "189": {
+    "lineCode": "111",
+    "shortName": "111D",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "190": {
+    "lineCode": "111",
+    "shortName": "111C",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "191": {
+    "lineCode": "111",
+    "shortName": "111B",
+    "longName": "JNAMBA111",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "192": {
+    "lineCode": "117",
+    "shortName": "117A",
+    "longName": "JNAMBA117",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "193": {
+    "lineCode": "117",
+    "shortName": "117C",
+    "longName": "JNAMBA117",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "194": {
+    "lineCode": "117",
+    "shortName": "117B",
+    "longName": "JNAMBA117",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "195": {
+    "lineCode": "127",
+    "shortName": "127A",
+    "longName": "JNAMBA127",
+    "agencyId": "22",
+    "agencyName": "LOS CONSTITUYENTES S.A.T."
+  },
+  "196": {
+    "lineCode": "158",
+    "shortName": "158A",
+    "longName": "JNAMBA158",
+    "agencyId": "31",
+    "agencyName": "EL PUENTE S.A.T."
+  },
+  "197": {
+    "lineCode": "181",
+    "shortName": "181A",
+    "longName": "JNAMBA181",
+    "agencyId": "37",
+    "agencyName": "TTES.AUTOMOTORES DE PASAJEROS SIGLO XXI SA"
+  },
+  "198": {
+    "lineCode": "181",
+    "shortName": "181B",
+    "longName": "JNAMBA181",
+    "agencyId": "37",
+    "agencyName": "TTES.AUTOMOTORES DE PASAJEROS SIGLO XXI SA"
+  },
+  "200": {
+    "lineCode": "68",
+    "shortName": "68A",
+    "longName": "JNAMBA068",
+    "agencyId": "39",
+    "agencyName": "TRANSPORTES SESENTA Y OCHO S.R.L."
+  },
+  "201": {
+    "lineCode": "101",
+    "shortName": "101C",
+    "longName": "JNAMBA101",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "202": {
+    "lineCode": "19",
+    "shortName": "19A",
+    "longName": "JNAMBA019",
+    "agencyId": "82",
+    "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."
+  },
+  "203": {
+    "lineCode": "45",
+    "shortName": "45A",
+    "longName": "JNAMBA045",
+    "agencyId": "83",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."
+  },
+  "204": {
+    "lineCode": "86",
+    "shortName": "86E",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "206": {
+    "lineCode": "57",
+    "shortName": "57B",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "207": {
+    "lineCode": "49",
+    "shortName": "49A",
+    "longName": "JNAMBA049",
+    "agencyId": "57",
+    "agencyName": "BUENOS AIRES BUS SOCIEDAD ANONIMA"
+  },
+  "208": {
+    "lineCode": "53",
+    "shortName": "53E",
+    "longName": "JNAMBA053",
+    "agencyId": "58",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE"
+  },
+  "209": {
+    "lineCode": "55",
+    "shortName": "55A",
+    "longName": "JNAMBA055",
+    "agencyId": "88",
+    "agencyName": "ALMAFUERTE S.A.T.A.C.I."
+  },
+  "210": {
+    "lineCode": "59",
+    "shortName": "59A",
+    "longName": "JNAMBA059",
+    "agencyId": "84",
+    "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"
+  },
+  "211": {
+    "lineCode": "67",
+    "shortName": "67A",
+    "longName": "JNAMBA067",
+    "agencyId": "85",
+    "agencyName": "TRANSPORTES DEL TEJAR S.A."
+  },
+  "212": {
+    "lineCode": "70",
+    "shortName": "70B",
+    "longName": "JNAMBA070",
+    "agencyId": "86",
+    "agencyName": "TRANSPORTES 270 S.A."
+  },
+  "213": {
+    "lineCode": "85",
+    "shortName": "85A",
+    "longName": "JNAMBA085",
+    "agencyId": "59",
+    "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE"
+  },
+  "214": {
+    "lineCode": "86",
+    "shortName": "86A",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "215": {
+    "lineCode": "86",
+    "shortName": "86D",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "216": {
+    "lineCode": "86",
+    "shortName": "86B",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "217": {
+    "lineCode": "86",
+    "shortName": "86C",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "221": {
+    "lineCode": "93",
+    "shortName": "93A",
+    "longName": "JNAMBA093",
+    "agencyId": "90",
+    "agencyName": "TRANSPORTES 1º SEPTIEMBRE S.A."
+  },
+  "222": {
+    "lineCode": "93",
+    "shortName": "93B",
+    "longName": "JNAMBA093",
+    "agencyId": "90",
+    "agencyName": "TRANSPORTES 1º SEPTIEMBRE S.A."
+  },
+  "223": {
+    "lineCode": "93",
+    "shortName": "93C",
+    "longName": "JNAMBA093",
+    "agencyId": "90",
+    "agencyName": "TRANSPORTES 1º SEPTIEMBRE S.A."
+  },
+  "224": {
+    "lineCode": "96",
+    "shortName": "96A",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "225": {
+    "lineCode": "96",
+    "shortName": "96B",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "226": {
+    "lineCode": "96",
+    "shortName": "96C",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "227": {
+    "lineCode": "96",
+    "shortName": "96D",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "228": {
+    "lineCode": "96",
+    "shortName": "96E",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "229": {
+    "lineCode": "96",
+    "shortName": "96F",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "230": {
+    "lineCode": "96",
+    "shortName": "96G",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "231": {
+    "lineCode": "96",
+    "shortName": "96H",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "232": {
+    "lineCode": "96",
+    "shortName": "96I",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "233": {
+    "lineCode": "97",
+    "shortName": "97A",
+    "longName": "JNAMBA097",
+    "agencyId": "61",
+    "agencyName": "BUS DEL OESTE S.A."
+  },
+  "234": {
+    "lineCode": "97",
+    "shortName": "97B",
+    "longName": "JNAMBA097",
+    "agencyId": "61",
+    "agencyName": "BUS DEL OESTE S.A."
+  },
+  "235": {
+    "lineCode": "97",
+    "shortName": "97C",
+    "longName": "JNAMBA097",
+    "agencyId": "61",
+    "agencyName": "BUS DEL OESTE S.A."
+  },
+  "236": {
+    "lineCode": "98",
+    "shortName": "98A",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "237": {
+    "lineCode": "98",
+    "shortName": "98B",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "238": {
+    "lineCode": "98",
+    "shortName": "98C",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "239": {
+    "lineCode": "98",
+    "shortName": "98D",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "240": {
+    "lineCode": "98",
+    "shortName": "98E",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "241": {
+    "lineCode": "98",
+    "shortName": "98F",
+    "longName": "JNAMBA098",
+    "agencyId": "62",
+    "agencyName": "EXPRESO QUILMES S.A."
+  },
+  "242": {
+    "lineCode": "103",
+    "shortName": "103A",
+    "longName": "JNAMBA103",
+    "agencyId": "81",
+    "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I."
+  },
+  "243": {
+    "lineCode": "105",
+    "shortName": "105A",
+    "longName": "JNAMBA105",
+    "agencyId": "71",
+    "agencyName": "EMPRESA DE TRANSPORTES AMERICA S.A.C.I."
+  },
+  "244": {
+    "lineCode": "105",
+    "shortName": "105B",
+    "longName": "JNAMBA105",
+    "agencyId": "71",
+    "agencyName": "EMPRESA DE TRANSPORTES AMERICA S.A.C.I."
+  },
+  "246": {
+    "lineCode": "123",
+    "shortName": "123A",
+    "longName": "JNAMBA123",
+    "agencyId": "92",
+    "agencyName": "TRANSPORTES LINEA 123 S.A.C.I."
+  },
+  "260": {
+    "lineCode": "154",
+    "shortName": "154A",
+    "longName": "JNAMBA154",
+    "agencyId": "83",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."
+  },
+  "261": {
+    "lineCode": "159",
+    "shortName": "159B",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "262": {
+    "lineCode": "159",
+    "shortName": "159C",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "263": {
+    "lineCode": "160",
+    "shortName": "160A",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "264": {
+    "lineCode": "160",
+    "shortName": "160B",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "265": {
+    "lineCode": "160",
+    "shortName": "160C",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "266": {
+    "lineCode": "160",
+    "shortName": "160D",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "267": {
+    "lineCode": "160",
+    "shortName": "160E",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "268": {
+    "lineCode": "160",
+    "shortName": "160F",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "269": {
+    "lineCode": "160",
+    "shortName": "160G",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "270": {
+    "lineCode": "4",
+    "shortName": "4A",
+    "longName": "JNAMBA004",
+    "agencyId": "93",
+    "agencyName": "TRANSPORTES SOL DE MAYO C.I.S.A."
+  },
+  "271": {
+    "lineCode": "4",
+    "shortName": "4B",
+    "longName": "JNAMBA004",
+    "agencyId": "93",
+    "agencyName": "TRANSPORTES SOL DE MAYO C.I.S.A."
+  },
+  "272": {
+    "lineCode": "4",
+    "shortName": "4C",
+    "longName": "JNAMBA004",
+    "agencyId": "93",
+    "agencyName": "TRANSPORTES SOL DE MAYO C.I.S.A."
+  },
+  "273": {
+    "lineCode": "33",
+    "shortName": "33A",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "274": {
+    "lineCode": "33",
+    "shortName": "33B",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "275": {
+    "lineCode": "33",
+    "shortName": "33C",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "276": {
+    "lineCode": "33",
+    "shortName": "33D",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "277": {
+    "lineCode": "46",
+    "shortName": "46A",
+    "longName": "JNAMBA046",
+    "agencyId": "73",
+    "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"
+  },
+  "278": {
+    "lineCode": "46",
+    "shortName": "46B",
+    "longName": "JNAMBA046",
+    "agencyId": "73",
+    "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"
+  },
+  "279": {
+    "lineCode": "49",
+    "shortName": "49B",
+    "longName": "JNAMBA049",
+    "agencyId": "57",
+    "agencyName": "BUENOS AIRES BUS SOCIEDAD ANONIMA"
+  },
+  "280": {
+    "lineCode": "53",
+    "shortName": "53B",
+    "longName": "JNAMBA053",
+    "agencyId": "58",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE"
+  },
+  "281": {
+    "lineCode": "53",
+    "shortName": "53D",
+    "longName": "JNAMBA053",
+    "agencyId": "58",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE"
+  },
+  "282": {
+    "lineCode": "53",
+    "shortName": "53C",
+    "longName": "JNAMBA053",
+    "agencyId": "58",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE"
+  },
+  "283": {
+    "lineCode": "53",
+    "shortName": "53A",
+    "longName": "JNAMBA053",
+    "agencyId": "58",
+    "agencyName": "LINEA 213 S.A. DE TRANSPORTE"
+  },
+  "284": {
+    "lineCode": "59",
+    "shortName": "59B",
+    "longName": "JNAMBA059",
+    "agencyId": "84",
+    "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"
+  },
+  "285": {
+    "lineCode": "59",
+    "shortName": "59C",
+    "longName": "JNAMBA059",
+    "agencyId": "84",
+    "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"
+  },
+  "286": {
+    "lineCode": "85",
+    "shortName": "85B",
+    "longName": "JNAMBA085",
+    "agencyId": "59",
+    "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE"
+  },
+  "287": {
+    "lineCode": "85",
+    "shortName": "85C",
+    "longName": "JNAMBA085",
+    "agencyId": "59",
+    "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE"
+  },
+  "288": {
+    "lineCode": "85",
+    "shortName": "85D",
+    "longName": "JNAMBA085",
+    "agencyId": "59",
+    "agencyName": "SOCIEDAD ANONIMA EXPRESO SUDOESTE"
+  },
+  "289": {
+    "lineCode": "88",
+    "shortName": "88A",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "290": {
+    "lineCode": "88",
+    "shortName": "88B",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "291": {
+    "lineCode": "88",
+    "shortName": "88C",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "292": {
+    "lineCode": "88",
+    "shortName": "88D",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "293": {
+    "lineCode": "88",
+    "shortName": "88E",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "294": {
+    "lineCode": "88",
+    "shortName": "88F",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "295": {
+    "lineCode": "88",
+    "shortName": "88G",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "296": {
+    "lineCode": "88",
+    "shortName": "88H",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "297": {
+    "lineCode": "88",
+    "shortName": "88I",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "298": {
+    "lineCode": "88",
+    "shortName": "88J",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "299": {
+    "lineCode": "88",
+    "shortName": "88L",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "300": {
+    "lineCode": "88",
+    "shortName": "88K",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "301": {
+    "lineCode": "92",
+    "shortName": "92A",
+    "longName": "JNAMBA092",
+    "agencyId": "89",
+    "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L."
+  },
+  "302": {
+    "lineCode": "33",
+    "shortName": "33E",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "303": {
+    "lineCode": "45",
+    "shortName": "45B",
+    "longName": "JNAMBA045",
+    "agencyId": "83",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."
+  },
+  "304": {
+    "lineCode": "45",
+    "shortName": "45C",
+    "longName": "JNAMBA045",
+    "agencyId": "83",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."
+  },
+  "305": {
+    "lineCode": "45",
+    "shortName": "45D",
+    "longName": "JNAMBA045",
+    "agencyId": "83",
+    "agencyName": "MICROOMNIBUS CUARENTA Y CINCO S.A.C.I.F."
+  },
+  "306": {
+    "lineCode": "86",
+    "shortName": "86F",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "307": {
+    "lineCode": "2",
+    "shortName": "2A",
+    "longName": "JNAMBA002",
+    "agencyId": "40",
+    "agencyName": "TRANPORTES VEINTIDOS DE SETIEMBRE S.A.C."
+  },
+  "308": {
+    "lineCode": "2",
+    "shortName": "2B",
+    "longName": "JNAMBA002",
+    "agencyId": "40",
+    "agencyName": "TRANPORTES VEINTIDOS DE SETIEMBRE S.A.C."
+  },
+  "309": {
+    "lineCode": "15",
+    "shortName": "15A",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "310": {
+    "lineCode": "15",
+    "shortName": "15B",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "311": {
+    "lineCode": "15",
+    "shortName": "15C",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "312": {
+    "lineCode": "15",
+    "shortName": "15D",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "313": {
+    "lineCode": "15",
+    "shortName": "15E",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "314": {
+    "lineCode": "15",
+    "shortName": "15F",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "315": {
+    "lineCode": "15",
+    "shortName": "15G",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "316": {
+    "lineCode": "15",
+    "shortName": "15H",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "317": {
+    "lineCode": "15",
+    "shortName": "15I",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "318": {
+    "lineCode": "15",
+    "shortName": "15J",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "319": {
+    "lineCode": "15",
+    "shortName": "15K",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "320": {
+    "lineCode": "29",
+    "shortName": "29A",
+    "longName": "JNAMBA029",
+    "agencyId": "47",
+    "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A."
+  },
+  "321": {
+    "lineCode": "29",
+    "shortName": "29B",
+    "longName": "JNAMBA029",
+    "agencyId": "47",
+    "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A."
+  },
+  "322": {
+    "lineCode": "29",
+    "shortName": "29C",
+    "longName": "JNAMBA029",
+    "agencyId": "47",
+    "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A."
+  },
+  "325": {
+    "lineCode": "37",
+    "shortName": "37A",
+    "longName": "JNAMBA037",
+    "agencyId": "51",
+    "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P."
+  },
+  "326": {
+    "lineCode": "37",
+    "shortName": "37B",
+    "longName": "JNAMBA037",
+    "agencyId": "51",
+    "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P."
+  },
+  "327": {
+    "lineCode": "37",
+    "shortName": "37C",
+    "longName": "JNAMBA037",
+    "agencyId": "51",
+    "agencyName": "4 DE SEPTIEMBRE S.A.T.C.P."
+  },
+  "328": {
+    "lineCode": "39",
+    "shortName": "39A",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "329": {
+    "lineCode": "39",
+    "shortName": "39B",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "330": {
+    "lineCode": "39",
+    "shortName": "39C",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "331": {
+    "lineCode": "41",
+    "shortName": "41A",
+    "longName": "JNAMBA041",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "333": {
+    "lineCode": "47",
+    "shortName": "47A",
+    "longName": "JNAMBA047",
+    "agencyId": "52",
+    "agencyName": "LINEA DE MICROOMNIBUS 47 S.A.T.C.F.I."
+  },
+  "334": {
+    "lineCode": "47",
+    "shortName": "47B",
+    "longName": "JNAMBA047",
+    "agencyId": "52",
+    "agencyName": "LINEA DE MICROOMNIBUS 47 S.A.T.C.F.I."
+  },
+  "335": {
+    "lineCode": "51",
+    "shortName": "51A",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "336": {
+    "lineCode": "51",
+    "shortName": "51B",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "337": {
+    "lineCode": "51",
+    "shortName": "51C",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "338": {
+    "lineCode": "51",
+    "shortName": "51D",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "339": {
+    "lineCode": "51",
+    "shortName": "51E",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "340": {
+    "lineCode": "64",
+    "shortName": "64A",
+    "longName": "JNAMBA064",
+    "agencyId": "41",
+    "agencyName": "VUELTA DE ROCHA S.A.T.C.I."
+  },
+  "341": {
+    "lineCode": "64",
+    "shortName": "64B",
+    "longName": "JNAMBA064",
+    "agencyId": "41",
+    "agencyName": "VUELTA DE ROCHA S.A.T.C.I."
+  },
+  "342": {
+    "lineCode": "64",
+    "shortName": "64C",
+    "longName": "JNAMBA064",
+    "agencyId": "41",
+    "agencyName": "VUELTA DE ROCHA S.A.T.C.I."
+  },
+  "343": {
+    "lineCode": "74",
+    "shortName": "74A",
+    "longName": "JNAMBA074",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "344": {
+    "lineCode": "79",
+    "shortName": "79A",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "345": {
+    "lineCode": "79",
+    "shortName": "79B",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "346": {
+    "lineCode": "79",
+    "shortName": "79C",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "347": {
+    "lineCode": "79",
+    "shortName": "79D",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "348": {
+    "lineCode": "79",
+    "shortName": "79E",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "349": {
+    "lineCode": "79",
+    "shortName": "79F",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "350": {
+    "lineCode": "79",
+    "shortName": "79G",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "351": {
+    "lineCode": "79",
+    "shortName": "79H",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "352": {
+    "lineCode": "80",
+    "shortName": "80A",
+    "longName": "JNAMBA080",
+    "agencyId": "53",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."
+  },
+  "353": {
+    "lineCode": "80",
+    "shortName": "80B",
+    "longName": "JNAMBA080",
+    "agencyId": "53",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."
+  },
+  "354": {
+    "lineCode": "57",
+    "shortName": "57F",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "355": {
+    "lineCode": "80",
+    "shortName": "80C",
+    "longName": "JNAMBA080",
+    "agencyId": "53",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."
+  },
+  "356": {
+    "lineCode": "95",
+    "shortName": "95A",
+    "longName": "JNAMBA095",
+    "agencyId": "50",
+    "agencyName": "EMPRESA ANTARTIDA ARGENTINA S.A.T."
+  },
+  "357": {
+    "lineCode": "95",
+    "shortName": "95B",
+    "longName": "JNAMBA095",
+    "agencyId": "50",
+    "agencyName": "EMPRESA ANTARTIDA ARGENTINA S.A.T."
+  },
+  "358": {
+    "lineCode": "102",
+    "shortName": "102A",
+    "longName": "JNAMBA102",
+    "agencyId": "2",
+    "agencyName": "TRANSP. SGTO. CABRAL"
+  },
+  "363": {
+    "lineCode": "118",
+    "shortName": "118A",
+    "longName": "JNAMBA118",
+    "agencyId": "42",
+    "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A."
+  },
+  "365": {
+    "lineCode": "126",
+    "shortName": "126A",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "366": {
+    "lineCode": "126",
+    "shortName": "126B",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "383": {
+    "lineCode": "166",
+    "shortName": "166B",
+    "longName": "JNAMBA166",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "388": {
+    "lineCode": "172",
+    "shortName": "172A",
+    "longName": "JNAMBA172",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "389": {
+    "lineCode": "172",
+    "shortName": "172B",
+    "longName": "JNAMBA172",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "391": {
+    "lineCode": "57",
+    "shortName": "57M",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "392": {
+    "lineCode": "57",
+    "shortName": "57A",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "393": {
+    "lineCode": "57",
+    "shortName": "57H",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "394": {
+    "lineCode": "57",
+    "shortName": "57ENIE",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "442": {
+    "lineCode": "193",
+    "shortName": "193A",
+    "longName": "JNAMBA193",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "443": {
+    "lineCode": "28",
+    "shortName": "28J",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "444": {
+    "lineCode": "194",
+    "shortName": "194B",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "445": {
+    "lineCode": "194",
+    "shortName": "194C",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "446": {
+    "lineCode": "194",
+    "shortName": "194D",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "447": {
+    "lineCode": "194",
+    "shortName": "194E",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "448": {
+    "lineCode": "194",
+    "shortName": "194F",
+    "longName": "JNAMBA194",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "449": {
+    "lineCode": "6",
+    "shortName": "6B",
+    "longName": "JNAMBA006",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "450": {
+    "lineCode": "6",
+    "shortName": "6C",
+    "longName": "JNAMBA006",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "451": {
+    "lineCode": "6",
+    "shortName": "6D",
+    "longName": "JNAMBA006",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "452": {
+    "lineCode": "12",
+    "shortName": "12B",
+    "longName": "JNAMBA012",
+    "agencyId": "6",
+    "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."
+  },
+  "453": {
+    "lineCode": "7",
+    "shortName": "7B",
+    "longName": "JNAMBA007",
+    "agencyId": "14",
+    "agencyName": "TRANSP. AUTOMOTORES 12 DE OCTUBRE S.A.C."
+  },
+  "455": {
+    "lineCode": "42",
+    "shortName": "42B",
+    "longName": "JNAMBA042",
+    "agencyId": "15",
+    "agencyName": "TRANSPORTES COLEGIALES S.A.C.I."
+  },
+  "458": {
+    "lineCode": "146",
+    "shortName": "146B",
+    "longName": "JNAMBA146",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "461": {
+    "lineCode": "68",
+    "shortName": "68B",
+    "longName": "JNAMBA068",
+    "agencyId": "39",
+    "agencyName": "TRANSPORTES SESENTA Y OCHO S.R.L."
+  },
+  "464": {
+    "lineCode": "152",
+    "shortName": "152B",
+    "longName": "JNAMBA152",
+    "agencyId": "20",
+    "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."
+  },
+  "466": {
+    "lineCode": "128",
+    "shortName": "128A",
+    "longName": "JNAMBA128",
+    "agencyId": "31",
+    "agencyName": "EL PUENTE S.A.T."
+  },
+  "469": {
+    "lineCode": "34",
+    "shortName": "34B",
+    "longName": "JNAMBA034",
+    "agencyId": "36",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I."
+  },
+  "474": {
+    "lineCode": "148",
+    "shortName": "148A",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "475": {
+    "lineCode": "148",
+    "shortName": "148B",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "476": {
+    "lineCode": "148",
+    "shortName": "148C",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "477": {
+    "lineCode": "148",
+    "shortName": "148E",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "478": {
+    "lineCode": "148",
+    "shortName": "148G",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "479": {
+    "lineCode": "148",
+    "shortName": "148F",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "480": {
+    "lineCode": "148",
+    "shortName": "148H",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "481": {
+    "lineCode": "148",
+    "shortName": "148I",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "482": {
+    "lineCode": "148",
+    "shortName": "148J",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "491": {
+    "lineCode": "403",
+    "shortName": "403A",
+    "longName": "JPBSAS403",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "492": {
+    "lineCode": "435",
+    "shortName": "435A",
+    "longName": "JPBSAS435",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "505": {
+    "lineCode": "520",
+    "shortName": "520CA",
+    "longName": "JMLPLA520",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "506": {
+    "lineCode": "520",
+    "shortName": "520CB",
+    "longName": "JMLPLA520",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "511": {
+    "lineCode": "325",
+    "shortName": "325RTr",
+    "longName": "JPBSAS325",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "527": {
+    "lineCode": "628",
+    "shortName": "628RTr",
+    "longName": "JMLMTZ628",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "537": {
+    "lineCode": "166",
+    "shortName": "166A",
+    "longName": "JNAMBA166",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "546": {
+    "lineCode": "205",
+    "shortName": "205A",
+    "longName": "JPBSAS205",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "547": {
+    "lineCode": "242",
+    "shortName": "242A",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "548": {
+    "lineCode": "243",
+    "shortName": "243A",
+    "longName": "JPBSAS243",
+    "agencyId": "91",
+    "agencyName": "EXPRESO LOMAS S.A."
+  },
+  "552": {
+    "lineCode": "410",
+    "shortName": "410A",
+    "longName": "JPBSAS410",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "553": {
+    "lineCode": "410",
+    "shortName": "410B",
+    "longName": "JPBSAS410",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "562": {
+    "lineCode": "429",
+    "shortName": "429A",
+    "longName": "JPBSAS429",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "563": {
+    "lineCode": "429",
+    "shortName": "429B",
+    "longName": "JPBSAS429",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "574": {
+    "lineCode": "159",
+    "shortName": "159D",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "575": {
+    "lineCode": "159",
+    "shortName": "159E",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "576": {
+    "lineCode": "159",
+    "shortName": "159F",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "577": {
+    "lineCode": "159",
+    "shortName": "159H",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "578": {
+    "lineCode": "159",
+    "shortName": "159J",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "579": {
+    "lineCode": "159",
+    "shortName": "159A",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "581": {
+    "lineCode": "159",
+    "shortName": "159I",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "582": {
+    "lineCode": "159",
+    "shortName": "159K",
+    "longName": "JNAMBA159",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "635": {
+    "lineCode": "57",
+    "shortName": "57P",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "636": {
+    "lineCode": "57",
+    "shortName": "57L",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "638": {
+    "lineCode": "88",
+    "shortName": "88M",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "639": {
+    "lineCode": "103",
+    "shortName": "103B",
+    "longName": "JNAMBA103",
+    "agencyId": "81",
+    "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I."
+  },
+  "640": {
+    "lineCode": "103",
+    "shortName": "103C",
+    "longName": "JNAMBA103",
+    "agencyId": "81",
+    "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I."
+  },
+  "641": {
+    "lineCode": "103",
+    "shortName": "103D",
+    "longName": "JNAMBA103",
+    "agencyId": "81",
+    "agencyName": "TRANSPORTES QUIRNO COSTA S.A.C.I."
+  },
+  "647": {
+    "lineCode": "168",
+    "shortName": "168A",
+    "longName": "JNAMBA168",
+    "agencyId": "80",
+    "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I."
+  },
+  "648": {
+    "lineCode": "168",
+    "shortName": "168B",
+    "longName": "JNAMBA168",
+    "agencyId": "80",
+    "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I."
+  },
+  "649": {
+    "lineCode": "168",
+    "shortName": "168C",
+    "longName": "JNAMBA168",
+    "agencyId": "80",
+    "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I."
+  },
+  "652": {
+    "lineCode": "168",
+    "shortName": "168D",
+    "longName": "JNAMBA168",
+    "agencyId": "80",
+    "agencyName": "EXPRESO SAN ISIDRO S.A.T.C.I.F.I."
+  },
+  "654": {
+    "lineCode": "176",
+    "shortName": "176A",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "655": {
+    "lineCode": "178",
+    "shortName": "178A",
+    "longName": "JNAMBA178",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "656": {
+    "lineCode": "178",
+    "shortName": "178B",
+    "longName": "JNAMBA178",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "657": {
+    "lineCode": "178",
+    "shortName": "178C",
+    "longName": "JNAMBA178",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "658": {
+    "lineCode": "178",
+    "shortName": "178D",
+    "longName": "JNAMBA178",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "659": {
+    "lineCode": "178",
+    "shortName": "178E",
+    "longName": "JNAMBA178",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "660": {
+    "lineCode": "179",
+    "shortName": "179A",
+    "longName": "JNAMBA179",
+    "agencyId": "66",
+    "agencyName": "GRUPO LINEA 179 S.A."
+  },
+  "661": {
+    "lineCode": "180",
+    "shortName": "180A",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "662": {
+    "lineCode": "180",
+    "shortName": "180B",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "663": {
+    "lineCode": "180",
+    "shortName": "180C",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "664": {
+    "lineCode": "180",
+    "shortName": "180D",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "665": {
+    "lineCode": "180",
+    "shortName": "180E",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "666": {
+    "lineCode": "182",
+    "shortName": "182A",
+    "longName": "JNAMBA182",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "667": {
+    "lineCode": "182",
+    "shortName": "182B",
+    "longName": "JNAMBA182",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "668": {
+    "lineCode": "182",
+    "shortName": "182C",
+    "longName": "JNAMBA182",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "669": {
+    "lineCode": "185",
+    "shortName": "185A",
+    "longName": "JNAMBA185",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "671": {
+    "lineCode": "242",
+    "shortName": "242B",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "672": {
+    "lineCode": "242",
+    "shortName": "242C",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "673": {
+    "lineCode": "242",
+    "shortName": "242D",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "674": {
+    "lineCode": "242",
+    "shortName": "242E",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "675": {
+    "lineCode": "242",
+    "shortName": "242F",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "686": {
+    "lineCode": "70",
+    "shortName": "70A",
+    "longName": "JNAMBA070",
+    "agencyId": "86",
+    "agencyName": "TRANSPORTES 270 S.A."
+  },
+  "687": {
+    "lineCode": "446",
+    "shortName": "446A",
+    "longName": "JPBSAS446",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "688": {
+    "lineCode": "421",
+    "shortName": "421A",
+    "longName": "JPBSAS421",
+    "agencyId": "21",
+    "agencyName": "TRANSPORTE LARRAZABAL C.I.S.A."
+  },
+  "726": {
+    "lineCode": "532",
+    "shortName": "532A",
+    "longName": "JMLDZM532",
+    "agencyId": "116",
+    "agencyName": "EMPRESA J.M. EZEIZA S.R.L."
+  },
+  "727": {
+    "lineCode": "532",
+    "shortName": "532B",
+    "longName": "JMLDZM532",
+    "agencyId": "116",
+    "agencyName": "EMPRESA J.M. EZEIZA S.R.L."
+  },
+  "728": {
+    "lineCode": "532",
+    "shortName": "532C",
+    "longName": "JMLDZM532",
+    "agencyId": "116",
+    "agencyName": "EMPRESA J.M. EZEIZA S.R.L."
+  },
+  "729": {
+    "lineCode": "532",
+    "shortName": "532D",
+    "longName": "JMLDZM532",
+    "agencyId": "116",
+    "agencyName": "EMPRESA J.M. EZEIZA S.R.L."
+  },
+  "733": {
+    "lineCode": "543",
+    "shortName": "543A",
+    "longName": "JMLDZM543",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "734": {
+    "lineCode": "543",
+    "shortName": "543B",
+    "longName": "JMLDZM543",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "735": {
+    "lineCode": "543",
+    "shortName": "543C",
+    "longName": "JMLDZM543",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "736": {
+    "lineCode": "544",
+    "shortName": "544A",
+    "longName": "JMLDZM544",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "748": {
+    "lineCode": "405",
+    "shortName": "405A",
+    "longName": "JPBSAS405",
+    "agencyId": "139",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A."
+  },
+  "749": {
+    "lineCode": "520",
+    "shortName": "520BB",
+    "longName": "JMLANU520",
+    "agencyId": "139",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A."
+  },
+  "750": {
+    "lineCode": "520",
+    "shortName": "520BB2",
+    "longName": "JMLANU520",
+    "agencyId": "139",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A."
+  },
+  "751": {
+    "lineCode": "520",
+    "shortName": "520BC",
+    "longName": "JMLANU520",
+    "agencyId": "139",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A."
+  },
+  "752": {
+    "lineCode": "520",
+    "shortName": "520BD",
+    "longName": "JMLANU520",
+    "agencyId": "139",
+    "agencyName": "MICRO OMNIBUS AVENIDA S.A."
+  },
+  "755": {
+    "lineCode": "542",
+    "shortName": "542U",
+    "longName": "JMLDZM542BAJA",
+    "agencyId": "97",
+    "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA"
+  },
+  "757": {
+    "lineCode": "277",
+    "shortName": "277A",
+    "longName": "JPBSAS277",
+    "agencyId": "97",
+    "agencyName": "CIA LA PAZ AMADOR MOURE SACIFIYA"
+  },
+  "780": {
+    "lineCode": "236",
+    "shortName": "236C",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "782": {
+    "lineCode": "236",
+    "shortName": "236E",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "783": {
+    "lineCode": "236",
+    "shortName": "236F",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "784": {
+    "lineCode": "236",
+    "shortName": "236G",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "785": {
+    "lineCode": "236",
+    "shortName": "236H",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "787": {
+    "lineCode": "269",
+    "shortName": "269A",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "788": {
+    "lineCode": "269",
+    "shortName": "269B",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "789": {
+    "lineCode": "269",
+    "shortName": "269C",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "790": {
+    "lineCode": "269",
+    "shortName": "269D",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "791": {
+    "lineCode": "269",
+    "shortName": "269E",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "792": {
+    "lineCode": "269",
+    "shortName": "269F",
+    "longName": "JPBSAS269",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "793": {
+    "lineCode": "395",
+    "shortName": "395A",
+    "longName": "JPBSAS395",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "794": {
+    "lineCode": "395",
+    "shortName": "395B",
+    "longName": "JPBSAS395",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "795": {
+    "lineCode": "441",
+    "shortName": "441A",
+    "longName": "JPBSAS441",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "796": {
+    "lineCode": "441",
+    "shortName": "441B",
+    "longName": "JPBSAS441",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "797": {
+    "lineCode": "441",
+    "shortName": "441C",
+    "longName": "JPBSAS441",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "798": {
+    "lineCode": "441",
+    "shortName": "441D",
+    "longName": "JPBSAS441",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "810": {
+    "lineCode": "548",
+    "shortName": "548A",
+    "longName": "JMLDZM548",
+    "agencyId": "99",
+    "agencyName": "EMPRESA MICROOMNIBUS LARROQUE LINEA 548 SRL"
+  },
+  "830": {
+    "lineCode": "524",
+    "shortName": "524A",
+    "longName": "JMLANU524",
+    "agencyId": "109",
+    "agencyName": "EMPRESA CINCO DE AGOSTO S.R.L."
+  },
+  "894": {
+    "lineCode": "204",
+    "shortName": "204A",
+    "longName": "JPBSAS204",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "895": {
+    "lineCode": "204",
+    "shortName": "204B",
+    "longName": "JPBSAS204",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "913": {
+    "lineCode": "392",
+    "shortName": "392A",
+    "longName": "JPBSAS392",
+    "agencyId": "135",
+    "agencyName": "LIBERTADOR SAN MARTIN SAT"
+  },
+  "914": {
+    "lineCode": "430",
+    "shortName": "430A",
+    "longName": "JPBSAS430",
+    "agencyId": "138",
+    "agencyName": "LINEA SESENTA SA"
+  },
+  "947": {
+    "lineCode": "228",
+    "shortName": "228CB",
+    "longName": "JPBSAS228C",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "948": {
+    "lineCode": "228",
+    "shortName": "228CC",
+    "longName": "JPBSAS228C",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "949": {
+    "lineCode": "228",
+    "shortName": "228CD",
+    "longName": "JPBSAS228C",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "960": {
+    "lineCode": "228",
+    "shortName": "228BA",
+    "longName": "JPBSAS228B",
+    "agencyId": "138",
+    "agencyName": "LINEA SESENTA SA"
+  },
+  "1010": {
+    "lineCode": "18",
+    "shortName": "OE18",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1014": {
+    "lineCode": "27",
+    "shortName": "OE27",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1017": {
+    "lineCode": "66",
+    "shortName": "OE66",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1022": {
+    "lineCode": "85",
+    "shortName": "OE85",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1036": {
+    "lineCode": "276",
+    "shortName": "276A",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1037": {
+    "lineCode": "276",
+    "shortName": "276E",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1038": {
+    "lineCode": "276",
+    "shortName": "276F",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1039": {
+    "lineCode": "276",
+    "shortName": "276C",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1040": {
+    "lineCode": "276",
+    "shortName": "276B",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1042": {
+    "lineCode": "276",
+    "shortName": "276H",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1043": {
+    "lineCode": "276",
+    "shortName": "276D",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "1044": {
+    "lineCode": "64",
+    "shortName": "64D",
+    "longName": "JNAMBA064",
+    "agencyId": "41",
+    "agencyName": "VUELTA DE ROCHA S.A.T.C.I."
+  },
+  "1050": {
+    "lineCode": "580",
+    "shortName": "580A",
+    "longName": "JMQUIL580",
+    "agencyId": "128",
+    "agencyName": "EXPRESO VILLA NUEVA S.A."
+  },
+  "1063": {
+    "lineCode": "228",
+    "shortName": "228FA",
+    "longName": "JPBSAS228F",
+    "agencyId": "131",
+    "agencyName": "LA CENTRAL DE ESCOBAR SA"
+  },
+  "1087": {
+    "lineCode": "371",
+    "shortName": "371A",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1088": {
+    "lineCode": "371",
+    "shortName": "371B",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1089": {
+    "lineCode": "371",
+    "shortName": "371C",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1090": {
+    "lineCode": "371",
+    "shortName": "371D",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1091": {
+    "lineCode": "371",
+    "shortName": "371E",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1107": {
+    "lineCode": "278",
+    "shortName": "278A",
+    "longName": "JPBSAS278",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "1111": {
+    "lineCode": "281",
+    "shortName": "281L",
+    "longName": "JPBSAS281",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "1114": {
+    "lineCode": "585",
+    "shortName": "585A",
+    "longName": "JMQUIL585",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "1115": {
+    "lineCode": "585",
+    "shortName": "585B",
+    "longName": "JMQUIL585",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "1146": {
+    "lineCode": "275",
+    "shortName": "275B",
+    "longName": "JPBSAS275",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "1147": {
+    "lineCode": "275",
+    "shortName": "275C",
+    "longName": "JPBSAS275",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "1149": {
+    "lineCode": "275",
+    "shortName": "275E",
+    "longName": "JPBSAS275",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "1152": {
+    "lineCode": "275",
+    "shortName": "275H",
+    "longName": "JPBSAS275",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "1155": {
+    "lineCode": "275",
+    "shortName": "275K",
+    "longName": "JPBSAS275",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "1176": {
+    "lineCode": "202",
+    "shortName": "202B",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1177": {
+    "lineCode": "202",
+    "shortName": "202C",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1178": {
+    "lineCode": "202",
+    "shortName": "202D",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1180": {
+    "lineCode": "202",
+    "shortName": "202F",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1182": {
+    "lineCode": "202",
+    "shortName": "202H",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1183": {
+    "lineCode": "202",
+    "shortName": "202I",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1184": {
+    "lineCode": "202",
+    "shortName": "202J",
+    "longName": "JPBSAS202",
+    "agencyId": "158",
+    "agencyName": "TRANSPORTE LA UNION SA"
+  },
+  "1201": {
+    "lineCode": "214",
+    "shortName": "214B64",
+    "longName": "JPBSAS214",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1202": {
+    "lineCode": "214",
+    "shortName": "214D",
+    "longName": "JPBSAS214",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1203": {
+    "lineCode": "273",
+    "shortName": "273A",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1204": {
+    "lineCode": "273",
+    "shortName": "273B11",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1205": {
+    "lineCode": "273",
+    "shortName": "273BC",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1206": {
+    "lineCode": "273",
+    "shortName": "273BG",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1209": {
+    "lineCode": "273",
+    "shortName": "273F",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1210": {
+    "lineCode": "273",
+    "shortName": "273G",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1213": {
+    "lineCode": "273",
+    "shortName": "273CENT",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1215": {
+    "lineCode": "273",
+    "shortName": "273R6",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1216": {
+    "lineCode": "273",
+    "shortName": "273R4",
+    "longName": "JPBSAS273",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1217": {
+    "lineCode": "418",
+    "shortName": "418TRO",
+    "longName": "JPBSAS418",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1224": {
+    "lineCode": "177",
+    "shortName": "177A",
+    "longName": "JNAMBA177",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1231": {
+    "lineCode": "179",
+    "shortName": "179B",
+    "longName": "JNAMBA179",
+    "agencyId": "66",
+    "agencyName": "GRUPO LINEA 179 S.A."
+  },
+  "1232": {
+    "lineCode": "179",
+    "shortName": "179C",
+    "longName": "JNAMBA179",
+    "agencyId": "66",
+    "agencyName": "GRUPO LINEA 179 S.A."
+  },
+  "1242": {
+    "lineCode": "195",
+    "shortName": "195A",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1243": {
+    "lineCode": "195",
+    "shortName": "195B",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1244": {
+    "lineCode": "195",
+    "shortName": "195C",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1245": {
+    "lineCode": "195",
+    "shortName": "195D",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1246": {
+    "lineCode": "195",
+    "shortName": "195E",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1247": {
+    "lineCode": "195",
+    "shortName": "195F",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1248": {
+    "lineCode": "195",
+    "shortName": "195G",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1249": {
+    "lineCode": "195",
+    "shortName": "195H",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1250": {
+    "lineCode": "195",
+    "shortName": "195I",
+    "longName": "JNAMBA195",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "1251": {
+    "lineCode": "371",
+    "shortName": "371K",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1252": {
+    "lineCode": "371",
+    "shortName": "371L",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1253": {
+    "lineCode": "371",
+    "shortName": "371M",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1254": {
+    "lineCode": "371",
+    "shortName": "371N",
+    "longName": "JPBSAS371",
+    "agencyId": "95",
+    "agencyName": "EMPRESA CIUDAD DE SAN FERNANDO SA"
+  },
+  "1277": {
+    "lineCode": "60",
+    "shortName": "60C",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1280": {
+    "lineCode": "60",
+    "shortName": "60F",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1281": {
+    "lineCode": "60",
+    "shortName": "60G",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1282": {
+    "lineCode": "60",
+    "shortName": "60H",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1283": {
+    "lineCode": "60",
+    "shortName": "60I",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1284": {
+    "lineCode": "60",
+    "shortName": "60J",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1285": {
+    "lineCode": "60",
+    "shortName": "60K",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1286": {
+    "lineCode": "60",
+    "shortName": "60L",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1287": {
+    "lineCode": "60",
+    "shortName": "60M",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1288": {
+    "lineCode": "60",
+    "shortName": "60N",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1289": {
+    "lineCode": "60",
+    "shortName": "60ENIE",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1290": {
+    "lineCode": "60",
+    "shortName": "60O",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1291": {
+    "lineCode": "60",
+    "shortName": "60P",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1292": {
+    "lineCode": "60",
+    "shortName": "60Q",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1293": {
+    "lineCode": "60",
+    "shortName": "60R",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1294": {
+    "lineCode": "60",
+    "shortName": "60S",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1295": {
+    "lineCode": "60",
+    "shortName": "60T",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1296": {
+    "lineCode": "60",
+    "shortName": "60U",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1297": {
+    "lineCode": "60",
+    "shortName": "60V",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1298": {
+    "lineCode": "60",
+    "shortName": "60W",
+    "longName": "JNAMBA060",
+    "agencyId": "69",
+    "agencyName": "MICRO OMNIBUS NORTE S.A."
+  },
+  "1388": {
+    "lineCode": "19",
+    "shortName": "OE19",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1390": {
+    "lineCode": "62",
+    "shortName": "OE62",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1393": {
+    "lineCode": "215",
+    "shortName": "215D",
+    "longName": "JPBSAS215",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "1405": {
+    "lineCode": "384",
+    "shortName": "384R2",
+    "longName": "JPBSAS384",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "1469": {
+    "lineCode": "303",
+    "shortName": "303A",
+    "longName": "JPBSAS303",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1470": {
+    "lineCode": "320",
+    "shortName": "320A",
+    "longName": "JPBSAS320",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1471": {
+    "lineCode": "390",
+    "shortName": "390A",
+    "longName": "JPBSAS390",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1472": {
+    "lineCode": "461",
+    "shortName": "461A",
+    "longName": "JPBSAS461",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1473": {
+    "lineCode": "461",
+    "shortName": "461B",
+    "longName": "JPBSAS461",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1474": {
+    "lineCode": "462",
+    "shortName": "462A",
+    "longName": "JPBSAS462",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1475": {
+    "lineCode": "463",
+    "shortName": "463A",
+    "longName": "JPBSAS463",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1476": {
+    "lineCode": "463",
+    "shortName": "463B",
+    "longName": "JPBSAS463",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1477": {
+    "lineCode": "463",
+    "shortName": "463C",
+    "longName": "JPBSAS463",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1478": {
+    "lineCode": "463",
+    "shortName": "463D",
+    "longName": "JPBSAS463",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1479": {
+    "lineCode": "464",
+    "shortName": "464A",
+    "longName": "JPBSAS464",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1480": {
+    "lineCode": "464",
+    "shortName": "464B",
+    "longName": "JPBSAS464",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1481": {
+    "lineCode": "464",
+    "shortName": "464C",
+    "longName": "JPBSAS464",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1482": {
+    "lineCode": "464",
+    "shortName": "464D",
+    "longName": "JPBSAS464",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1495": {
+    "lineCode": "443",
+    "shortName": "443ABA",
+    "longName": "JPBSAS443A",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1496": {
+    "lineCode": "443",
+    "shortName": "443ABB",
+    "longName": "JPBSAS443A",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1497": {
+    "lineCode": "443",
+    "shortName": "443ABC",
+    "longName": "JPBSAS443A",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1498": {
+    "lineCode": "443",
+    "shortName": "443ABD",
+    "longName": "JPBSAS443A",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "1528": {
+    "lineCode": "59",
+    "shortName": "59D",
+    "longName": "JNAMBA059",
+    "agencyId": "84",
+    "agencyName": "MICROOMNIBUS CIUDAD DE BS.AS. S.A.T.C.I"
+  },
+  "1548": {
+    "lineCode": "180",
+    "shortName": "180H",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "1549": {
+    "lineCode": "180",
+    "shortName": "180I",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "1563": {
+    "lineCode": "152",
+    "shortName": "152C",
+    "longName": "JNAMBA152",
+    "agencyId": "20",
+    "agencyName": "EMPRESA TANDILENSE S.A.C.I.F.I.Y DE S."
+  },
+  "1577": {
+    "lineCode": "15",
+    "shortName": "15L",
+    "longName": "JNAMBA015",
+    "agencyId": "55",
+    "agencyName": "TRANSPORTES SUR-NOR C.I.S.A."
+  },
+  "1578": {
+    "lineCode": "29",
+    "shortName": "29D",
+    "longName": "JNAMBA029",
+    "agencyId": "47",
+    "agencyName": "EMP.DE TRANSP. PEDRO DE MENDOZA C.I.S.A."
+  },
+  "1579": {
+    "lineCode": "39",
+    "shortName": "39D",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "1580": {
+    "lineCode": "39",
+    "shortName": "39E",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "1581": {
+    "lineCode": "39",
+    "shortName": "39F",
+    "longName": "JNAMBA039",
+    "agencyId": "56",
+    "agencyName": "TRANSPORTES SANTA FE S.A.C.I."
+  },
+  "1583": {
+    "lineCode": "51",
+    "shortName": "51F",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1584": {
+    "lineCode": "51",
+    "shortName": "51G",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1585": {
+    "lineCode": "51",
+    "shortName": "51H",
+    "longName": "JNAMBA051",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1588": {
+    "lineCode": "79",
+    "shortName": "79I",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1589": {
+    "lineCode": "79",
+    "shortName": "79J",
+    "longName": "JNAMBA079",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1590": {
+    "lineCode": "80",
+    "shortName": "80D",
+    "longName": "JNAMBA080",
+    "agencyId": "53",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."
+  },
+  "1591": {
+    "lineCode": "80",
+    "shortName": "80E",
+    "longName": "JNAMBA080",
+    "agencyId": "53",
+    "agencyName": "TRANSPORTES NUEVA CHICAGO C.I.S.A."
+  },
+  "1593": {
+    "lineCode": "109",
+    "shortName": "109B",
+    "longName": "JNAMBA109",
+    "agencyId": "24",
+    "agencyName": "TRANSPORTE NUEVE DE JULIO SAC."
+  },
+  "1594": {
+    "lineCode": "109",
+    "shortName": "109C",
+    "longName": "JNAMBA109",
+    "agencyId": "24",
+    "agencyName": "TRANSPORTE NUEVE DE JULIO SAC."
+  },
+  "1595": {
+    "lineCode": "177",
+    "shortName": "177B",
+    "longName": "JNAMBA177",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "1597": {
+    "lineCode": "118",
+    "shortName": "118B",
+    "longName": "JNAMBA118",
+    "agencyId": "42",
+    "agencyName": "MICROOMNIBUS BARRANCAS DE BELGRANO S.A."
+  },
+  "1602": {
+    "lineCode": "126",
+    "shortName": "126C",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "1603": {
+    "lineCode": "126",
+    "shortName": "126D",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "1621": {
+    "lineCode": "56",
+    "shortName": "56D",
+    "longName": "JNAMBA056",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "1633": {
+    "lineCode": "91",
+    "shortName": "91E",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "1634": {
+    "lineCode": "91",
+    "shortName": "91F",
+    "longName": "JNAMBA091",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "1637": {
+    "lineCode": "169",
+    "shortName": "169B",
+    "longName": "JNAMBA169",
+    "agencyId": "33",
+    "agencyName": "TRANSPORTE ESCALADA S.A.T."
+  },
+  "1663": {
+    "lineCode": "134",
+    "shortName": "134B",
+    "longName": "JNAMBA134",
+    "agencyId": "7",
+    "agencyName": "TRANSPORTES AUTOMOTORES RIACHUELO S.A."
+  },
+  "1668": {
+    "lineCode": "71",
+    "shortName": "71C",
+    "longName": "JNAMBA071",
+    "agencyId": "27",
+    "agencyName": "LINEA 71 S.A."
+  },
+  "1669": {
+    "lineCode": "76",
+    "shortName": "76B",
+    "longName": "JNAMBA076",
+    "agencyId": "10",
+    "agencyName": "TRANSPORTES LOPE DE VEGA S.A.C.I."
+  },
+  "1670": {
+    "lineCode": "148",
+    "shortName": "148D",
+    "longName": "JNAMBA148",
+    "agencyId": "63",
+    "agencyName": "EL NUEVO HALCON S.A."
+  },
+  "1671": {
+    "lineCode": "31",
+    "shortName": "31A",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "1672": {
+    "lineCode": "31",
+    "shortName": "31B",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "1673": {
+    "lineCode": "31",
+    "shortName": "31C",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "1674": {
+    "lineCode": "31",
+    "shortName": "31D",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "1715": {
+    "lineCode": "28",
+    "shortName": "28L",
+    "longName": "JNAMBA028",
+    "agencyId": "3",
+    "agencyName": "D.O.T.A. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "1717": {
+    "lineCode": "11",
+    "shortName": "NORTE11",
+    "longName": "JMLPLANORTE",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1718": {
+    "lineCode": "12",
+    "shortName": "NORTE12",
+    "longName": "JMLPLANORTE",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1722": {
+    "lineCode": "15",
+    "shortName": "NORTE15",
+    "longName": "JMLPLANORTE",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1727": {
+    "lineCode": "18",
+    "shortName": "NORTE18",
+    "longName": "JMLPLANORTE",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1729": {
+    "lineCode": "180",
+    "shortName": "180F",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "1730": {
+    "lineCode": "180",
+    "shortName": "180G",
+    "longName": "JNAMBA180",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "1731": {
+    "lineCode": "92",
+    "shortName": "92B",
+    "longName": "JNAMBA092",
+    "agencyId": "89",
+    "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L."
+  },
+  "1732": {
+    "lineCode": "92",
+    "shortName": "92C",
+    "longName": "JNAMBA092",
+    "agencyId": "89",
+    "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L."
+  },
+  "1734": {
+    "lineCode": "33",
+    "shortName": "33F",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "1735": {
+    "lineCode": "33",
+    "shortName": "33G",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "1736": {
+    "lineCode": "33",
+    "shortName": "33H",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "1737": {
+    "lineCode": "33",
+    "shortName": "33I",
+    "longName": "JNAMBA033",
+    "agencyId": "87",
+    "agencyName": "TRANSPORTES ALMIRANTE BROWN S.A."
+  },
+  "1740": {
+    "lineCode": "34",
+    "shortName": "34C",
+    "longName": "JNAMBA034",
+    "agencyId": "36",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I."
+  },
+  "1741": {
+    "lineCode": "34",
+    "shortName": "34D",
+    "longName": "JNAMBA034",
+    "agencyId": "36",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I."
+  },
+  "1742": {
+    "lineCode": "34",
+    "shortName": "34E",
+    "longName": "JNAMBA034",
+    "agencyId": "36",
+    "agencyName": "JUAN B. JUSTO S.A.T.C.I."
+  },
+  "1744": {
+    "lineCode": "160",
+    "shortName": "160H",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1745": {
+    "lineCode": "160",
+    "shortName": "160I",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1746": {
+    "lineCode": "160",
+    "shortName": "160J",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1747": {
+    "lineCode": "160",
+    "shortName": "160K",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1748": {
+    "lineCode": "160",
+    "shortName": "160L",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1749": {
+    "lineCode": "160",
+    "shortName": "160M",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1750": {
+    "lineCode": "160",
+    "shortName": "160N",
+    "longName": "JNAMBA160",
+    "agencyId": "64",
+    "agencyName": "MICRO OMNIBUS SUR S.A.C."
+  },
+  "1751": {
+    "lineCode": "55",
+    "shortName": "55B",
+    "longName": "JNAMBA055",
+    "agencyId": "88",
+    "agencyName": "ALMAFUERTE S.A.T.A.C.I."
+  },
+  "1752": {
+    "lineCode": "55",
+    "shortName": "55C",
+    "longName": "JNAMBA055",
+    "agencyId": "88",
+    "agencyName": "ALMAFUERTE S.A.T.A.C.I."
+  },
+  "1753": {
+    "lineCode": "57",
+    "shortName": "57E",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1754": {
+    "lineCode": "57",
+    "shortName": "57K",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1755": {
+    "lineCode": "57",
+    "shortName": "57I",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1756": {
+    "lineCode": "57",
+    "shortName": "57D",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1757": {
+    "lineCode": "57",
+    "shortName": "57N",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1758": {
+    "lineCode": "57",
+    "shortName": "57G",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1759": {
+    "lineCode": "57",
+    "shortName": "57O",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1760": {
+    "lineCode": "57",
+    "shortName": "57J",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1761": {
+    "lineCode": "57",
+    "shortName": "57Q",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1762": {
+    "lineCode": "57",
+    "shortName": "57R",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "1770": {
+    "lineCode": "24",
+    "shortName": "24C",
+    "longName": "JNAMBA024",
+    "agencyId": "35",
+    "agencyName": "EMP.TRANSP.AUTOM.DE PASAJEROS S.A.C.I.F."
+  },
+  "1771": {
+    "lineCode": "86",
+    "shortName": "86G",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "1772": {
+    "lineCode": "86",
+    "shortName": "86H",
+    "longName": "JNAMBA086",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "1773": {
+    "lineCode": "96",
+    "shortName": "96J",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1774": {
+    "lineCode": "96",
+    "shortName": "96K",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1775": {
+    "lineCode": "96",
+    "shortName": "96L",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1776": {
+    "lineCode": "96",
+    "shortName": "96M",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1777": {
+    "lineCode": "96",
+    "shortName": "96N",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1778": {
+    "lineCode": "96",
+    "shortName": "96Ñ",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1779": {
+    "lineCode": "96",
+    "shortName": "96O",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1780": {
+    "lineCode": "96",
+    "shortName": "96P",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1781": {
+    "lineCode": "96",
+    "shortName": "96Q",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1782": {
+    "lineCode": "96",
+    "shortName": "96R",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1783": {
+    "lineCode": "96",
+    "shortName": "96S",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1784": {
+    "lineCode": "96",
+    "shortName": "96T",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1785": {
+    "lineCode": "96",
+    "shortName": "96U",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1786": {
+    "lineCode": "96",
+    "shortName": "96V",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1787": {
+    "lineCode": "96",
+    "shortName": "96W",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1788": {
+    "lineCode": "96",
+    "shortName": "96X",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1789": {
+    "lineCode": "96",
+    "shortName": "96Y",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1790": {
+    "lineCode": "96",
+    "shortName": "96Z",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1791": {
+    "lineCode": "96",
+    "shortName": "96AA",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1792": {
+    "lineCode": "96",
+    "shortName": "96AB",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1793": {
+    "lineCode": "96",
+    "shortName": "96AC",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1794": {
+    "lineCode": "96",
+    "shortName": "96AD",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1795": {
+    "lineCode": "96",
+    "shortName": "96AE",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1796": {
+    "lineCode": "96",
+    "shortName": "96AF",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1797": {
+    "lineCode": "96",
+    "shortName": "96AG",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1798": {
+    "lineCode": "96",
+    "shortName": "96AH",
+    "longName": "JNAMBA096",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1799": {
+    "lineCode": "193",
+    "shortName": "193B",
+    "longName": "JNAMBA193",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "1800": {
+    "lineCode": "193",
+    "shortName": "193C",
+    "longName": "JNAMBA193",
+    "agencyId": "78",
+    "agencyName": "D.U.V.I. SOCIEDAD ANONIMA"
+  },
+  "1801": {
+    "lineCode": "107",
+    "shortName": "107B",
+    "longName": "JNAMBA107",
+    "agencyId": "4",
+    "agencyName": "NUDO S.A."
+  },
+  "1802": {
+    "lineCode": "185",
+    "shortName": "185B",
+    "longName": "JNAMBA185",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1803": {
+    "lineCode": "185",
+    "shortName": "185C",
+    "longName": "JNAMBA185",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "1804": {
+    "lineCode": "182",
+    "shortName": "182D",
+    "longName": "JNAMBA182",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "1805": {
+    "lineCode": "176",
+    "shortName": "176B",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1806": {
+    "lineCode": "176",
+    "shortName": "176C",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1807": {
+    "lineCode": "176",
+    "shortName": "176D",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1808": {
+    "lineCode": "176",
+    "shortName": "176E",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1809": {
+    "lineCode": "176",
+    "shortName": "176F",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1810": {
+    "lineCode": "176",
+    "shortName": "176G",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1811": {
+    "lineCode": "176",
+    "shortName": "176H",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1812": {
+    "lineCode": "176",
+    "shortName": "176I",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1813": {
+    "lineCode": "176",
+    "shortName": "176J",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1814": {
+    "lineCode": "176",
+    "shortName": "176K",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1815": {
+    "lineCode": "176",
+    "shortName": "176L",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1816": {
+    "lineCode": "176",
+    "shortName": "176M",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1817": {
+    "lineCode": "176",
+    "shortName": "176N",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1818": {
+    "lineCode": "176",
+    "shortName": "176Ñ",
+    "longName": "JNAMBA176",
+    "agencyId": "65",
+    "agencyName": "EXPRESO GENERAL SARMIENTO S.A."
+  },
+  "1848": {
+    "lineCode": "10",
+    "shortName": "SUR10",
+    "longName": "JMLPLASUR",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1850": {
+    "lineCode": "19",
+    "shortName": "SUR19",
+    "longName": "JMLPLASUR",
+    "agencyId": "165",
+    "agencyName": "UNION PLATENSE SRL"
+  },
+  "1866": {
+    "lineCode": "561",
+    "shortName": "561A",
+    "longName": "JMLDZM561",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "1868": {
+    "lineCode": "562",
+    "shortName": "562B",
+    "longName": "JMLDZM562",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "1869": {
+    "lineCode": "562",
+    "shortName": "562C",
+    "longName": "JMLDZM562",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "1877": {
+    "lineCode": "500",
+    "shortName": "500HA",
+    "longName": "JMFVAR500",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1879": {
+    "lineCode": "503",
+    "shortName": "503A",
+    "longName": "JMFVAR503",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1880": {
+    "lineCode": "503",
+    "shortName": "503B",
+    "longName": "JMFVAR503",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1881": {
+    "lineCode": "506",
+    "shortName": "506A",
+    "longName": "JMFVAR506",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1888": {
+    "lineCode": "383",
+    "shortName": "383R7",
+    "longName": "JPBSAS383",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1889": {
+    "lineCode": "383",
+    "shortName": "383R9",
+    "longName": "JPBSAS383",
+    "agencyId": "215",
+    "agencyName": "TRANSPORTES SAN JUAN BAUTISTA S.A."
+  },
+  "1964": {
+    "lineCode": "88",
+    "shortName": "88N",
+    "longName": "JNAMBA088",
+    "agencyId": "79",
+    "agencyName": "LINEA EXPRESO LINIERS S.A.I.Y C."
+  },
+  "1967": {
+    "lineCode": "57",
+    "shortName": "57C",
+    "longName": "JNAMBA057",
+    "agencyId": "70",
+    "agencyName": "TRANSPORTES ATLANTIDA S.A.C."
+  },
+  "2472": {
+    "lineCode": "124",
+    "shortName": "124A",
+    "longName": "JNAMBA124",
+    "agencyId": "6",
+    "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."
+  },
+  "2473": {
+    "lineCode": "124",
+    "shortName": "124B",
+    "longName": "JNAMBA124",
+    "agencyId": "6",
+    "agencyName": "TRANSPORTES AUTOMOTORES CALLAO S.A."
+  },
+  "2474": {
+    "lineCode": "90",
+    "shortName": "90A",
+    "longName": "JNAMBA090",
+    "agencyId": "8",
+    "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2475": {
+    "lineCode": "90",
+    "shortName": "90B",
+    "longName": "JNAMBA090",
+    "agencyId": "8",
+    "agencyName": "M.O.D.O. S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2476": {
+    "lineCode": "228",
+    "shortName": "228AC",
+    "longName": "JPBSAS228A",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2490": {
+    "lineCode": "16",
+    "shortName": "OE16V",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "2491": {
+    "lineCode": "61",
+    "shortName": "OE61V",
+    "longName": "JMLPLAOESTE",
+    "agencyId": "120",
+    "agencyName": "EMPRESA NUEVE DE JULIO S.A.T."
+  },
+  "2500": {
+    "lineCode": "257",
+    "shortName": "257B",
+    "longName": "JPBSAS257",
+    "agencyId": "128",
+    "agencyName": "EXPRESO VILLA NUEVA S.A."
+  },
+  "2507": {
+    "lineCode": "266",
+    "shortName": "266R1",
+    "longName": "JPBSAS266",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2508": {
+    "lineCode": "266",
+    "shortName": "266R2",
+    "longName": "JPBSAS266",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2509": {
+    "lineCode": "266",
+    "shortName": "266R4",
+    "longName": "JPBSAS266",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2510": {
+    "lineCode": "266",
+    "shortName": "266RS",
+    "longName": "JPBSAS266",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2511": {
+    "lineCode": "266",
+    "shortName": "266R6",
+    "longName": "JPBSAS266",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2514": {
+    "lineCode": "263",
+    "shortName": "263RNeg",
+    "longName": "JPBSAS263A",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2515": {
+    "lineCode": "263",
+    "shortName": "263RRoj",
+    "longName": "JPBSAS263A",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2516": {
+    "lineCode": "263",
+    "shortName": "263RVer",
+    "longName": "JPBSAS263A",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2518": {
+    "lineCode": "382",
+    "shortName": "382R1",
+    "longName": "JPBSAS382",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2519": {
+    "lineCode": "382",
+    "shortName": "382R2",
+    "longName": "JPBSAS382",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2520": {
+    "lineCode": "620",
+    "shortName": "620T",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2521": {
+    "lineCode": "620",
+    "shortName": "620R1",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2522": {
+    "lineCode": "620",
+    "shortName": "620R2",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2523": {
+    "lineCode": "620",
+    "shortName": "620R3",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2524": {
+    "lineCode": "620",
+    "shortName": "620R4",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2525": {
+    "lineCode": "620",
+    "shortName": "620R5",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2526": {
+    "lineCode": "620",
+    "shortName": "620R6",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2527": {
+    "lineCode": "620",
+    "shortName": "620R7",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2528": {
+    "lineCode": "620",
+    "shortName": "620R8",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2529": {
+    "lineCode": "620",
+    "shortName": "620R9",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2530": {
+    "lineCode": "620",
+    "shortName": "620R10",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2531": {
+    "lineCode": "620",
+    "shortName": "620R11",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2532": {
+    "lineCode": "620",
+    "shortName": "620R12",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2533": {
+    "lineCode": "620",
+    "shortName": "620R13",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2534": {
+    "lineCode": "620",
+    "shortName": "620R14",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2535": {
+    "lineCode": "620",
+    "shortName": "620Ro1",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2536": {
+    "lineCode": "620",
+    "shortName": "620Ro2",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2537": {
+    "lineCode": "620",
+    "shortName": "620Ro3",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2538": {
+    "lineCode": "620",
+    "shortName": "620Ro4",
+    "longName": "JMLMTZ620",
+    "agencyId": "149",
+    "agencyName": "NUEVO IDEAL S.A."
+  },
+  "2540": {
+    "lineCode": "283",
+    "shortName": "283B1",
+    "longName": "JPBSAS283",
+    "agencyId": "96",
+    "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"
+  },
+  "2541": {
+    "lineCode": "523",
+    "shortName": "523A",
+    "longName": "JMLANU523",
+    "agencyId": "96",
+    "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"
+  },
+  "2542": {
+    "lineCode": "283",
+    "shortName": "283B2",
+    "longName": "JPBSAS283",
+    "agencyId": "96",
+    "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"
+  },
+  "2543": {
+    "lineCode": "283",
+    "shortName": "283B3",
+    "longName": "JPBSAS283",
+    "agencyId": "96",
+    "agencyName": "CIA ANDRADE EMPRESA DE TRANSPORTE DE PASAJEROS SRL"
+  },
+  "2544": {
+    "lineCode": "721",
+    "shortName": "721A",
+    "longName": "JMTIGR721",
+    "agencyId": "142",
+    "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"
+  },
+  "2545": {
+    "lineCode": "721",
+    "shortName": "721B",
+    "longName": "JMTIGR721",
+    "agencyId": "142",
+    "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"
+  },
+  "2546": {
+    "lineCode": "721",
+    "shortName": "721C",
+    "longName": "JMTIGR721",
+    "agencyId": "142",
+    "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"
+  },
+  "2547": {
+    "lineCode": "721",
+    "shortName": "721D",
+    "longName": "JMTIGR721",
+    "agencyId": "142",
+    "agencyName": "MICRO OMNIBUS GRAL PACHECO SRL"
+  },
+  "2550": {
+    "lineCode": "527",
+    "shortName": "527B",
+    "longName": "JMLANU527",
+    "agencyId": "174",
+    "agencyName": "EL URBANO SRL"
+  },
+  "2551": {
+    "lineCode": "522",
+    "shortName": "522A",
+    "longName": "JMLANU522",
+    "agencyId": "174",
+    "agencyName": "EL URBANO SRL"
+  },
+  "2552": {
+    "lineCode": "527",
+    "shortName": "527C",
+    "longName": "JMLANU527",
+    "agencyId": "174",
+    "agencyName": "EL URBANO SRL"
+  },
+  "2557": {
+    "lineCode": "343",
+    "shortName": "343A",
+    "longName": "JPBSAS343",
+    "agencyId": "101",
+    "agencyName": "COMPAÑIA NOROESTE S.A.T."
+  },
+  "2558": {
+    "lineCode": "343",
+    "shortName": "343B",
+    "longName": "JPBSAS343",
+    "agencyId": "101",
+    "agencyName": "COMPAÑIA NOROESTE S.A.T."
+  },
+  "2560": {
+    "lineCode": "238",
+    "shortName": "238A",
+    "longName": "JPBSAS238",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2561": {
+    "lineCode": "238",
+    "shortName": "238B",
+    "longName": "JPBSAS238",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2562": {
+    "lineCode": "238",
+    "shortName": "238C",
+    "longName": "JPBSAS238",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2563": {
+    "lineCode": "238",
+    "shortName": "238D",
+    "longName": "JPBSAS238",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2566": {
+    "lineCode": "341",
+    "shortName": "341A",
+    "longName": "JPBSAS341",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2568": {
+    "lineCode": "341",
+    "shortName": "341B",
+    "longName": "JPBSAS341",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2569": {
+    "lineCode": "341",
+    "shortName": "341C",
+    "longName": "JPBSAS341",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2572": {
+    "lineCode": "500",
+    "shortName": "500DA",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2573": {
+    "lineCode": "500",
+    "shortName": "500DB",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2574": {
+    "lineCode": "500",
+    "shortName": "500DC",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2575": {
+    "lineCode": "500",
+    "shortName": "500DD",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2576": {
+    "lineCode": "500",
+    "shortName": "500DE",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2577": {
+    "lineCode": "500",
+    "shortName": "500DF",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2578": {
+    "lineCode": "500",
+    "shortName": "500DG",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2579": {
+    "lineCode": "500",
+    "shortName": "500DH",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2580": {
+    "lineCode": "500",
+    "shortName": "500DI",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2581": {
+    "lineCode": "500",
+    "shortName": "500DJ",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2582": {
+    "lineCode": "500",
+    "shortName": "500DK",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2583": {
+    "lineCode": "500",
+    "shortName": "500DL",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2584": {
+    "lineCode": "500",
+    "shortName": "500DM",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2585": {
+    "lineCode": "500",
+    "shortName": "500DN",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2586": {
+    "lineCode": "500",
+    "shortName": "500DO",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2587": {
+    "lineCode": "500",
+    "shortName": "500DP",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2588": {
+    "lineCode": "500",
+    "shortName": "500DQ",
+    "longName": "JMMERL500D",
+    "agencyId": "162",
+    "agencyName": "TRANSPORTES UNIDOS DE MERLO S.A.C.I.I."
+  },
+  "2589": {
+    "lineCode": "391",
+    "shortName": "391A",
+    "longName": "JPBSAS391",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2590": {
+    "lineCode": "391",
+    "shortName": "391B",
+    "longName": "JPBSAS391",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2592": {
+    "lineCode": "391",
+    "shortName": "391C",
+    "longName": "JPBSAS391",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2593": {
+    "lineCode": "379",
+    "shortName": "379A",
+    "longName": "JPBSAS379",
+    "agencyId": "125",
+    "agencyName": "EXPRESO PARQUE EL LUCERO S.A. DE TRANSPORTES"
+  },
+  "2594": {
+    "lineCode": "326",
+    "shortName": "326A",
+    "longName": "JPBSAS326",
+    "agencyId": "172",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."
+  },
+  "2595": {
+    "lineCode": "326",
+    "shortName": "326B",
+    "longName": "JPBSAS326",
+    "agencyId": "172",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."
+  },
+  "2596": {
+    "lineCode": "326",
+    "shortName": "326C",
+    "longName": "JPBSAS326",
+    "agencyId": "172",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."
+  },
+  "2597": {
+    "lineCode": "278",
+    "shortName": "278S",
+    "longName": "JPBSAS278",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "2598": {
+    "lineCode": "278",
+    "shortName": "278B",
+    "longName": "JPBSAS278",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "2599": {
+    "lineCode": "440",
+    "shortName": "440-1",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2601": {
+    "lineCode": "440",
+    "shortName": "440-2",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2602": {
+    "lineCode": "440",
+    "shortName": "440-6",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2603": {
+    "lineCode": "440",
+    "shortName": "440-9",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2604": {
+    "lineCode": "440",
+    "shortName": "440-10",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2605": {
+    "lineCode": "440",
+    "shortName": "440-19",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2606": {
+    "lineCode": "440",
+    "shortName": "440-25",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2607": {
+    "lineCode": "440",
+    "shortName": "440-48",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2608": {
+    "lineCode": "440",
+    "shortName": "440-48R1",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2609": {
+    "lineCode": "440",
+    "shortName": "440-52",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2610": {
+    "lineCode": "440",
+    "shortName": "440-81",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2611": {
+    "lineCode": "440",
+    "shortName": "440-82",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2612": {
+    "lineCode": "440",
+    "shortName": "440-82R1",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2613": {
+    "lineCode": "440",
+    "shortName": "440-82R2",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2614": {
+    "lineCode": "440",
+    "shortName": "440-82R3",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2615": {
+    "lineCode": "440",
+    "shortName": "440-97",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2616": {
+    "lineCode": "440",
+    "shortName": "440-98",
+    "longName": "JPBSAS440",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2617": {
+    "lineCode": "315",
+    "shortName": "315A",
+    "longName": "JPBSAS315",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2618": {
+    "lineCode": "315",
+    "shortName": "315B",
+    "longName": "JPBSAS315",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2619": {
+    "lineCode": "315",
+    "shortName": "315C",
+    "longName": "JPBSAS315",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2620": {
+    "lineCode": "315",
+    "shortName": "315D",
+    "longName": "JPBSAS315",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2621": {
+    "lineCode": "315",
+    "shortName": "315E",
+    "longName": "JPBSAS315",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "2628": {
+    "lineCode": "236",
+    "shortName": "236A",
+    "longName": "JPBSAS236",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2631": {
+    "lineCode": "271",
+    "shortName": "271A",
+    "longName": "JPBSAS271",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2632": {
+    "lineCode": "271",
+    "shortName": "271P",
+    "longName": "JPBSAS271",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2633": {
+    "lineCode": "271",
+    "shortName": "271D",
+    "longName": "JPBSAS271",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2634": {
+    "lineCode": "373",
+    "shortName": "373R5",
+    "longName": "JPBSAS373",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2635": {
+    "lineCode": "373",
+    "shortName": "373R1",
+    "longName": "JPBSAS373",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2637": {
+    "lineCode": "443",
+    "shortName": "443B",
+    "longName": "JPBSAS443",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2654": {
+    "lineCode": "634",
+    "shortName": "634A",
+    "longName": "JMMORN634",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2655": {
+    "lineCode": "634",
+    "shortName": "634B",
+    "longName": "JMMORN634",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2656": {
+    "lineCode": "634",
+    "shortName": "634C",
+    "longName": "JMMORN634",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2657": {
+    "lineCode": "634",
+    "shortName": "634D",
+    "longName": "JMMORN634",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2658": {
+    "lineCode": "299",
+    "shortName": "299S",
+    "longName": "JPBSAS299",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2659": {
+    "lineCode": "299",
+    "shortName": "299M",
+    "longName": "JPBSAS299",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2660": {
+    "lineCode": "299",
+    "shortName": "299A",
+    "longName": "JPBSAS299",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2661": {
+    "lineCode": "299",
+    "shortName": "299C",
+    "longName": "JPBSAS299",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2662": {
+    "lineCode": "570",
+    "shortName": "570R1",
+    "longName": "JMAVEL570",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2663": {
+    "lineCode": "570",
+    "shortName": "570R4",
+    "longName": "JMAVEL570",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "2665": {
+    "lineCode": "314",
+    "shortName": "314A",
+    "longName": "JPBSAS314",
+    "agencyId": "133",
+    "agencyName": "LA PRIMERA DE MARTINEZ S.A"
+  },
+  "2666": {
+    "lineCode": "314",
+    "shortName": "314B",
+    "longName": "JPBSAS314",
+    "agencyId": "133",
+    "agencyName": "LA PRIMERA DE MARTINEZ S.A"
+  },
+  "2667": {
+    "lineCode": "314",
+    "shortName": "314C",
+    "longName": "JPBSAS314",
+    "agencyId": "133",
+    "agencyName": "LA PRIMERA DE MARTINEZ S.A"
+  },
+  "2668": {
+    "lineCode": "242",
+    "shortName": "242RD",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2669": {
+    "lineCode": "8",
+    "shortName": "R8/99",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2671": {
+    "lineCode": "333",
+    "shortName": "R333/9",
+    "longName": "JPBSAS242",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2674": {
+    "lineCode": "720",
+    "shortName": "720A",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2675": {
+    "lineCode": "720",
+    "shortName": "720B",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2676": {
+    "lineCode": "298",
+    "shortName": "298T",
+    "longName": "JPBSAS298",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2677": {
+    "lineCode": "298",
+    "shortName": "298TM",
+    "longName": "JPBSAS298",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2678": {
+    "lineCode": "298",
+    "shortName": "298RM",
+    "longName": "JPBSAS298",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2679": {
+    "lineCode": "298",
+    "shortName": "298RC",
+    "longName": "JPBSAS298",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2680": {
+    "lineCode": "720",
+    "shortName": "720C",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2681": {
+    "lineCode": "720",
+    "shortName": "720D",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2682": {
+    "lineCode": "720",
+    "shortName": "720E",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2683": {
+    "lineCode": "720",
+    "shortName": "720F",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2684": {
+    "lineCode": "1",
+    "shortName": "RTr1",
+    "longName": "JPBSAS218",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2685": {
+    "lineCode": "218",
+    "shortName": "218R2",
+    "longName": "JPBSAS218",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2686": {
+    "lineCode": "218",
+    "shortName": "218R3",
+    "longName": "JPBSAS218",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2687": {
+    "lineCode": "218",
+    "shortName": "218R4",
+    "longName": "JPBSAS218",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2688": {
+    "lineCode": "1",
+    "shortName": "RTr1",
+    "longName": "JPBSAS284",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2689": {
+    "lineCode": "284",
+    "shortName": "284R2",
+    "longName": "JPBSAS284",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2690": {
+    "lineCode": "1",
+    "shortName": "RTr1",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2691": {
+    "lineCode": "378",
+    "shortName": "378R2",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2692": {
+    "lineCode": "378",
+    "shortName": "378R3",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2693": {
+    "lineCode": "378",
+    "shortName": "378R4",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2694": {
+    "lineCode": "378",
+    "shortName": "378R5",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2695": {
+    "lineCode": "378",
+    "shortName": "378R6",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2696": {
+    "lineCode": "378",
+    "shortName": "378R7",
+    "longName": "JPBSAS378",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2697": {
+    "lineCode": "622",
+    "shortName": "622R1",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2698": {
+    "lineCode": "622",
+    "shortName": "622R2",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2699": {
+    "lineCode": "622",
+    "shortName": "622R3",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2700": {
+    "lineCode": "622",
+    "shortName": "622R4",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2701": {
+    "lineCode": "622",
+    "shortName": "622Ro5",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2702": {
+    "lineCode": "622",
+    "shortName": "622Ro6",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2703": {
+    "lineCode": "622",
+    "shortName": "622Ro7",
+    "longName": "JMLMTZ622",
+    "agencyId": "171",
+    "agencyName": "ALMAFUERTE EMPRESA DE TRANSPORTE S.A.C.I. E I"
+  },
+  "2707": {
+    "lineCode": "621",
+    "shortName": "621R1",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2708": {
+    "lineCode": "621",
+    "shortName": "621R2",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2711": {
+    "lineCode": "621",
+    "shortName": "621R5",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2712": {
+    "lineCode": "621",
+    "shortName": "621R6",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2713": {
+    "lineCode": "621",
+    "shortName": "621R7",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2714": {
+    "lineCode": "621",
+    "shortName": "621R8",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2715": {
+    "lineCode": "621",
+    "shortName": "621R9",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2716": {
+    "lineCode": "621",
+    "shortName": "621RND10",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2717": {
+    "lineCode": "621",
+    "shortName": "621RND11",
+    "longName": "JMLMTZ621",
+    "agencyId": "60",
+    "agencyName": "TRANSPORTE IDEAL SAN JUSTO S.A."
+  },
+  "2726": {
+    "lineCode": "720",
+    "shortName": "720G",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2727": {
+    "lineCode": "720",
+    "shortName": "720H",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2728": {
+    "lineCode": "219",
+    "shortName": "219R3N",
+    "longName": "JPBSAS219",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2729": {
+    "lineCode": "219",
+    "shortName": "219R3R",
+    "longName": "JPBSAS219",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2730": {
+    "lineCode": "219",
+    "shortName": "219R5",
+    "longName": "JPBSAS219",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2731": {
+    "lineCode": "300",
+    "shortName": "300ANT",
+    "longName": "JPBSAS300",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2732": {
+    "lineCode": "300",
+    "shortName": "300ASEV",
+    "longName": "JPBSAS300",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2733": {
+    "lineCode": "300",
+    "shortName": "300B1",
+    "longName": "JPBSAS300",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2734": {
+    "lineCode": "372",
+    "shortName": "372A",
+    "longName": "JPBSAS372",
+    "agencyId": "72",
+    "agencyName": "MICRO OMNIBUS QUILMES S.A.C.I. Y F."
+  },
+  "2739": {
+    "lineCode": "306",
+    "shortName": "306A",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2740": {
+    "lineCode": "306",
+    "shortName": "306B",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2741": {
+    "lineCode": "306",
+    "shortName": "306C",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2742": {
+    "lineCode": "306",
+    "shortName": "306D",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2743": {
+    "lineCode": "306",
+    "shortName": "306E",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2744": {
+    "lineCode": "306",
+    "shortName": "306F",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2745": {
+    "lineCode": "306",
+    "shortName": "306G",
+    "longName": "JPBSAS306",
+    "agencyId": "123",
+    "agencyName": "EXPRESO ESTEBAN ECHEVERRIA S.R.L."
+  },
+  "2747": {
+    "lineCode": "312",
+    "shortName": "312R2",
+    "longName": "JPBSAS312",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "2748": {
+    "lineCode": "312",
+    "shortName": "312R3",
+    "longName": "JPBSAS312",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "2749": {
+    "lineCode": "329",
+    "shortName": "329TR1",
+    "longName": "JPBSAS329",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "2750": {
+    "lineCode": "329",
+    "shortName": "329R2",
+    "longName": "JPBSAS329",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "2752": {
+    "lineCode": "422",
+    "shortName": "422R2",
+    "longName": "JPBSAS422",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "2789": {
+    "lineCode": "720",
+    "shortName": "720I",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2790": {
+    "lineCode": "720",
+    "shortName": "720J",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2791": {
+    "lineCode": "720",
+    "shortName": "720K",
+    "longName": "JMTIGR720",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2792": {
+    "lineCode": "723",
+    "shortName": "723A",
+    "longName": "JMTIGR723",
+    "agencyId": "148",
+    "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"
+  },
+  "2793": {
+    "lineCode": "723",
+    "shortName": "723B",
+    "longName": "JMTIGR723",
+    "agencyId": "148",
+    "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"
+  },
+  "2794": {
+    "lineCode": "723",
+    "shortName": "723C",
+    "longName": "JMTIGR723",
+    "agencyId": "148",
+    "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"
+  },
+  "2795": {
+    "lineCode": "723",
+    "shortName": "723D",
+    "longName": "JMTIGR723",
+    "agencyId": "148",
+    "agencyName": "UTENOR LINEA 723 UNION TRANSITORIA DE EMPRESAS"
+  },
+  "2796": {
+    "lineCode": "722",
+    "shortName": "722A",
+    "longName": "JMTIGR722",
+    "agencyId": "212",
+    "agencyName": "UTENOR SA L 722"
+  },
+  "2797": {
+    "lineCode": "295",
+    "shortName": "295TR1",
+    "longName": "JPBSAS295",
+    "agencyId": "144",
+    "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T."
+  },
+  "2798": {
+    "lineCode": "295",
+    "shortName": "295R2",
+    "longName": "JPBSAS295",
+    "agencyId": "144",
+    "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T."
+  },
+  "2799": {
+    "lineCode": "295",
+    "shortName": "295R4",
+    "longName": "JPBSAS295",
+    "agencyId": "144",
+    "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T."
+  },
+  "2800": {
+    "lineCode": "295",
+    "shortName": "295R5",
+    "longName": "JPBSAS295",
+    "agencyId": "144",
+    "agencyName": "MICRO OMNIBUS O´HIGGINS S.A.T."
+  },
+  "2801": {
+    "lineCode": "252",
+    "shortName": "252A",
+    "longName": "JPBSAS252",
+    "agencyId": "157",
+    "agencyName": "TRANSPORTE JOSE HERNANDEZ S.A.C.I."
+  },
+  "2802": {
+    "lineCode": "252",
+    "shortName": "252B",
+    "longName": "JPBSAS252",
+    "agencyId": "157",
+    "agencyName": "TRANSPORTE JOSE HERNANDEZ S.A.C.I."
+  },
+  "2804": {
+    "lineCode": "263",
+    "shortName": "263BA",
+    "longName": "JPBSAS263B",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "2805": {
+    "lineCode": "263",
+    "shortName": "263BB",
+    "longName": "JPBSAS263B",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "2806": {
+    "lineCode": "263",
+    "shortName": "263BC",
+    "longName": "JPBSAS263B",
+    "agencyId": "68",
+    "agencyName": "SAN VICENTE S.A. DE TRANSPORTES"
+  },
+  "2807": {
+    "lineCode": "630",
+    "shortName": "630R1",
+    "longName": "JMLMTZ630",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "2808": {
+    "lineCode": "630",
+    "shortName": "630R2",
+    "longName": "JMLMTZ630",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "2809": {
+    "lineCode": "630",
+    "shortName": "630R3",
+    "longName": "JMLMTZ630",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "2810": {
+    "lineCode": "630",
+    "shortName": "630R4",
+    "longName": "JMLMTZ630",
+    "agencyId": "76",
+    "agencyName": "LA VECINAL DE MATANZA SACI. DE MICROOMNIBUS"
+  },
+  "2812": {
+    "lineCode": "247",
+    "shortName": "247R2",
+    "longName": "JPBSAS247",
+    "agencyId": "124",
+    "agencyName": "EXPRESO NUEVE DE JULIO S.A."
+  },
+  "2813": {
+    "lineCode": "247",
+    "shortName": "247R5",
+    "longName": "JPBSAS247",
+    "agencyId": "124",
+    "agencyName": "EXPRESO NUEVE DE JULIO S.A."
+  },
+  "2814": {
+    "lineCode": "247",
+    "shortName": "247R7",
+    "longName": "JPBSAS247",
+    "agencyId": "124",
+    "agencyName": "EXPRESO NUEVE DE JULIO S.A."
+  },
+  "2826": {
+    "lineCode": "395",
+    "shortName": "395C",
+    "longName": "JPBSAS395",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "2827": {
+    "lineCode": "318",
+    "shortName": "318TRONC",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2828": {
+    "lineCode": "318",
+    "shortName": "318A",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2829": {
+    "lineCode": "318",
+    "shortName": "318B",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2830": {
+    "lineCode": "318",
+    "shortName": "318C",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2831": {
+    "lineCode": "318",
+    "shortName": "318D",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2832": {
+    "lineCode": "318",
+    "shortName": "318E",
+    "longName": "JPBSAS318",
+    "agencyId": "143",
+    "agencyName": "MICRO OMNIBUS MITRE S.A."
+  },
+  "2838": {
+    "lineCode": "333",
+    "shortName": "333",
+    "longName": "JPBSAS333A",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2840": {
+    "lineCode": "407",
+    "shortName": "407A",
+    "longName": "JPBSAS407",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2841": {
+    "lineCode": "437",
+    "shortName": "437A",
+    "longName": "JPBSAS437",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2842": {
+    "lineCode": "437",
+    "shortName": "437B",
+    "longName": "JPBSAS437",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2851": {
+    "lineCode": "521",
+    "shortName": "521AA",
+    "longName": "JMLANU521",
+    "agencyId": "140",
+    "agencyName": "MICRO OMNIBUS ESTE S.A"
+  },
+  "2852": {
+    "lineCode": "526",
+    "shortName": "526A",
+    "longName": "JMLANU526",
+    "agencyId": "140",
+    "agencyName": "MICRO OMNIBUS ESTE S.A"
+  },
+  "2860": {
+    "lineCode": "336",
+    "shortName": "336A",
+    "longName": "JPBSAS336",
+    "agencyId": "135",
+    "agencyName": "LIBERTADOR SAN MARTIN SAT"
+  },
+  "2861": {
+    "lineCode": "624",
+    "shortName": "624A",
+    "longName": "JMLMTZ624",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2862": {
+    "lineCode": "624",
+    "shortName": "624B",
+    "longName": "JMLMTZ624",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2863": {
+    "lineCode": "624",
+    "shortName": "624C",
+    "longName": "JMLMTZ624",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2864": {
+    "lineCode": "624",
+    "shortName": "624D",
+    "longName": "JMLMTZ624",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2865": {
+    "lineCode": "624",
+    "shortName": "624E",
+    "longName": "JMLMTZ624",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "2894": {
+    "lineCode": "307",
+    "shortName": "307A2",
+    "longName": "JPBSAS307",
+    "agencyId": "117",
+    "agencyName": "EMPRESA LINEA SIETE SAT"
+  },
+  "2898": {
+    "lineCode": "307",
+    "shortName": "307DA",
+    "longName": "JPBSAS307",
+    "agencyId": "117",
+    "agencyName": "EMPRESA LINEA SIETE SAT"
+  },
+  "2903": {
+    "lineCode": "307",
+    "shortName": "307F",
+    "longName": "JPBSAS307",
+    "agencyId": "117",
+    "agencyName": "EMPRESA LINEA SIETE SAT"
+  },
+  "2906": {
+    "lineCode": "276",
+    "shortName": "276I",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2907": {
+    "lineCode": "276",
+    "shortName": "276J",
+    "longName": "JPBSAS276",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2909": {
+    "lineCode": "541",
+    "shortName": "541A",
+    "longName": "JMLDZM541",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "2910": {
+    "lineCode": "541",
+    "shortName": "541B",
+    "longName": "JMLDZM541",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "2911": {
+    "lineCode": "203",
+    "shortName": "203A",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2912": {
+    "lineCode": "544",
+    "shortName": "544B",
+    "longName": "JMLDZM544",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "2914": {
+    "lineCode": "203",
+    "shortName": "203B",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2915": {
+    "lineCode": "203",
+    "shortName": "203C",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2917": {
+    "lineCode": "203",
+    "shortName": "203E",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2918": {
+    "lineCode": "203",
+    "shortName": "203F",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2919": {
+    "lineCode": "203",
+    "shortName": "203G",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2920": {
+    "lineCode": "203",
+    "shortName": "203H",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2921": {
+    "lineCode": "203",
+    "shortName": "203I",
+    "longName": "JPBSAS203",
+    "agencyId": "49",
+    "agencyName": "AZUL S.A. DE TRANSPORTE AUTOMOTOR"
+  },
+  "2922": {
+    "lineCode": "302",
+    "shortName": "302A",
+    "longName": "JPBSAS302",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2923": {
+    "lineCode": "302",
+    "shortName": "302B",
+    "longName": "JPBSAS302",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2924": {
+    "lineCode": "302",
+    "shortName": "302C",
+    "longName": "JPBSAS302",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2926": {
+    "lineCode": "244",
+    "shortName": "244A",
+    "longName": "JPBSAS244",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2927": {
+    "lineCode": "244",
+    "shortName": "244B",
+    "longName": "JPBSAS244",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2928": {
+    "lineCode": "244",
+    "shortName": "244C",
+    "longName": "JPBSAS244",
+    "agencyId": "115",
+    "agencyName": "EMPRESA DEL OESTE SAT"
+  },
+  "2939": {
+    "lineCode": "204",
+    "shortName": "204BA",
+    "longName": "JPBSAS204B",
+    "agencyId": "138",
+    "agencyName": "LINEA SESENTA SA"
+  },
+  "2941": {
+    "lineCode": "204",
+    "shortName": "204BC",
+    "longName": "JPBSAS204B",
+    "agencyId": "138",
+    "agencyName": "LINEA SESENTA SA"
+  },
+  "2942": {
+    "lineCode": "228",
+    "shortName": "228EA",
+    "longName": "JPBSAS228E",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2943": {
+    "lineCode": "228",
+    "shortName": "228EB",
+    "longName": "JPBSAS228E",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "2944": {
+    "lineCode": "707",
+    "shortName": "707AZU",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2945": {
+    "lineCode": "707",
+    "shortName": "707VER",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2946": {
+    "lineCode": "707",
+    "shortName": "707NAR",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2947": {
+    "lineCode": "707",
+    "shortName": "707ROJ",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2948": {
+    "lineCode": "707",
+    "shortName": "707R8A",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2949": {
+    "lineCode": "707",
+    "shortName": "707R8B",
+    "longName": "JMSIDR707",
+    "agencyId": "141",
+    "agencyName": "MICRO OMNIBUS GENERAL SAN MARTIN SAC"
+  },
+  "2950": {
+    "lineCode": "365",
+    "shortName": "365R1",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2951": {
+    "lineCode": "365",
+    "shortName": "365R2",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2952": {
+    "lineCode": "365",
+    "shortName": "365R3",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2953": {
+    "lineCode": "365",
+    "shortName": "365R4",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2954": {
+    "lineCode": "365",
+    "shortName": "365R5",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2955": {
+    "lineCode": "365",
+    "shortName": "365R6",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2956": {
+    "lineCode": "365",
+    "shortName": "365R7",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2957": {
+    "lineCode": "365",
+    "shortName": "365R8",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2958": {
+    "lineCode": "365",
+    "shortName": "365R9",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2959": {
+    "lineCode": "365",
+    "shortName": "365R10",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2960": {
+    "lineCode": "365",
+    "shortName": "365R11",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2961": {
+    "lineCode": "365",
+    "shortName": "365R12",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2962": {
+    "lineCode": "365",
+    "shortName": "365R13",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2963": {
+    "lineCode": "365",
+    "shortName": "365R14",
+    "longName": "JPBSAS365",
+    "agencyId": "9",
+    "agencyName": "LA NUEVA METROPOL S.A."
+  },
+  "2971": {
+    "lineCode": "564",
+    "shortName": "564R3",
+    "longName": "JMLDZM564",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2972": {
+    "lineCode": "564",
+    "shortName": "564RB",
+    "longName": "JMLDZM564",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "2973": {
+    "lineCode": "237",
+    "shortName": "237AA1",
+    "longName": "JPBSAS237A",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2974": {
+    "lineCode": "237",
+    "shortName": "237AA2",
+    "longName": "JPBSAS237A",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2975": {
+    "lineCode": "237",
+    "shortName": "237AB",
+    "longName": "JPBSAS237A",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2976": {
+    "lineCode": "237",
+    "shortName": "237AT",
+    "longName": "JPBSAS237A",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2977": {
+    "lineCode": "237",
+    "shortName": "237AV",
+    "longName": "JPBSAS237A",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "2991": {
+    "lineCode": "204",
+    "shortName": "204C",
+    "longName": "JPBSAS204",
+    "agencyId": "146",
+    "agencyName": "MICRO OMNIBUS TIGRE S.A."
+  },
+  "3009": {
+    "lineCode": "338",
+    "shortName": "338B",
+    "longName": "JPBSAS338",
+    "agencyId": "155",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"
+  },
+  "3010": {
+    "lineCode": "338",
+    "shortName": "338C",
+    "longName": "JPBSAS338",
+    "agencyId": "155",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"
+  },
+  "3012": {
+    "lineCode": "338",
+    "shortName": "338E",
+    "longName": "JPBSAS338",
+    "agencyId": "155",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"
+  },
+  "3014": {
+    "lineCode": "406",
+    "shortName": "406A",
+    "longName": "JPBSAS406",
+    "agencyId": "155",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"
+  },
+  "3015": {
+    "lineCode": "406",
+    "shortName": "406B",
+    "longName": "JPBSAS406",
+    "agencyId": "155",
+    "agencyName": "TRANSPORTE AUTOMOTORES LA PLATA SA"
+  },
+  "3016": {
+    "lineCode": "740",
+    "shortName": "740G",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3017": {
+    "lineCode": "740",
+    "shortName": "740H",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3018": {
+    "lineCode": "740",
+    "shortName": "740I",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3019": {
+    "lineCode": "740",
+    "shortName": "740J",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3020": {
+    "lineCode": "740",
+    "shortName": "740K",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3021": {
+    "lineCode": "740",
+    "shortName": "740L",
+    "longName": "JMSMIG740",
+    "agencyId": "132",
+    "agencyName": "LA PRIMERA DE GRAND BOURG S.A."
+  },
+  "3023": {
+    "lineCode": "505",
+    "shortName": "505D",
+    "longName": "JMFVAR505",
+    "agencyId": "75",
+    "agencyName": "COMPAÑIA MICROOMNIBUS LA COLORADA SACI"
+  },
+  "3024": {
+    "lineCode": "386",
+    "shortName": "386A",
+    "longName": "JPBSAS386",
+    "agencyId": "172",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."
+  },
+  "3025": {
+    "lineCode": "386",
+    "shortName": "386B",
+    "longName": "JPBSAS386",
+    "agencyId": "172",
+    "agencyName": "COMPAÑIA  DE TRANSPORTE VECINAL S.A."
+  },
+  "3027": {
+    "lineCode": "324",
+    "shortName": "324R2",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3028": {
+    "lineCode": "324",
+    "shortName": "324R2F",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3029": {
+    "lineCode": "324",
+    "shortName": "324R3",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3030": {
+    "lineCode": "324",
+    "shortName": "324R3F",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3031": {
+    "lineCode": "324",
+    "shortName": "324T5",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3032": {
+    "lineCode": "324",
+    "shortName": "324T5F",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3033": {
+    "lineCode": "324",
+    "shortName": "324R6P",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3034": {
+    "lineCode": "324",
+    "shortName": "324R6C",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3035": {
+    "lineCode": "324",
+    "shortName": "324R9",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3036": {
+    "lineCode": "324",
+    "shortName": "324R9F",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3037": {
+    "lineCode": "324",
+    "shortName": "324R16",
+    "longName": "JPBSAS324",
+    "agencyId": "145",
+    "agencyName": "MICRO OMNIBUS PRIMERA JUNTA S.A"
+  },
+  "3038": {
+    "lineCode": "31",
+    "shortName": "31E",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3041": {
+    "lineCode": "257",
+    "shortName": "257A",
+    "longName": "JPBSAS257",
+    "agencyId": "128",
+    "agencyName": "EXPRESO VILLA NUEVA S.A."
+  },
+  "3042": {
+    "lineCode": "328",
+    "shortName": "328A",
+    "longName": "JPBSAS328",
+    "agencyId": "163",
+    "agencyName": "TRANSPORTES VILLA BOSCH SAC el"
+  },
+  "3043": {
+    "lineCode": "328",
+    "shortName": "328B",
+    "longName": "JPBSAS328",
+    "agencyId": "163",
+    "agencyName": "TRANSPORTES VILLA BOSCH SAC el"
+  },
+  "3044": {
+    "lineCode": "328",
+    "shortName": "328C",
+    "longName": "JPBSAS328",
+    "agencyId": "163",
+    "agencyName": "TRANSPORTES VILLA BOSCH SAC el"
+  },
+  "3045": {
+    "lineCode": "328",
+    "shortName": "328D",
+    "longName": "JPBSAS328",
+    "agencyId": "163",
+    "agencyName": "TRANSPORTES VILLA BOSCH SAC el"
+  },
+  "3336": {
+    "lineCode": "670",
+    "shortName": "670A",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3337": {
+    "lineCode": "670",
+    "shortName": "670B",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3338": {
+    "lineCode": "670",
+    "shortName": "670C",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3339": {
+    "lineCode": "670",
+    "shortName": "670D",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3340": {
+    "lineCode": "670",
+    "shortName": "670E",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3341": {
+    "lineCode": "670",
+    "shortName": "670F",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3342": {
+    "lineCode": "670",
+    "shortName": "670G",
+    "longName": "JMGNSM670",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3343": {
+    "lineCode": "31",
+    "shortName": "31F",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3344": {
+    "lineCode": "31",
+    "shortName": "31G",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3345": {
+    "lineCode": "31",
+    "shortName": "31H",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3346": {
+    "lineCode": "31",
+    "shortName": "31I",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3347": {
+    "lineCode": "31",
+    "shortName": "31J",
+    "longName": "JNAMBA031",
+    "agencyId": "23",
+    "agencyName": "ROCARAZA S.A."
+  },
+  "3420": {
+    "lineCode": "310",
+    "shortName": "310",
+    "longName": "JPBSAS310",
+    "agencyId": "98",
+    "agencyName": "COMPAÑIA ISLEÑA S.R.L."
+  },
+  "3492": {
+    "lineCode": "506",
+    "shortName": "506R80A",
+    "longName": "JMLPLA506",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "3493": {
+    "lineCode": "506",
+    "shortName": "506R80B",
+    "longName": "JMLPLA506",
+    "agencyId": "129",
+    "agencyName": "FUERTE BARRAGAN S.A.T.I.C.I."
+  },
+  "3527": {
+    "lineCode": "503",
+    "shortName": "503R16",
+    "longName": "JMLPLAESTE",
+    "agencyId": "311",
+    "agencyName": "EXPRESO LA PLATA BUENOS AIRES S.A."
+  },
+  "3530": {
+    "lineCode": "503",
+    "shortName": "503R61",
+    "longName": "JMLPLAESTE",
+    "agencyId": "311",
+    "agencyName": "EXPRESO LA PLATA BUENOS AIRES S.A."
+  },
+  "3531": {
+    "lineCode": "503",
+    "shortName": "503R80",
+    "longName": "JMLPLAESTE",
+    "agencyId": "311",
+    "agencyName": "EXPRESO LA PLATA BUENOS AIRES S.A."
+  },
+  "3695": {
+    "lineCode": "174",
+    "shortName": "174A",
+    "longName": "JNAMBA174",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3696": {
+    "lineCode": "174",
+    "shortName": "174B",
+    "longName": "JNAMBA174",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3697": {
+    "lineCode": "174",
+    "shortName": "174C",
+    "longName": "JNAMBA174",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3702": {
+    "lineCode": "317",
+    "shortName": "317A",
+    "longName": "JPBSAS317",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3703": {
+    "lineCode": "317",
+    "shortName": "317B",
+    "longName": "JPBSAS317",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3704": {
+    "lineCode": "635",
+    "shortName": "635A",
+    "longName": "JMMORN635",
+    "agencyId": "74",
+    "agencyName": "LA CABAÑA S.A."
+  },
+  "3705": {
+    "lineCode": "136",
+    "shortName": "136A",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3706": {
+    "lineCode": "136",
+    "shortName": "136B",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3707": {
+    "lineCode": "136",
+    "shortName": "136C",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3708": {
+    "lineCode": "136",
+    "shortName": "136D",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3709": {
+    "lineCode": "163",
+    "shortName": "163A",
+    "longName": "JNAMBA163",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3710": {
+    "lineCode": "163",
+    "shortName": "163B",
+    "longName": "JNAMBA163",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "3711": {
+    "lineCode": "253",
+    "shortName": "253A",
+    "longName": "JPBSAS253",
+    "agencyId": "82",
+    "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."
+  },
+  "3712": {
+    "lineCode": "321",
+    "shortName": "321A",
+    "longName": "JPBSAS321",
+    "agencyId": "82",
+    "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."
+  },
+  "3713": {
+    "lineCode": "153",
+    "shortName": "153A",
+    "longName": "JNAMBA153",
+    "agencyId": "82",
+    "agencyName": "MICROOMNIBUS SAAVEDRA S.A.T.A.C.I."
+  },
+  "3714": {
+    "lineCode": "322",
+    "shortName": "322A",
+    "longName": "JPBSAS322",
+    "agencyId": "135",
+    "agencyName": "LIBERTADOR SAN MARTIN SAT"
+  },
+  "3730": {
+    "lineCode": "540",
+    "shortName": "540A",
+    "longName": "JMLDZM540",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3731": {
+    "lineCode": "550",
+    "shortName": "550B",
+    "longName": "JMLDZM550",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3732": {
+    "lineCode": "550",
+    "shortName": "550H",
+    "longName": "JMLDZM550",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3733": {
+    "lineCode": "550",
+    "shortName": "550J",
+    "longName": "JMLDZM550",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3734": {
+    "lineCode": "552",
+    "shortName": "552A",
+    "longName": "JMLDZM552",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3735": {
+    "lineCode": "552",
+    "shortName": "552B",
+    "longName": "JMLDZM552",
+    "agencyId": "322",
+    "agencyName": "AUTOBUSES BUENOS AIRES SRL"
+  },
+  "3738": {
+    "lineCode": "46",
+    "shortName": "46C",
+    "longName": "JNAMBA046",
+    "agencyId": "73",
+    "agencyName": "UNION TRANSPORTISTAS DE EMPRESAS SA"
+  },
+  "3739": {
+    "lineCode": "126",
+    "shortName": "126E",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "3740": {
+    "lineCode": "126",
+    "shortName": "126F",
+    "longName": "JNAMBA126",
+    "agencyId": "43",
+    "agencyName": "CARDENAS S.A. EMPRESA DE TRANSPORTES"
+  },
+  "3782": {
+    "lineCode": "504",
+    "shortName": "504RA",
+    "longName": "JMITUZ504",
+    "agencyId": "54",
+    "agencyName": "EMPRESA LINEA 216 S.A.T."
+  },
+  "3915": {
+    "lineCode": "422",
+    "shortName": "422TR1",
+    "longName": "JPBSAS422",
+    "agencyId": "161",
+    "agencyName": "TRANSPORTES LA PERLITA S.A."
+  },
+  "3925": {
+    "lineCode": "293",
+    "shortName": "293RA",
+    "longName": "JPBSAS293A",
+    "agencyId": "127",
+    "agencyName": "EXPRESO VILLA GALICIA  SAN JOSE S.A."
+  },
+  "3940": {
+    "lineCode": "92",
+    "shortName": "92D",
+    "longName": "JNAMBA092",
+    "agencyId": "89",
+    "agencyName": "EMP.DE TRANSP.MICROOMN.SAENZ PEÑA S.R.L."
+  },
+  "4000": {
+    "lineCode": "293",
+    "shortName": "293AT",
+    "longName": "JPBSAS293",
+    "agencyId": "102",
+    "agencyName": "COMPAÑÍA DE OMNIBUS 25 DE MAYO LINEA 278"
+  },
+  "4033": {
+    "lineCode": "549",
+    "shortName": "549A",
+    "longName": "JMLDZM549",
+    "agencyId": "203",
+    "agencyName": "YITOS S.A."
+  },
+  "4167": {
+    "lineCode": "505",
+    "shortName": "505R3",
+    "longName": "JMALBR505",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4168": {
+    "lineCode": "505",
+    "shortName": "505R4",
+    "longName": "JMALBR505",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4169": {
+    "lineCode": "505",
+    "shortName": "505R5",
+    "longName": "JMALBR505",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4170": {
+    "lineCode": "505",
+    "shortName": "505R6",
+    "longName": "JMALBR505",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4171": {
+    "lineCode": "506",
+    "shortName": "506R1",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4172": {
+    "lineCode": "506",
+    "shortName": "506R2",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4173": {
+    "lineCode": "506",
+    "shortName": "506R3",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4174": {
+    "lineCode": "506",
+    "shortName": "506R4",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4175": {
+    "lineCode": "506",
+    "shortName": "506R5",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4176": {
+    "lineCode": "506",
+    "shortName": "506R6",
+    "longName": "JMALBR506",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "4349": {
+    "lineCode": "99",
+    "shortName": "99A",
+    "longName": "JNAMBA099",
+    "agencyId": "29",
+    "agencyName": "COLECTIVEROS UNIDOS S.A."
+  },
+  "4354": {
+    "lineCode": "61",
+    "shortName": "61A",
+    "longName": "JNAMBA061",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4355": {
+    "lineCode": "163",
+    "shortName": "163C",
+    "longName": "JNAMBA163",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "4357": {
+    "lineCode": "62",
+    "shortName": "62A",
+    "longName": "JNAMBA062",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4358": {
+    "lineCode": "136",
+    "shortName": "136E",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "4359": {
+    "lineCode": "136",
+    "shortName": "136F",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "4360": {
+    "lineCode": "136",
+    "shortName": "136G",
+    "longName": "JNAMBA136",
+    "agencyId": "77",
+    "agencyName": "SARGENTO CABRAL S.A.DE TRANSPORTE"
+  },
+  "4361": {
+    "lineCode": "114",
+    "shortName": "114A",
+    "longName": "JNAMBA114",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4362": {
+    "lineCode": "114",
+    "shortName": "114B",
+    "longName": "JNAMBA114",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4363": {
+    "lineCode": "114",
+    "shortName": "114C",
+    "longName": "JNAMBA114",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4364": {
+    "lineCode": "129",
+    "shortName": "129A",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4365": {
+    "lineCode": "129",
+    "shortName": "129B",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4366": {
+    "lineCode": "129",
+    "shortName": "129C",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4367": {
+    "lineCode": "129",
+    "shortName": "129D",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4368": {
+    "lineCode": "129",
+    "shortName": "129E",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4369": {
+    "lineCode": "129",
+    "shortName": "129F",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4370": {
+    "lineCode": "129",
+    "shortName": "129G",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4371": {
+    "lineCode": "129",
+    "shortName": "129H",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4372": {
+    "lineCode": "129",
+    "shortName": "129I",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4373": {
+    "lineCode": "129",
+    "shortName": "129J",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4374": {
+    "lineCode": "129",
+    "shortName": "129K",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4375": {
+    "lineCode": "129",
+    "shortName": "129L",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4376": {
+    "lineCode": "129",
+    "shortName": "129M",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4377": {
+    "lineCode": "129",
+    "shortName": "129N",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4378": {
+    "lineCode": "129",
+    "shortName": "129Ñ",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4379": {
+    "lineCode": "129",
+    "shortName": "129O",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4380": {
+    "lineCode": "129",
+    "shortName": "129P",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4381": {
+    "lineCode": "129",
+    "shortName": "129Q",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4382": {
+    "lineCode": "129",
+    "shortName": "129R",
+    "longName": "JNAMBA129",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4391": {
+    "lineCode": "143",
+    "shortName": "143A",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4392": {
+    "lineCode": "143",
+    "shortName": "143B",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4393": {
+    "lineCode": "143",
+    "shortName": "143C",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4394": {
+    "lineCode": "143",
+    "shortName": "143D",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4395": {
+    "lineCode": "143",
+    "shortName": "143E",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4396": {
+    "lineCode": "143",
+    "shortName": "143F",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4397": {
+    "lineCode": "143",
+    "shortName": "143G",
+    "longName": "JNAMBA143",
+    "agencyId": "25",
+    "agencyName": "LA CENTRAL DE VICENTE LOPEZ S.A."
+  },
+  "4690": {
+    "lineCode": "514",
+    "shortName": "514A",
+    "longName": "JMALBR514",
+    "agencyId": "410",
+    "agencyName": "AUTOBUSES BS AS SRL- TTE LARRAZABAL SRL- UT"
+  },
+  "4691": {
+    "lineCode": "514",
+    "shortName": "514B",
+    "longName": "JMALBR514",
+    "agencyId": "410",
+    "agencyName": "AUTOBUSES BS AS SRL- TTE LARRAZABAL SRL- UT"
+  },
+  "4692": {
+    "lineCode": "514",
+    "shortName": "514R4",
+    "longName": "JMALBR514",
+    "agencyId": "410",
+    "agencyName": "AUTOBUSES BS AS SRL- TTE LARRAZABAL SRL- UT"
+  },
+  "6030": {
+    "lineCode": "184",
+    "shortName": "184A",
+    "longName": "JNAMBA184",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6267": {
+    "lineCode": "140",
+    "shortName": "140A",
+    "longName": "JNAMBA140",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6268": {
+    "lineCode": "140",
+    "shortName": "140C",
+    "longName": "JNAMBA140",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6269": {
+    "lineCode": "140",
+    "shortName": "140B",
+    "longName": "JNAMBA140",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6270": {
+    "lineCode": "140",
+    "shortName": "140D",
+    "longName": "JNAMBA140",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6271": {
+    "lineCode": "133",
+    "shortName": "133A",
+    "longName": "JNAMBA133",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6272": {
+    "lineCode": "133",
+    "shortName": "133B",
+    "longName": "JNAMBA133",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6273": {
+    "lineCode": "133",
+    "shortName": "133C",
+    "longName": "JNAMBA133",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6274": {
+    "lineCode": "133",
+    "shortName": "133D",
+    "longName": "JNAMBA133",
+    "agencyId": "430",
+    "agencyName": "ERSA URBANO"
+  },
+  "6320": {
+    "lineCode": "VERDE",
+    "shortName": "VERDE",
+    "longName": "JMJUNIVERDE",
+    "agencyId": "446",
+    "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A."
+  },
+  "6351": {
+    "lineCode": "ROJA",
+    "shortName": "ROJA",
+    "longName": "JMJUNIROJA",
+    "agencyId": "446",
+    "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A."
+  },
+  "6352": {
+    "lineCode": "1",
+    "shortName": "AZUL1",
+    "longName": "JMJUNIAZUL",
+    "agencyId": "446",
+    "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A."
+  },
+  "6353": {
+    "lineCode": "2",
+    "shortName": "AZUL2",
+    "longName": "JMJUNIAZUL",
+    "agencyId": "446",
+    "agencyName": "TRANSPORTE 8 DE OCTUBRE S.A."
+  },
+  "6356": {
+    "lineCode": "9",
+    "shortName": "9C",
+    "longName": "JNAMBA009",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "6719": {
+    "lineCode": "119",
+    "shortName": "119A",
+    "longName": "JNAMBA119",
+    "agencyId": "110",
+    "agencyName": "EMPRESA DE TRANSPORTE DEL SUR SRL"
+  },
+  "6720": {
+    "lineCode": "164",
+    "shortName": "164A",
+    "longName": "JNAMBA164",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "6721": {
+    "lineCode": "164",
+    "shortName": "164B",
+    "longName": "JNAMBA164",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "6722": {
+    "lineCode": "164",
+    "shortName": "164C",
+    "longName": "JNAMBA164",
+    "agencyId": "11",
+    "agencyName": "GENERAL TOMAS GUIDO S.A.C.I.F."
+  },
+  "6811": {
+    "lineCode": "145",
+    "shortName": "145A",
+    "longName": "JNAMBA145",
+    "agencyId": "505",
+    "agencyName": "NUESTRA SEÑORA DEL ROSARIO S.A. UNION TRANSITORIA"
+  },
+  "6812": {
+    "lineCode": "145",
+    "shortName": "145B",
+    "longName": "JNAMBA145",
+    "agencyId": "505",
+    "agencyName": "NUESTRA SEÑORA DEL ROSARIO S.A. UNION TRANSITORIA"
+  },
+  "6813": {
+    "lineCode": "145",
+    "shortName": "145C",
+    "longName": "JNAMBA145",
+    "agencyId": "505",
+    "agencyName": "NUESTRA SEÑORA DEL ROSARIO S.A. UNION TRANSITORIA"
+  }
+}
