@@ -565,7 +565,16 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   });
 
   const allFields = currentMeta.fields.length > 0 ? currentMeta.fields : (rows.length > 0 ? Object.keys(rows[0]) : []);
-  const displayFields = allFields.filter(f => f !== 'id' && f !== 'company_id' && !f.endsWith('_uuid') && f !== 'created_at' && f !== 'last_updated');
+  const displayFields = allFields.filter(f => 
+    f !== 'id' && 
+    f !== 'company_id' && 
+    !f.endsWith('_uuid') && 
+    f !== 'created_at' && 
+    f !== 'last_updated' &&
+    f !== 'headsign_ida' &&
+    f !== 'headsign_vuelta' &&
+    f !== 'route_id'
+  );
   const fieldsToRender = displayFields.length > 0 ? displayFields : allFields.filter(f => f !== 'id' && f !== 'company_id');
 
   const displayedRows = rows
@@ -1796,7 +1805,15 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
             <form onSubmit={handleSaveForm} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', paddingRight: '0.35rem' }}>
               {currentMeta.fields
-                .filter(field => field !== 'id' && !field.endsWith('_uuid') && field !== 'created_at' && field !== 'last_updated')
+                .filter(field => 
+                  field !== 'id' && 
+                  !field.endsWith('_uuid') && 
+                  field !== 'created_at' && 
+                  field !== 'last_updated' &&
+                  field !== 'headsign_ida' &&
+                  field !== 'headsign_vuelta' &&
+                  field !== 'route_id'
+                )
                 .map(field => {
                   const isPK = field === currentMeta.primaryKey;
                   const val = formData[field] !== undefined && formData[field] !== null ? (
