@@ -42,32 +42,31 @@ L.Icon.Default.mergeOptions({
 
 const ZARATE_CENTER: [number, number] = [-34.0970, -59.0300];
 
-function createBusVehicleIcon(label: string, linea: string, speed?: number) {
+function createBusVehicleIcon(linea: string) {
+  const lineText = linea || 'SUBE';
   return L.divIcon({
     className: 'custom-vehicle-icon',
     html: `<div style="
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      justify-content: center;
       background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
       color: #ffffff;
-      padding: 3px 8px;
-      border-radius: 16px;
+      padding: 2px 7px;
+      min-width: 24px;
+      border-radius: 12px;
       font-size: 11px;
       font-weight: 800;
-      border: 2px solid #ffffff;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.65);
+      letter-spacing: -0.2px;
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 10px rgba(2, 132, 199, 0.5);
       white-space: nowrap;
       cursor: pointer;
       pointer-events: auto;
-    ">
-      <span style="font-size: 13px;">🚍</span>
-      <span>${linea || 'SUBE'}</span>
-      ${label && label !== linea ? `<span style="font-size: 9px; opacity: 0.85; background: rgba(0,0,0,0.3); padding: 1px 4px; border-radius: 4px;">#${label}</span>` : ''}
-      ${typeof speed === 'number' && speed > 0 ? `<span style="font-size: 9px; color: #4ade80; font-weight: 700;">${speed}km/h</span>` : ''}
-    </div>`,
-    iconSize: [85, 26],
-    iconAnchor: [42, 13]
+      text-align: center;
+    ">${lineText}</div>`,
+    iconSize: [36, 22],
+    iconAnchor: [18, 11]
   });
 }
 
@@ -2905,7 +2904,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   key={`telemetry_veh_${veh.id || idx}`}
                   position={[veh.lat, veh.lng]}
                   zIndexOffset={7000}
-                  icon={createBusVehicleIcon(veh.intern, veh.linea, veh.speed)}
+                  icon={createBusVehicleIcon(veh.linea || veh.route_short_name)}
                   eventHandlers={{
                     click(e) {
                       if (e.originalEvent) {
