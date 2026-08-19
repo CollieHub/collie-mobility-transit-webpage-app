@@ -1156,6 +1156,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
   // Seleccionar la línea SIT por defecto ÚNICAMENTE en la carga inicial
   useEffect(() => {
+    if (selectedSource === 'redsube') return;
     if (initialBranchSetRef.current) return;
     if (linesList.length === 0 && branchesList.length === 0) return;
 
@@ -1181,7 +1182,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
       setSelectedBranchId(branchesList[0].id);
       initialBranchSetRef.current = true;
     }
-  }, [linesList, branchesList, selectedLineFilterId]);
+  }, [linesList, branchesList, selectedLineFilterId, selectedSource]);
 
   const updateFullPolylinePathFromControls = useCallback(async (controls: [number, number][]) => {
     if (controls.length < 2) {
@@ -2689,24 +2690,30 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
           {/* Active Branch Info & Routing Indicator */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
-              {selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Selecciona un Ramal'}
+              {selectedSource === 'redsube'
+                ? (selectedVehicle 
+                    ? `Línea ${selectedVehicle.linea || selectedVehicle.route_short_name} #${selectedVehicle.intern || selectedVehicle.id} • ${selectedVehicle.trip_headsign || 'En Circulación'}`
+                    : (selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Monitoreo de Flota RedSUBE'))
+                : (selectedBranchObj ? (selectedBranchObj.code ? `${selectedBranchObj.code} - ${selectedBranchObj.name}` : selectedBranchObj.name) : 'Selecciona un Ramal')}
             </span>
-            <span style={{
-              backgroundColor: direction === 'ida' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(225, 29, 72, 0.2)',
-              color: direction === 'ida' ? '#38bdf8' : '#fb7185',
-              padding: '0.2rem 0.6rem',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: 700
-            }}>
-              {(() => {
-                const customLabel = direction === 'ida' ? selectedBranchObj?.direction_ida_label : selectedBranchObj?.direction_vuelta_label;
-                if (customLabel && customLabel.toLowerCase().trim() !== direction && customLabel.toLowerCase().trim() !== (direction === 'ida' ? 'ida' : 'vuelta') && customLabel.trim() !== '') {
-                  return `${direction.toUpperCase()} (${customLabel.trim()})`;
-                }
-                return direction.toUpperCase();
-              })()}
-            </span>
+            {selectedSource !== 'redsube' && (
+              <span style={{
+                backgroundColor: direction === 'ida' ? 'rgba(2, 132, 199, 0.2)' : 'rgba(225, 29, 72, 0.2)',
+                color: direction === 'ida' ? '#38bdf8' : '#fb7185',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 700
+              }}>
+                {(() => {
+                  const customLabel = direction === 'ida' ? selectedBranchObj?.direction_ida_label : selectedBranchObj?.direction_vuelta_label;
+                  if (customLabel && customLabel.toLowerCase().trim() !== direction && customLabel.toLowerCase().trim() !== (direction === 'ida' ? 'ida' : 'vuelta') && customLabel.trim() !== '') {
+                    return `${direction.toUpperCase()} (${customLabel.trim()})`;
+                  }
+                  return direction.toUpperCase();
+                })()}
+              </span>
+            )}
 
             {isRouting && (
               <span style={{ fontSize: '0.7rem', backgroundColor: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -2898,8 +2905,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               onAddStop={handleAddStop}
             />
 
-            {/* Traza de Fondo NO Activa (Ida o Vuelta simultánea) */}
-            {direction === 'vuelta' && idaPolylinePath.length > 1 && (
+            {/* Traza de Fondo NO Activa (Ida o Vuelta simultánea - Solo en modo Core/Edición) */}
+            {selectedSource !== 'redsube' && direction === 'vuelta' && idaPolylinePath.length > 1 && (
               <>
                 <Polyline
                   positions={idaPolylinePath}
@@ -2931,7 +2938,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               </>
             )}
 
-            {direction === 'ida' && vueltaPolylinePath.length > 1 && (
+            {selectedSource !== 'redsube' && direction === 'ida' && vueltaPolylinePath.length > 1 && (
               <>
                 <Polyline
                   positions={vueltaPolylinePath}
@@ -2953,8 +2960,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               </>
             )}
 
-            {/* Interactive Polyline: Continuous OSRM street route shape (Dirección Activa) */}
-            {displayPolylinePath.length > 1 && (
+            {/* Interactive Polyline: Continuous OSRM street route shape (Dirección Activa - Solo en modo Core/Edición) */}
+            {selectedSource !== 'redsube' && displayPolylinePath.length > 1 && (
               <>
                 {direction === 'ida' && (
                   <Polyline
@@ -3001,8 +3008,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               </>
             )}
 
-            {/* Control Waypoint Markers: Render key control handles with numbers matching the Recorrido list */}
-            {waypoints.filter(pt => Array.isArray(pt) && pt.length >= 2 && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])).map((pt, idx) => {
+            {/* Control Waypoint Markers: Renderizar solo en modo Core/Edición */}
+            {selectedSource !== 'redsube' && waypoints.filter(pt => Array.isArray(pt) && pt.length >= 2 && typeof pt[0] === 'number' && typeof pt[1] === 'number' && !isNaN(pt[0]) && !isNaN(pt[1])).map((pt, idx) => {
               const isStart = idx === 0;
               const isEnd = idx === waypoints.length - 1 && waypoints.length > 1;
               const isSelected = selectedWaypointIdx === idx;
@@ -3038,10 +3045,10 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               );
             })}
 
-            {/* Stop Draggable Markers: Render active and other direction stops */}
-            {stopIconSize > 0 && allBranchStops.filter(st => st && typeof st.lat === 'number' && typeof st.lng === 'number' && !isNaN(st.lat) && !isNaN(st.lng)).map((st, idx) => {
+            {/* Render Paradas del Editor solo en modo Core/Edición */}
+            {selectedSource !== 'redsube' && allBranchStops.filter(st => typeof st.lat === 'number' && typeof st.lng === 'number' && !isNaN(st.lat) && !isNaN(st.lng)).map((st, idx) => {
               const isActiveDir = st.direction === direction;
-              const isIda = st.direction !== 'vuelta';
+              const isIda = st.direction === 'ida';
               const displayNum = (st.stop_order ?? (idx + 1));
               const isSelectedStop = selectedStopId === st.id;
               const stopColor = isSelectedStop ? '#ec4899' : (isIda ? '#0284c7' : '#9333ea');
@@ -3099,14 +3106,16 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               );
             })}
 
-            {/* 1. Líneas de Camino / Trazas GPS Siguiendo las Calles en Tiempo Real (OSRM) */}
-            {showGpsTraces && Object.entries(gpsTraces).map(([vKey, trace]) => {
-              const pts = trace?.points || [];
-              const streetPath = trace?.streetPath || [];
+            {/* 1. Único Recorrido por Calles en Tiempo Real (OSRM) para la Unidad Seleccionada */}
+            {showGpsTraces && selectedVehicle && (() => {
+              const vKey = String(selectedVehicle.intern || selectedVehicle.id);
+              const trace = gpsTraces[vKey];
+              if (!trace) return null;
+              const pts = trace.points || [];
+              const streetPath = trace.streetPath || [];
               if (pts.length < 2 && streetPath.length < 2) return null;
 
               const coords: [number, number][] = streetPath.length > 0 ? streetPath : pts.map(p => [p.lat, p.lng]);
-              const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
 
               return (
                 <React.Fragment key={`gps-trace-${vKey}`}>
@@ -3116,8 +3125,10 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     smoothFactor={1.0}
                     pathOptions={{
                       color: '#000000',
-                      weight: isSelected ? 8 : 5,
-                      opacity: isSelected ? 0.9 : 0.65
+                      weight: 8,
+                      opacity: 0.9,
+                      lineJoin: 'round',
+                      lineCap: 'round'
                     }}
                     interactive={false}
                   />
@@ -3126,61 +3137,52 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     positions={coords}
                     smoothFactor={1.0}
                     pathOptions={{
-                      color: isSelected ? '#f59e0b' : '#00e676',
-                      weight: isSelected ? 5 : 3.5,
+                      color: '#f59e0b',
+                      weight: 5,
                       opacity: 1.0,
-                      dashArray: isSelected ? '8, 6' : undefined
-                    }}
-                    eventHandlers={{
-                      click(e) {
-                        if (e.originalEvent) {
-                          L.DomEvent.stopPropagation(e.originalEvent);
-                        }
-                        const foundVeh = telemetryVehicles.find(v => String(v.intern) === vKey || String(v.id) === vKey);
-                        if (foundVeh) {
-                          setSelectedVehicle(foundVeh);
-                        }
-                      }
+                      lineJoin: 'round',
+                      lineCap: 'round'
                     }}
                   >
                     <Tooltip sticky interactive={false}>
                       <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
-                        Camino Línea {pts[0]?.linea || ''} #{pts[0]?.intern || vKey} ({pts.length} reportes por calles)
+                        Recorrido Línea {pts[0]?.linea || selectedVehicle.linea || ''} #{pts[0]?.intern || vKey} ({pts.length} reportes por calles)
                       </div>
                     </Tooltip>
                   </Polyline>
                 </React.Fragment>
               );
-            })}
+            })()}
 
-            {/* 2. Puntos GPS Históricos Individuales (CircleMarkers) */}
-            {(showRawGpsPoints || selectedVehicle) && Object.entries(gpsTraces).map(([vKey, trace]) => {
-              const pts = trace?.points || [];
+            {/* 2. Puntos GPS Históricos Individuales (Solo de la Unidad Seleccionada) */}
+            {selectedVehicle && (() => {
+              const vKey = String(selectedVehicle.intern || selectedVehicle.id);
+              const trace = gpsTraces[vKey];
+              if (!trace) return null;
+              const pts = trace.points || [];
               if (pts.length === 0) return null;
-              const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
-              if (!showRawGpsPoints && !isSelected) return null;
 
               return (
                 <React.Fragment key={`gps-raw-pts-${vKey}`}>
                   {pts.map((pt, idx) => {
                     const isLast = idx === pts.length - 1;
-                    if (isLast && !showRawGpsPoints) return null; // No solapar con el marcador del vehículo principal
+                    if (isLast && !showRawGpsPoints) return null;
 
                     return (
                       <CircleMarker
                         key={`gps-raw-pt-${vKey}-${idx}`}
                         center={[pt.lat, pt.lng]}
-                        radius={isSelected ? 4 : 3}
+                        radius={4}
                         pathOptions={{
                           color: '#000000',
-                          fillColor: isSelected ? '#f59e0b' : '#00f2fe',
+                          fillColor: '#f59e0b',
                           fillOpacity: 0.9,
                           weight: 1.2
                         }}
                       >
                         <Tooltip sticky interactive={false}>
                           <div style={{ fontSize: '0.74rem', lineHeight: '1.45', padding: '2px 4px', color: '#0f172a' }}>
-                            <div style={{ fontWeight: 800, color: isSelected ? '#d97706' : '#0284c7', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '2px', marginBottom: '2px' }}>
+                            <div style={{ fontWeight: 800, color: '#d97706', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '2px', marginBottom: '2px' }}>
                               Reporte #{idx + 1} • #{pt.intern || vKey} (Línea {pt.linea || ''})
                             </div>
                             <div>Velocidad: <strong style={{ color: '#059669' }}>{Math.round(pt.speed || 0)} km/h</strong> {pt.bearing ? `(${Math.round(pt.bearing)}°)` : ''}</div>
@@ -3196,7 +3198,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   })}
                 </React.Fragment>
               );
-            })}
+            })()}
 
             {/* Marcadores de Colectivos en Tiempo Real (RedSUBE / Telemetría GTFS V3) */}
             {telemetryVehicles.filter(veh => veh && typeof veh.lat === 'number' && typeof veh.lng === 'number' && !isNaN(veh.lat) && !isNaN(veh.lng)).map((veh, idx) => {
