@@ -186,7 +186,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPurgingCache, setIsPurgingCache] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(true);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -403,7 +403,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
     fetchTableRows(activeTable, searchQuery);
   };
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
+  const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotification({ type, message });
     setTimeout(() => setNotification(null), 4000);
   };
@@ -629,7 +629,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
           zIndex: 10000,
           padding: '0.85rem 1.25rem',
           borderRadius: '12px',
-          backgroundColor: notification.type === 'success' ? '#065f46' : '#991b1b',
+          backgroundColor: notification.type === 'success' ? '#065f46' : notification.type === 'info' ? '#1e40af' : '#991b1b',
           color: '#ffffff',
           fontWeight: 500,
           fontSize: '0.875rem',

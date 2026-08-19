@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Polygon, Marker, Popup, CircleMarker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
@@ -26,7 +26,8 @@ import {
   Hash,
   FileCode,
   LocateFixed,
-  Check
+  Check,
+  Footprints
 } from 'lucide-react';
 import { KmlMyMapsIngestor } from './KmlMyMapsIngestor';
 import RedSubeV3Panel, { getBranchColor } from './RedSubeV3Panel';
@@ -795,7 +796,7 @@ interface RadarViewProps {
   linesList?: any[];
   branchesList?: any[];
   selectedSource?: string;
-  showNotification?: (type: 'success' | 'error', message: string) => void;
+  showNotification?: (type: 'success' | 'error' | 'info', message: string) => void;
 }
 
 export default function RadarView({ linesList = [], branchesList = [], selectedSource: propSelectedSource, showNotification }: RadarViewProps) {
@@ -837,6 +838,42 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
   const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
   const [vehicleModalTab, setVehicleModalTab] = useState<'info' | 'json'>('info');
   const [vehicleJsonCopied, setVehicleJsonCopied] = useState<boolean>(false);
+  const [showGpsTraces, setShowGpsTraces] = useState<boolean>(true);
+  const [showRawGpsPoints, setShowRawGpsPoints] = useState<boolean>(false);
+  const [gpsTraces, setGpsTraces] = useState<Record<string, Array<{
+    lat: number;
+    lng: number;
+    speed?: number;
+    bearing?: number;
+    timestamp?: number;
+    intern?: string;
+    linea?: string;
+    route_short_name?: string;
+  }>>>(() => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const saved = localStorage.getItem('collie_radar_gps_traces_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem('collie_radar_gps_traces_v1', JSON.stringify(gpsTraces));
+    } catch (_) {}
+  }, [gpsTraces]);
+
+  const handleClearGpsTraces = useCallback(() => {
+    setGpsTraces({});
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('collie_radar_gps_traces_v1');
+    }
+    showNotification?.('info', 'Historial de camino recorrido por unidades limpiado');
+  }, [showNotification]);
+
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
   const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null);
   const [useStreetRouting, setUseStreetRouting] = useState<boolean>(true);
@@ -2152,7 +2189,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   handleFocusCurrentRoute();
                 }}
                 onUnitsUpdate={(units) => {
-                  setTelemetryVehicles(units.map((u: any) => ({
+                  const mappedUnits = units.map((u: any) => ({
                     ...u,
                     id: String(u.id || u.vehicle_id || u.intern || Math.random()),
                     intern: String(u.intern || u.id || u.vehicle_id || 'Unidad'),
@@ -2169,7 +2206,48 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     delayMinutes: 0,
                     status: 'running',
                     timestamp: u.timestamp || Date.now()
-                  })));
+                  }));
+
+                  setTelemetryVehicles(mappedUnits);
+
+                  // Acumular el camino recorrido (GPS Traces) por cada unidad activa
+                  setGpsTraces(prev => {
+                    let changed = false;
+                    const next = { ...prev };
+
+                    for (const u of mappedUnits) {
+                      if (typeof u.lat !== 'number' || typeof u.lng !== 'number' || isNaN(u.lat) || isNaN(u.lng)) continue;
+                      const key = String(u.intern || u.id || u.vehicle_id);
+                      const currentPts = next[key] || [];
+                      const lastPt = currentPts.length > 0 ? currentPts[currentPts.length - 1] : null;
+
+                      let shouldAdd = true;
+                      if (lastPt) {
+                        const distMeters = calculateDistanceKm(lastPt.lat, lastPt.lng, u.lat, u.lng) * 1000;
+                        if (distMeters < 5) {
+                          shouldAdd = false;
+                        }
+                      }
+
+                      if (shouldAdd) {
+                        changed = true;
+                        const newPoint = {
+                          lat: u.lat,
+                          lng: u.lng,
+                          speed: u.speed || 0,
+                          bearing: u.bearing || 0,
+                          timestamp: u.timestamp || Date.now(),
+                          intern: u.intern,
+                          linea: u.linea || u.route_short_name,
+                          route_short_name: u.route_short_name || u.linea
+                        };
+                        // Guardar hasta 150 puntos por unidad para trazado suave y fluido
+                        next[key] = [...currentPts.slice(-150), newPoint];
+                      }
+                    }
+
+                    return changed ? next : prev;
+                  });
                 }}
                 currentDirection={direction}
                 mapBounds={mapBounds}
@@ -2635,6 +2713,54 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
               <span>{stopIconMode === 'number' ? '🔢 Números: SÍ' : '🚌 Íconos: SÍ'}</span>
             </button>
 
+            {/* Toggle Seguimiento de Camino Recorrido por Unidades (GPS Traces) */}
+            <button
+              onClick={() => setShowGpsTraces(!showGpsTraces)}
+              title="Mostrar u ocultar el trazado continuo del camino que van haciendo las unidades en vivo"
+              className="btn-animated"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: '8px',
+                border: showGpsTraces ? '1px solid #00e676' : '1px solid rgba(255, 255, 255, 0.1)',
+                backgroundColor: showGpsTraces ? 'rgba(0, 230, 118, 0.15)' : '#1f2937',
+                color: showGpsTraces ? '#00e676' : '#9ca3af',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Footprints size={14} />
+              <span>{showGpsTraces ? '🛤️ Camino GPS: SÍ' : '🛤️ Camino GPS: NO'}</span>
+            </button>
+
+            {/* Botón para Limpiar Trazas GPS si hay puntos acumulados */}
+            {Object.keys(gpsTraces).length > 0 && (
+              <button
+                onClick={handleClearGpsTraces}
+                title="Limpiar caminos y puntos GPS históricos registrados de las unidades"
+                className="btn-animated"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.45rem 0.65rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                  color: '#f87171',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <Trash2 size={13} />
+                <span>Limpiar</span>
+              </button>
+            )}
+
             <button
               onClick={() => setShowRightDock(!showRightDock)}
               title="Alternar dock flotante"
@@ -2895,6 +3021,101 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     </div>
                   </Popup>
                 </Marker>
+              );
+            })}
+
+            {/* 1. Líneas de Camino / Trazas GPS Recorridas por las Unidades en Tiempo Real */}
+            {showGpsTraces && Object.entries(gpsTraces).map(([vKey, points]) => {
+              if (!points || points.length < 2) return null;
+              const coords: [number, number][] = points.map(p => [p.lat, p.lng]);
+              const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
+
+              return (
+                <React.Fragment key={`gps-trace-${vKey}`}>
+                  {/* Borde exterior oscuro de contraste */}
+                  <Polyline
+                    positions={coords}
+                    smoothFactor={1.0}
+                    pathOptions={{
+                      color: '#000000',
+                      weight: isSelected ? 8 : 5,
+                      opacity: isSelected ? 0.9 : 0.65
+                    }}
+                    interactive={false}
+                  />
+                  {/* Línea Neón Principal */}
+                  <Polyline
+                    positions={coords}
+                    smoothFactor={1.0}
+                    pathOptions={{
+                      color: isSelected ? '#f59e0b' : '#00e676',
+                      weight: isSelected ? 5 : 3,
+                      opacity: 1.0,
+                      dashArray: isSelected ? '8, 6' : undefined
+                    }}
+                    eventHandlers={{
+                      click(e) {
+                        if (e.originalEvent) {
+                          L.DomEvent.stopPropagation(e.originalEvent);
+                        }
+                        const foundVeh = telemetryVehicles.find(v => String(v.intern) === vKey || String(v.id) === vKey);
+                        if (foundVeh) {
+                          setSelectedVehicle(foundVeh);
+                        }
+                      }
+                    }}
+                  >
+                    <Tooltip sticky interactive={false}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0f172a' }}>
+                        Camino Línea {points[0]?.linea || ''} #{points[0]?.intern || vKey} ({points.length} puntos)
+                      </div>
+                    </Tooltip>
+                  </Polyline>
+                </React.Fragment>
+              );
+            })}
+
+            {/* 2. Puntos GPS Históricos Individuales (CircleMarkers) */}
+            {(showRawGpsPoints || selectedVehicle) && Object.entries(gpsTraces).map(([vKey, points]) => {
+              if (!points || points.length === 0) return null;
+              const isSelected = selectedVehicle && (String(selectedVehicle.intern) === vKey || String(selectedVehicle.id) === vKey);
+              if (!showRawGpsPoints && !isSelected) return null;
+
+              return (
+                <React.Fragment key={`gps-raw-pts-${vKey}`}>
+                  {points.map((pt, idx) => {
+                    const isLast = idx === points.length - 1;
+                    if (isLast && !showRawGpsPoints) return null; // No solapar con el marcador del vehículo principal
+
+                    return (
+                      <CircleMarker
+                        key={`gps-raw-pt-${vKey}-${idx}`}
+                        center={[pt.lat, pt.lng]}
+                        radius={isSelected ? 4 : 3}
+                        pathOptions={{
+                          color: '#000000',
+                          fillColor: isSelected ? '#f59e0b' : '#00f2fe',
+                          fillOpacity: 0.9,
+                          weight: 1.2
+                        }}
+                      >
+                        <Tooltip sticky interactive={false}>
+                          <div style={{ fontSize: '0.74rem', lineHeight: '1.45', padding: '2px 4px', color: '#0f172a' }}>
+                            <div style={{ fontWeight: 800, color: isSelected ? '#d97706' : '#0284c7', borderBottom: '1px solid rgba(0,0,0,0.1)', paddingBottom: '2px', marginBottom: '2px' }}>
+                              Punto #{idx + 1} • #{pt.intern || vKey} (Línea {pt.linea || ''})
+                            </div>
+                            <div>Velocidad: <strong style={{ color: '#059669' }}>{Math.round(pt.speed || 0)} km/h</strong> {pt.bearing ? `(${Math.round(pt.bearing)}°)` : ''}</div>
+                            {pt.timestamp && (
+                              <div style={{ color: '#64748b', fontSize: '0.68rem', marginTop: '2px' }}>
+                                Hora: {new Date(typeof pt.timestamp === 'number' && pt.timestamp < 2000000000 ? pt.timestamp * 1000 : pt.timestamp).toLocaleTimeString()}
+                              </div>
+                            )}
+                          </div>
+                        </Tooltip>
+                      </CircleMarker>
+                    );
+                  })}
+                </React.Fragment>
               );
             })}
 
@@ -3341,7 +3562,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   </div>
                 )}
 
-                {/* Coordenadas GPS y Botón Centrar */}
+                {/* Coordenadas GPS, Información del Camino y Botón Centrar */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -3352,30 +3573,63 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   color: '#64748b',
                   fontFamily: 'monospace'
                 }}>
-                  <span>Lat: {selectedVehicle.lat?.toFixed(5)}, Lng: {selectedVehicle.lng?.toFixed(5)}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (mapInstance && typeof selectedVehicle.lat === 'number') {
-                        mapInstance.setView([selectedVehicle.lat, selectedVehicle.lng], 16, { animate: true });
-                      }
-                    }}
-                    style={{
-                      backgroundColor: '#1e293b',
-                      border: '1px solid rgba(56, 189, 248, 0.4)',
-                      color: '#38bdf8',
-                      borderRadius: '6px',
-                      padding: '3px 8px',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                  >
-                    <LocateFixed size={13} /> Enfocar
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span>Lat: {selectedVehicle.lat?.toFixed(5)}, Lng: {selectedVehicle.lng?.toFixed(5)}</span>
+                    <span style={{ color: '#00e676', fontWeight: 600 }}>
+                      🛤️ Camino: {(gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || []).length} puntos
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {(gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || []).length >= 2 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const pts = gpsTraces[String(selectedVehicle.intern || selectedVehicle.id)] || [];
+                          if (mapInstance && pts.length >= 2) {
+                            mapInstance.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])), { padding: [40, 40], maxZoom: 16 });
+                          }
+                        }}
+                        style={{
+                          backgroundColor: '#1e293b',
+                          border: '1px solid rgba(0, 230, 118, 0.4)',
+                          color: '#00e676',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Footprints size={12} /> Ver Camino
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (mapInstance && typeof selectedVehicle.lat === 'number') {
+                          mapInstance.setView([selectedVehicle.lat, selectedVehicle.lng], 16, { animate: true });
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#1e293b',
+                        border: '1px solid rgba(56, 189, 248, 0.4)',
+                        color: '#38bdf8',
+                        borderRadius: '6px',
+                        padding: '3px 8px',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <LocateFixed size={13} /> Enfocar
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

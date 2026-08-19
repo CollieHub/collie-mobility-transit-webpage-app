@@ -74,7 +74,7 @@ export default function RedSubeV3Panel({
   mapBounds
 }: RedSubeV3PanelProps) {
   const [unitsLimit, setUnitsLimit] = useState<number>(50);
-  const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('ramal');
+  const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('free');
   const [selectedCompany, setSelectedCompany] = useState<string>('228');
   const [companies, setCompanies] = useState<any[]>([
     { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))' },
