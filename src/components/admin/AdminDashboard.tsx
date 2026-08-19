@@ -202,18 +202,18 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
 
   const getResolvedTableName = useCallback((tableName: string, source: SourceProvider = selectedSourceProvider): string => {
     if (source === 'redsube') {
-      if (tableName === 'lines') return 'redsube_lines';
-      if (tableName === 'branches') return 'redsube_branches';
-      if (tableName === 'companies') return 'redsube_agencies';
-      if (tableName === 'stops') return 'redsube_stops';
-      if (tableName === 'route_shapes') return 'redsube_route_shapes';
+      if (tableName === 'lines') return 'arg.redsube.lines';
+      if (tableName === 'branches') return 'arg.redsube.branches';
+      if (tableName === 'companies') return 'arg.redsube.agencies';
+      if (tableName === 'stops') return 'arg.redsube.stops';
+      if (tableName === 'route_shapes') return 'arg.redsube.route_shapes';
     }
     return tableName;
   }, [selectedSourceProvider]);
 
   const loadAuxiliaryData = useCallback(() => {
-    const targetLinesTable = selectedSourceProvider === 'redsube' ? 'redsube_lines' : 'lines';
-    const targetBranchesTable = selectedSourceProvider === 'redsube' ? 'redsube_branches' : 'branches';
+    const targetLinesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.lines' : 'lines';
+    const targetBranchesTable = selectedSourceProvider === 'redsube' ? 'arg.redsube.branches' : 'branches';
 
     fetch(`/v1/admin/table/${targetLinesTable}?limit=5000`)
       .then(res => res.json())
