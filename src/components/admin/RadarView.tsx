@@ -135,6 +135,64 @@ function createStopIconWithNumber(orderNum: number, color: string = '#ea580c', i
   });
 }
 
+function createTerminalIcon(name: string, isStart: boolean, color: string = '#f59e0b') {
+  const cleanName = (name || (isStart ? 'Inicio' : 'Destino')).replace(/^\d+[\.\s\-]+\s*/, '').trim();
+  return L.divIcon({
+    className: 'custom-terminal-marker',
+    html: `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transform: translate(-50%, -100%);
+        pointer-events: auto;
+        cursor: pointer;
+      ">
+        <div style="
+          background: rgba(15, 23, 42, 0.94);
+          color: #ffffff;
+          font-size: 11px;
+          font-weight: 800;
+          padding: 3px 8px;
+          border-radius: 6px;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+          white-space: nowrap;
+          margin-bottom: 4px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        ">
+          <span>${cleanName}</span>
+        </div>
+        <div style="
+          width: 26px;
+          height: 26px;
+          background: ${color};
+          border: 2px solid #ffffff;
+          border-radius: 7px;
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 6v6"></path>
+            <path d="M15 6v6"></path>
+            <path d="M2 12h19.6"></path>
+            <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"></path>
+            <circle cx="7" cy="18" r="2"></circle>
+            <path d="M9 18h6"></path>
+            <circle cx="17" cy="18" r="2"></circle>
+          </svg>
+        </div>
+      </div>
+    `,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0]
+  });
+}
+
 function createSearchedPinIcon() {
   const size = 32;
   const svgCode = `
@@ -1777,6 +1835,58 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
     return list.find(b => b.id === selectedBranchId);
   }, [branchesList, redSubeBranchesList, selectedBranchId, selectedSource]);
 
+  const currentStops = useMemo(() => {
+    return allBranchStops
+      .filter(st => st.direction === direction && typeof st.lat === 'number' && typeof st.lng === 'number' && !isNaN(st.lat) && !isNaN(st.lng))
+      .sort((a, b) => (a.stop_order || 0) - (b.stop_order || 0));
+  }, [allBranchStops, direction]);
+
+  const terminalStart = useMemo(() => {
+    if (!selectedBranchId) return null;
+    const branchName = selectedBranchObj?.name || '';
+    const parts = branchName.split(/\s*(?:⇄|--|-)\s*/);
+    const fallbackName = direction === 'ida' ? (selectedBranchObj?.headsign_ida || parts[0] || 'Inicio') : (selectedBranchObj?.headsign_vuelta || parts[1] || parts[0] || 'Inicio');
+
+    if (currentStops.length > 0) {
+      return {
+        pos: [currentStops[0].lat, currentStops[0].lng] as [number, number],
+        name: currentStops[0].name || fallbackName
+      };
+    }
+    if (displayPolylinePath.length > 0 && Array.isArray(displayPolylinePath[0]) && typeof displayPolylinePath[0][0] === 'number') {
+      return {
+        pos: displayPolylinePath[0],
+        name: fallbackName
+      };
+    }
+    return null;
+  }, [selectedBranchId, selectedBranchObj, currentStops, displayPolylinePath, direction]);
+
+  const terminalEnd = useMemo(() => {
+    if (!selectedBranchId) return null;
+    const branchName = selectedBranchObj?.name || '';
+    const parts = branchName.split(/\s*(?:⇄|--|-)\s*/);
+    const fallbackName = direction === 'ida' ? (selectedBranchObj?.headsign_vuelta || parts[1] || parts[0] || 'Destino') : (selectedBranchObj?.headsign_ida || parts[0] || 'Destino');
+
+    if (currentStops.length > 1) {
+      const last = currentStops[currentStops.length - 1];
+      return {
+        pos: [last.lat, last.lng] as [number, number],
+        name: last.name || fallbackName
+      };
+    }
+    if (displayPolylinePath.length > 1) {
+      const last = displayPolylinePath[displayPolylinePath.length - 1];
+      if (Array.isArray(last) && typeof last[0] === 'number') {
+        return {
+          pos: last,
+          name: fallbackName
+        };
+      }
+    }
+    return null;
+  }, [selectedBranchId, selectedBranchObj, currentStops, displayPolylinePath, direction]);
+
   return (
     <div style={{ display: 'flex', gap: '1rem', height: 'calc(100vh - 120px)', width: '100%', position: 'relative' }}>
       
@@ -2780,6 +2890,37 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 </Popup>
               </Marker>
             ))}
+
+            {/* Terminales de Inicio y Fin (Cabeceras) */}
+            {terminalStart && (
+              <Marker
+                key={`terminal_start_${direction}_${terminalStart.pos[0]}_${terminalStart.pos[1]}`}
+                position={terminalStart.pos}
+                zIndexOffset={4200}
+                icon={createTerminalIcon(terminalStart.name, true, '#f59e0b')}
+              >
+                <Popup>
+                  <div style={{ color: '#111827', fontSize: '0.82rem', fontWeight: 700 }}>
+                    🚩 Terminal de Inicio: {terminalStart.name}
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+
+            {terminalEnd && (
+              <Marker
+                key={`terminal_end_${direction}_${terminalEnd.pos[0]}_${terminalEnd.pos[1]}`}
+                position={terminalEnd.pos}
+                zIndexOffset={4200}
+                icon={createTerminalIcon(terminalEnd.name, false, '#f59e0b')}
+              >
+                <Popup>
+                  <div style={{ color: '#111827', fontSize: '0.82rem', fontWeight: 700 }}>
+                    🏁 Terminal de Fin: {terminalEnd.name}
+                  </div>
+                </Popup>
+              </Marker>
+            )}
           </MapContainer>
 
           {/* Botón flotante Mirita para centrar/enfocar el recorrido */}
