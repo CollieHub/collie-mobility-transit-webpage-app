@@ -2558,18 +2558,6 @@ app.get('/v1/redsube/vehicles', async (c) => {
   const clientId = c.env.REDSUBE_CLIENT_ID || '6dbd9c5c729e4bbf89b904cbdddd4efd';
   const clientSecret = c.env.REDSUBE_CLIENT_SECRET || '5314C00834B54ba6A860e3C28dF6cA18';
 
-  const cacheKey = `cache:redsube:vehicles_proto:${company}:${ramal}:${limit}:${hasBounds ? `${swLat.toFixed(3)}_${swLng.toFixed(3)}_${neLat.toFixed(3)}_${neLng.toFixed(3)}` : 'all'}`;
-  if (c.env.FLEET_KV) {
-    try {
-      const cached = await c.env.FLEET_KV.get(cacheKey);
-      if (cached) {
-        c.header('Cache-Control', 'public, max-age=6, s-maxage=6');
-        c.header('X-Cache-Status', 'HIT-KV');
-        return c.json(JSON.parse(cached));
-      }
-    } catch (_) {}
-  }
-
   try {
     const protoUrl = `https://apitransporte.buenosaires.gob.ar/colectivos/vehiclePositions?client_id=${clientId}&client_secret=${clientSecret}`;
     const protoResp = await fetch(protoUrl);
@@ -2692,8 +2680,8 @@ app.get('/v1/redsube/vehicles', async (c) => {
 
     // Filtrar por bounding box si se proporcionó
     if (hasBounds) {
-      const latPad = Math.abs(neLat - swLat) * 0.2;
-      const lngPad = Math.abs(neLng - swLng) * 0.2;
+      const latPad = Math.abs(neLat - swLat) * 0.25;
+      const lngPad = Math.abs(neLng - swLng) * 0.25;
       const minLat = Math.min(swLat, neLat) - latPad;
       const maxLat = Math.max(swLat, neLat) + latPad;
       const minLng = Math.min(swLng, neLng) - lngPad;
@@ -2724,13 +2712,7 @@ app.get('/v1/redsube/vehicles', async (c) => {
       vehicles: mappedVehicles.slice(0, limit)
     };
 
-    if (c.env.FLEET_KV) {
-      try {
-        await c.env.FLEET_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 6 });
-      } catch (_) {}
-    }
-
-    c.header('Cache-Control', 'public, max-age=6, s-maxage=6');
+    c.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     return c.json(payload);
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
