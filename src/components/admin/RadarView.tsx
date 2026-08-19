@@ -936,8 +936,9 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
 
   const [telemetryVehicles, setTelemetryVehicles] = useState<any[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null);
-  const [vehicleModalTab, setVehicleModalTab] = useState<'info' | 'json'>('info');
+  const [vehicleModalTab, setVehicleModalTab] = useState<'info' | 'raw_gtfs' | 'json'>('info');
   const [vehicleJsonCopied, setVehicleJsonCopied] = useState<boolean>(false);
+  const [rawGtfsCopied, setRawGtfsCopied] = useState<boolean>(false);
   const [showGpsTraces, setShowGpsTraces] = useState<boolean>(true);
   const [showRawGpsPoints, setShowRawGpsPoints] = useState<boolean>(false);
   const [gpsTraces, setGpsTraces] = useState<Record<string, {
@@ -3321,127 +3322,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                       setSelectedVehicle(veh);
                     }
                   }}
-                >
-                  <Popup>
-                    <div style={{
-                      color: '#0f172a',
-                      fontSize: '0.8rem',
-                      minWidth: '220px',
-                      maxWidth: '280px',
-                      padding: '2px'
-                    }}>
-                      {/* Cabecera Colectivo */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottom: '2px solid #0284c7',
-                        paddingBottom: '6px',
-                        marginBottom: '8px'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontSize: '18px' }}>🚍</span>
-                          <div>
-                            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0284c7', lineHeight: 1.1 }}>
-                              {veh.linea || veh.route_short_name ? `Línea ${veh.linea || veh.route_short_name}` : 'Línea a definir'}
-                            </div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>
-                              GTFS Route: {veh.route_id || 'N/A'}
-                            </div>
-                          </div>
-                        </div>
-                        <span style={{
-                          backgroundColor: '#0284c7',
-                          color: '#ffffff',
-                          fontSize: '0.75rem',
-                          fontWeight: 800,
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          boxShadow: '0 2px 4px rgba(2, 132, 199, 0.3)'
-                        }}>
-                          #{veh.intern}
-                        </span>
-                      </div>
-
-                      {/* Empresa / Concesionaria */}
-                      {veh.agency_name && (
-                        <div style={{
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: '6px',
-                          padding: '4px 8px',
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          color: '#334155',
-                          marginBottom: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '5px'
-                        }}>
-                          <span>🏢</span>
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {veh.agency_name}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Destino / Headsign GTFS */}
-                      {veh.trip_headsign && (
-                        <div style={{
-                          marginBottom: '6px',
-                          fontSize: '0.75rem',
-                          color: '#1e293b'
-                        }}>
-                          <span style={{ color: '#64748b', fontSize: '0.7rem' }}>Destino (Headsign):</span>
-                          <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                            🏁 {veh.trip_headsign}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Grid de Telemetría */}
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: '6px',
-                        backgroundColor: '#f1f5f9',
-                        padding: '6px 8px',
-                        borderRadius: '6px',
-                        fontSize: '0.72rem',
-                        marginBottom: '6px'
-                      }}>
-                        <div>
-                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>VELOCIDAD</span>
-                          <strong style={{ color: '#16a34a', fontSize: '0.85rem' }}>{Math.round(veh.speed)} km/h</strong>
-                        </div>
-                        <div>
-                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>SENTIDO</span>
-                          <strong style={{ color: '#0284c7' }}>{dirLabel}</strong>
-                        </div>
-                        {veh.bearing !== undefined && veh.bearing !== null && (
-                          <div>
-                            <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>RUMBO</span>
-                            <strong>{Math.round(veh.bearing)}°</strong>
-                          </div>
-                        )}
-                        <div>
-                          <span style={{ color: '#64748b', display: 'block', fontSize: '0.65rem' }}>ÚLTIMO GPS</span>
-                          <strong>{formattedTime}</strong>
-                        </div>
-                      </div>
-
-                      {/* Coordenadas GPS */}
-                      <div style={{
-                        fontSize: '0.65rem',
-                        color: '#94a3b8',
-                        textAlign: 'right',
-                        fontFamily: 'monospace'
-                      }}>
-                        GPS: {veh.lat.toFixed(5)}, {veh.lng.toFixed(5)}
-                      </div>
-                    </div>
-                  </Popup>
-                </Marker>
+                />
               );
             })}
 
@@ -3536,7 +3417,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 </div>
               </div>
 
-              {/* Tabs Switcher: Detalle vs JSON */}
+              {/* Tabs Switcher: Telemetría vs JSON Original GTFS vs JSON Mapeado */}
               <div style={{
                 display: 'flex',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
@@ -3547,8 +3428,8 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                   onClick={() => setVehicleModalTab('info')}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
-                    fontSize: '0.74rem',
+                    padding: '8px 10px',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
                     border: 'none',
                     borderBottom: vehicleModalTab === 'info' ? '2px solid #38bdf8' : '2px solid transparent',
@@ -3558,7 +3439,7 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
+                    gap: '5px',
                     transition: 'all 0.15s ease'
                   }}
                 >
@@ -3566,11 +3447,33 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                 </button>
                 <button
                   type="button"
+                  onClick={() => setVehicleModalTab('raw_gtfs')}
+                  style={{
+                    flex: 1.2,
+                    padding: '8px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    border: 'none',
+                    borderBottom: vehicleModalTab === 'raw_gtfs' ? '2px solid #10b981' : '2px solid transparent',
+                    backgroundColor: vehicleModalTab === 'raw_gtfs' ? 'rgba(16, 185, 129, 0.12)' : 'transparent',
+                    color: vehicleModalTab === 'raw_gtfs' ? '#34d399' : '#94a3b8',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>📦 JSON Original GTFS</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setVehicleModalTab('json')}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
-                    fontSize: '0.74rem',
+                    padding: '8px 10px',
+                    fontSize: '0.72rem',
                     fontWeight: 700,
                     border: 'none',
                     borderBottom: vehicleModalTab === 'json' ? '2px solid #38bdf8' : '2px solid transparent',
@@ -3580,18 +3483,18 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
+                    gap: '5px',
                     transition: 'all 0.15s ease'
                   }}
                 >
                   <FileCode size={13} />
-                  <span>JSON Completo</span>
+                  <span>JSON Mapeado</span>
                 </button>
               </div>
 
               {/* Body */}
               <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {vehicleModalTab === 'info' ? (
+                {vehicleModalTab === 'info' && (
                   <>
                     {/* Empresa */}
                     {selectedVehicle.agency_name && (
@@ -3712,12 +3615,108 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                       </div>
                     </div>
                   </>
-                ) : (
-                  /* Pestaña JSON Raw Completo */
+                )}
+
+                {/* Pestaña JSON Original GTFS (Datos Crudos) */}
+                {vehicleModalTab === 'raw_gtfs' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.7rem', color: '#34d399', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span>📦</span> Datos crudos del feed GTFS Realtime
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const rawData = selectedVehicle.raw_gtfs || {
+                            id: selectedVehicle.id,
+                            vehicle: {
+                              trip: {
+                                tripId: selectedVehicle.trip_id,
+                                routeId: selectedVehicle.route_id,
+                                directionId: selectedVehicle.direction
+                              },
+                              position: {
+                                latitude: selectedVehicle.lat,
+                                longitude: selectedVehicle.lng,
+                                bearing: selectedVehicle.bearing,
+                                speed: selectedVehicle.speed
+                              },
+                              vehicle: {
+                                id: selectedVehicle.vehicle_id || selectedVehicle.id,
+                                licensePlate: selectedVehicle.license_plate
+                              },
+                              timestamp: String(selectedVehicle.timestamp)
+                            }
+                          };
+                          navigator.clipboard.writeText(JSON.stringify(rawData, null, 2));
+                          setRawGtfsCopied(true);
+                          setTimeout(() => setRawGtfsCopied(false), 2000);
+                        }}
+                        style={{
+                          backgroundColor: rawGtfsCopied ? '#16a34a' : 'rgba(16, 185, 129, 0.15)',
+                          border: '1px solid rgba(16, 185, 129, 0.35)',
+                          color: rawGtfsCopied ? '#ffffff' : '#34d399',
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {rawGtfsCopied ? <Check size={12} /> : <Copy size={12} />}
+                        <span>{rawGtfsCopied ? '¡Copiado!' : 'Copiar GTFS Raw'}</span>
+                      </button>
+                    </div>
+                    <pre style={{
+                      backgroundColor: '#03140e',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      fontSize: '0.71rem',
+                      color: '#34d399',
+                      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                      maxHeight: '220px',
+                      overflowY: 'auto',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      margin: 0,
+                      boxShadow: 'inset 0 2px 6px rgba(0, 0, 0, 0.5)'
+                    }}>
+                      {JSON.stringify(selectedVehicle.raw_gtfs || {
+                        id: selectedVehicle.id,
+                        vehicle: {
+                          trip: {
+                            tripId: selectedVehicle.trip_id,
+                            routeId: selectedVehicle.route_id,
+                            directionId: selectedVehicle.direction
+                          },
+                          position: {
+                            latitude: selectedVehicle.lat,
+                            longitude: selectedVehicle.lng,
+                            bearing: selectedVehicle.bearing,
+                            speed: selectedVehicle.speed
+                          },
+                          vehicle: {
+                            id: selectedVehicle.vehicle_id || selectedVehicle.id,
+                            licensePlate: selectedVehicle.license_plate
+                          },
+                          timestamp: String(selectedVehicle.timestamp)
+                        }
+                      }, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {/* Pestaña JSON Mapeado */}
+                {vehicleModalTab === 'json' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>
-                        Datos completos de la unidad
+                        Objeto procesado por Collie Transit
                       </span>
                       <button
                         type="button"

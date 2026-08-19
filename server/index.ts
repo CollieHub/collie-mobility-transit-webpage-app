@@ -2648,7 +2648,39 @@ app.get('/v1/redsube/vehicles', async (c) => {
           odometer: odometer,
           timestamp: tsSec,
           timestamp_iso: new Date(tsSec * 1000).toISOString(),
-          timestamp_formatted: new Date(tsSec * 1000).toLocaleTimeString()
+          timestamp_formatted: new Date(tsSec * 1000).toLocaleTimeString(),
+          raw_gtfs: {
+            id: entity.id,
+            isDeleted: entity.isDeleted,
+            vehicle: {
+              trip: v.trip ? {
+                tripId: v.trip.tripId,
+                routeId: v.trip.routeId,
+                directionId: v.trip.directionId,
+                startDate: v.trip.startDate,
+                startTime: v.trip.startTime,
+                scheduleRelationship: v.trip.scheduleRelationship
+              } : undefined,
+              position: v.position ? {
+                latitude: v.position.latitude,
+                longitude: v.position.longitude,
+                bearing: v.position.bearing,
+                odometer: v.position.odometer,
+                speed: v.position.speed
+              } : undefined,
+              timestamp: v.timestamp ? String(v.timestamp) : undefined,
+              congestionLevel: v.congestionLevel,
+              stopId: v.stopId,
+              currentStopSequence: v.currentStopSequence,
+              currentStatus: v.currentStatus,
+              occupancyStatus: v.occupancyStatus,
+              vehicle: v.vehicle ? {
+                id: v.vehicle.id,
+                label: v.vehicle.label,
+                licensePlate: v.vehicle.licensePlate
+              } : undefined
+            }
+          }
         });
       }
     } else {
