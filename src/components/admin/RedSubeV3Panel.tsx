@@ -75,14 +75,14 @@ export default function RedSubeV3Panel({
 }: RedSubeV3PanelProps) {
   const [unitsLimit, setUnitsLimit] = useState<number>(100);
   const [unitsMode, setUnitsMode] = useState<'ramal' | 'free'>('free');
-  const [selectedCompany, setSelectedCompany] = useState<string>('228');
+  const [selectedCompany, setSelectedCompany] = useState<string>('TODAS');
   const [companies, setCompanies] = useState<any[]>([
+    { id: 'TODAS', name: '— Todas las Líneas Activas —' },
     { id: '228', name: 'Línea 228 (LA NUEVA METROPOL S.A. (Línea 194))' },
     { id: '194', name: 'Línea 194 (LA NUEVA METROPOL S.A. (Línea 194))' },
     { id: '204', name: 'Línea 204 (LINEA 204 S.A.)' },
     { id: 'SIT', name: 'SIT (Servicio Integral Zárate)' },
-    { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)' },
-    { id: 'TODAS', name: '— Todas las Líneas Activas —' }
+    { id: '314', name: 'Línea 314 (La Primera de Martínez S.A.)' }
   ]);
   const [routes, setRoutes] = useState<V3Route[]>([]);
   const [activeUnitsCount, setActiveUnitsCount] = useState<number>(0);
@@ -105,7 +105,12 @@ export default function RedSubeV3Panel({
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.companies)) {
-          setCompanies(data.companies);
+          // Asegurar que TODAS esté siempre al inicio
+          const hasTodas = data.companies.some((c: any) => c.id === 'TODAS');
+          const finalComps = hasTodas 
+            ? data.companies 
+            : [{ id: 'TODAS', name: '— Todas las Líneas Activas —' }, ...data.companies];
+          setCompanies(finalComps);
         }
       })
       .catch(() => {});
@@ -163,8 +168,12 @@ export default function RedSubeV3Panel({
     try {
       const targetComp = mode === 'free' ? 'TODAS' : comp;
       let boundsParams = '';
-      if (mode === 'free' && mapBounds && typeof mapBounds.getSouth === 'function') {
-        boundsParams = `&sw_lat=${mapBounds.getSouth()}&sw_lng=${mapBounds.getWest()}&ne_lat=${mapBounds.getNorth()}&ne_lng=${mapBounds.getEast()}`;
+      if (mode === 'free') {
+        if (mapBounds && typeof mapBounds.getSouth === 'function') {
+          boundsParams = `&sw_lat=${mapBounds.getSouth()}&sw_lng=${mapBounds.getWest()}&ne_lat=${mapBounds.getNorth()}&ne_lng=${mapBounds.getEast()}`;
+        } else {
+          boundsParams = `&sw_lat=-34.25&sw_lng=-59.20&ne_lat=-33.95&ne_lng=-58.85`;
+        }
       }
       const fetchLimit = mode === 'free' ? 2500 : 500;
       const res = await fetch(`/v1/redsube/vehicles?company=${encodeURIComponent(targetComp)}&limit=${fetchLimit}${boundsParams}`);
