@@ -60,14 +60,14 @@ const NAVIGATION_GROUPS = [
     title: 'RedSUBE (Nacional / CABA)',
     items: [
       { key: 'redsube.vehicle_overrides', label: '🛡️ Excepciones de Unidades', icon: ShieldIcon },
-      { key: 'redsube.caba.lines', label: 'Líneas RedSUBE', icon: BusIcon },
-      { key: 'redsube.caba.branches', label: 'Ramales RedSUBE', icon: BranchIcon },
-      { key: 'redsube.caba.agencies', label: 'Empresas RedSUBE', icon: BuildingIcon },
-      { key: 'redsube.caba.gtfs_transit_unidad_recorrido', label: 'Telemetría / GPS RedSUBE', icon: ActivityIcon },
-      { key: 'redsube.gtfs.routes', label: 'Rutas GTFS', icon: RouteIcon },
-      { key: 'redsube.gtfs.trips', label: 'Viajes GTFS', icon: ClockIcon },
-      { key: 'redsube.gtfs.shapes', label: 'Trazados Shapes GTFS', icon: RouteIcon },
-      { key: 'redsube.gtfs.stops', label: 'Paradas GTFS', icon: MapPinIcon },
+      { key: 'arg.redsube.lines', label: 'Líneas RedSUBE', icon: BusIcon },
+      { key: 'arg.redsube.branches', label: 'Ramales RedSUBE', icon: BranchIcon },
+      { key: 'arg.redsube.agencies', label: 'Empresas RedSUBE', icon: BuildingIcon },
+      { key: 'arg.redsube.gtfs_transit_unidad_recorrido', label: 'Telemetría / GPS RedSUBE', icon: ActivityIcon },
+      { key: 'arg.redsube.routes', label: 'Rutas GTFS', icon: RouteIcon },
+      { key: 'arg.redsube.trips', label: 'Viajes GTFS', icon: ClockIcon },
+      { key: 'arg.redsube.shapes', label: 'Trazados Shapes GTFS', icon: RouteIcon },
+      { key: 'arg.redsube.stops', label: 'Paradas GTFS', icon: MapPinIcon },
     ]
   },
   {
