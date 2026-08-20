@@ -398,6 +398,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
       setIsLoading(false);
       return;
     }
+    if (['schedules', 'calendar_exceptions', 'redsube.vehicle_overrides'].includes(activeTable)) {
+      setIsLoading(false);
+      return;
+    }
     fetchTableRows(activeTable, searchQuery);
   }, [activeTable, selectedSourceProvider, fetchTableRows]);
 
