@@ -12,7 +12,7 @@ const agencyToLineMap: Record<string, { line: string; agencyName: string }> = {
   ...(agencyToLineFull as Record<string, { line: string; agencyName: string }>),
   '231': { line: '194', agencyName: 'LA NUEVA METROPOL S.A. (Línea 194)' },
   '368': { line: '228C', agencyName: 'MICRO OMNIBUS TIGRE S.A. (Línea 228C)' },
-  '379': { line: '204', agencyName: 'MICRO OMNIBUS TIGRE S.A. (Línea 204)' },
+  '379': { line: '228', agencyName: 'MICRO OMNIBUS TIGRE S.A. (Línea 228)' },
   '4854': { line: '194', agencyName: 'LA NUEVA METROPOL S.A. (Línea 194)' },
   '709': { line: '194', agencyName: 'LA NUEVA METROPOL S.A.' },
   '710': { line: '228', agencyName: 'LA NUEVA METROPOL S.A. (Línea 228)' },
@@ -20,6 +20,16 @@ const agencyToLineMap: Record<string, { line: string; agencyName: string }> = {
   '27': { line: '71', agencyName: 'LINEA 71 S.A.' },
   '69': { line: '60', agencyName: 'MONSA (Línea 60)' },
   '13': { line: '26', agencyName: '17 DE AGOSTO S.A.' }
+};
+
+// Rutas explícitas de alta frecuencia (Zárate / Campana / MOTSA / Metropol)
+routeIdToGtfsMap['2111'] = {
+  lineCode: '228',
+  shortName: '228CB',
+  agencyName: 'MICRO OMNIBUS TIGRE S.A.',
+  headsignIda: 'A. del Plata ⇄ Zárate',
+  headsignVuelta: 'A. del Plata ⇄ Zárate',
+  longName: 'A. del Plata ⇄ Zárate'
 };
 
 // 1. Cargar todas las rutas de allGtfsLines
