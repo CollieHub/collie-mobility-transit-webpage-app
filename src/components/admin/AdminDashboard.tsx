@@ -43,7 +43,7 @@ interface AdminDashboardProps {
 export type SourceProvider = 'core' | 'redsube' | 'rosario' | 'uruguay';
 
 export const SOURCE_PROVIDERS: { key: SourceProvider; label: string; icon: string; title: string }[] = [
-  { key: 'core', label: 'Core', icon: 'mn', title: 'Servicio Core (Zárate / Local)' },
+  { key: 'core', label: 'Core', icon: '🚍', title: 'Servicio Core (Zárate / Local)' },
   { key: 'redsube', label: 'RedSUBE', icon: '🌐', title: 'Servicio RedSUBE (CABA / Nacional)' },
   { key: 'rosario', label: 'Rosario GPS', icon: '🚌', title: 'Servicio Rosario GPS' },
   { key: 'uruguay', label: 'Uruguay (Montevideo)', icon: '🇺🇾', title: 'Servicio Uruguay (Montevideo)' },
