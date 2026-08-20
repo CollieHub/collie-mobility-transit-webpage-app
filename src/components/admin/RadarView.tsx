@@ -895,9 +895,10 @@ interface RadarViewProps {
   branchesList?: any[];
   selectedSource?: string;
   showNotification?: (type: 'success' | 'error' | 'info', message: string) => void;
+  onOpenOverrideModal?: (preFill: any) => void;
 }
 
-export default function RadarView({ linesList = [], branchesList = [], selectedSource: propSelectedSource, showNotification }: RadarViewProps) {
+export default function RadarView({ linesList = [], branchesList = [], selectedSource: propSelectedSource, showNotification, onOpenOverrideModal }: RadarViewProps) {
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
   const [direction, setDirection] = useState<'ida' | 'vuelta'>('ida');
   const [isEditingEnabled, setIsEditingEnabled] = useState<boolean>(false);
@@ -3852,6 +3853,38 @@ export default function RadarView({ linesList = [], branchesList = [], selectedS
                         }}
                       >
                         <Footprints size={12} /> Ver Camino
+                      </button>
+                    )}
+                    {onOpenOverrideModal && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onOpenOverrideModal({
+                            identifier_type: selectedVehicle.license_plate ? 'license_plate' : 'intern',
+                            identifier_value: selectedVehicle.license_plate || selectedVehicle.intern || selectedVehicle.id,
+                            override_linea: selectedVehicle.linea && selectedVehicle.linea.toUpperCase() !== 'SUBE' ? selectedVehicle.linea : '',
+                            override_route_short_name: selectedVehicle.route_short_name || '',
+                            override_trip_headsign: selectedVehicle.trip_headsign || '',
+                            override_agency_name: selectedVehicle.agency_name || '',
+                            notes: `Reasignación rápida desde Mapa Radar (Interno ${selectedVehicle.intern || selectedVehicle.id})`
+                          });
+                        }}
+                        style={{
+                          backgroundColor: '#1e1b4b',
+                          border: '1px solid #6366f1',
+                          color: '#818cf8',
+                          borderRadius: '6px',
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        title="Crear regla de excepción manual para esta unidad"
+                      >
+                        ⚡ Reasignar Línea
                       </button>
                     )}
                     <button

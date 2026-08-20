@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import RamalScheduleEditor from './RamalScheduleEditor';
 import CalendarView from './CalendarView';
 import RadarView from './RadarView';
+import RedSubeVehicleOverridesPanel from './RedSubeVehicleOverridesPanel';
 import { getBranchColor } from './RedSubeV3Panel';
 import allGtfsLines from '../../lib/redsube/all_gtfs_lines.json';
 import agenciesMap from '../../lib/redsube/agencies_map.json';
@@ -42,7 +43,7 @@ interface AdminDashboardProps {
 export type SourceProvider = 'core' | 'redsube' | 'rosario' | 'uruguay';
 
 export const SOURCE_PROVIDERS: { key: SourceProvider; label: string; icon: string; title: string }[] = [
-  { key: 'core', label: 'Core', icon: '🚍', title: 'Servicio Core (Zárate / Local)' },
+  { key: 'core', label: 'Core', icon: 'mn', title: 'Servicio Core (Zárate / Local)' },
   { key: 'redsube', label: 'RedSUBE', icon: '🌐', title: 'Servicio RedSUBE (CABA / Nacional)' },
   { key: 'rosario', label: 'Rosario GPS', icon: '🚌', title: 'Servicio Rosario GPS' },
   { key: 'uruguay', label: 'Uruguay (Montevideo)', icon: '🇺🇾', title: 'Servicio Uruguay (Montevideo)' },
@@ -92,6 +93,7 @@ const NAVIGATION_GROUPS = [
       { key: 'redsube.caba.branches', label: 'Ramales RedSUBE', icon: BranchIcon },
       { key: 'redsube.caba.agencies', label: 'Empresas RedSUBE', icon: BuildingIcon },
       { key: 'redsube.caba.gtfs_transit_unidad_recorrido', label: 'Telemetría / GPS RedSUBE', icon: ActivityIcon },
+      { key: 'redsube.vehicle_overrides', label: 'Excepciones de Unidades', icon: ShieldIcon },
       { key: 'redsube.gtfs.routes', label: 'Rutas GTFS', icon: RouteIcon },
       { key: 'redsube.gtfs.trips', label: 'Viajes GTFS', icon: ClockIcon },
       { key: 'redsube.gtfs.shapes', label: 'Trazados Shapes GTFS', icon: RouteIcon },
@@ -156,6 +158,7 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
   const [branchPubStatusesList, setBranchPubStatusesList] = useState<any[]>([]);
 
   const [selectedLineFilter, setSelectedLineFilter] = useState<string>('all');
+  const [preFillOverrideData, setPreFillOverrideData] = useState<any | null>(null);
   const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>('all');
   const [selectedLineIds, setSelectedLineIds] = useState<Set<string>>(new Set());
   const [isLineDropdownOpen, setIsLineDropdownOpen] = useState<boolean>(false);
@@ -958,6 +961,10 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
               branchesList={branchesList}
               selectedSource={selectedSourceProvider}
               showNotification={showNotification}
+              onOpenOverrideModal={(preFill) => {
+                setPreFillOverrideData(preFill);
+                setActiveTable('redsube.vehicle_overrides');
+              }}
             />
           ) : activeTable === 'schedules' ? (
             <RamalScheduleEditor
@@ -972,6 +979,12 @@ export default function AdminDashboard({ onLogout, onBackToApp }: AdminDashboard
             />
           ) : activeTable === 'calendar_exceptions' ? (
             <CalendarView showNotification={showNotification} />
+          ) : activeTable === 'redsube.vehicle_overrides' ? (
+            <RedSubeVehicleOverridesPanel
+              showNotification={showNotification}
+              initialPreFillData={preFillOverrideData}
+              onClosePreFillModal={() => setPreFillOverrideData(null)}
+            />
           ) : (
             <>
               {/* Controls Bar: Selective Line & Branch Combos */}

@@ -129,9 +129,28 @@ CREATE TABLE IF NOT EXISTS "arg.redsube.gtfs_transit_unidad_recorrido" (
   last_updated INTEGER NOT NULL
 );
 
+-- 8. Excepciones de Unidades RedSUBE
+CREATE TABLE IF NOT EXISTS "arg.redsube.vehicle_overrides" (
+  id TEXT PRIMARY KEY,
+  identifier_type TEXT NOT NULL, -- 'license_plate' | 'intern' | 'vehicle_id'
+  identifier_value TEXT NOT NULL, -- ej. 'KVI872', '634', '4324'
+  override_linea TEXT NOT NULL, -- ej. '194', '228'
+  override_route_short_name TEXT, -- ej. '194A'
+  override_route_id TEXT, -- ej. 'route-194'
+  override_trip_headsign TEXT, -- ej. 'Zárate ⇄ Pza. Miserere'
+  override_agency_id TEXT, -- ej. '4854'
+  override_agency_name TEXT, -- ej. 'LA NUEVA METROPOL S.A.'
+  notes TEXT, -- Notas operativas (ej. "Unidad trasladada a Zárate")
+  is_active INTEGER DEFAULT 1, -- 1: activo, 0: inactivo
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Índices de Rendimiento
 CREATE INDEX IF NOT EXISTS "idx_arg_redsube_branches_line" ON "arg.redsube.branches"(line_id);
 CREATE INDEX IF NOT EXISTS "idx_arg_redsube_shapes_branch" ON "arg.redsube.route_shapes"(branch_id);
 CREATE INDEX IF NOT EXISTS "idx_arg_redsube_stops_branch" ON "arg.redsube.stops"(branch_id);
 CREATE INDEX IF NOT EXISTS "idx_arg_redsube_trips_route" ON "arg.redsube.trips"(route_id);
 CREATE INDEX IF NOT EXISTS "idx_arg_redsube_stoptimes_trip" ON "arg.redsube.stop_times"(trip_id);
+CREATE INDEX IF NOT EXISTS "idx_arg_redsube_overrides_lookup" ON "arg.redsube.vehicle_overrides"(identifier_type, identifier_value, is_active);
+

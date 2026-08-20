@@ -2760,6 +2760,50 @@ app.get('/v1/redsube/vehicles', async (c) => {
       });
     }
 
+    // Aplicar reglas de excepción de unidades activas desde D1 (vehicle_overrides)
+    try {
+      if (c.env.DB) {
+        const overridesRes = await c.env.DB.prepare(
+          'SELECT * FROM "arg.redsube.vehicle_overrides" WHERE is_active = 1'
+        ).all();
+        if (overridesRes.success && Array.isArray(overridesRes.results) && overridesRes.results.length > 0) {
+          const byPlate: Record<string, any> = {};
+          const byIntern: Record<string, any> = {};
+          const byId: Record<string, any> = {};
+
+          for (const item of overridesRes.results as any[]) {
+            const val = String(item.identifier_value || '').toUpperCase().trim();
+            if (!val) continue;
+            if (item.identifier_type === 'license_plate') byPlate[val] = item;
+            else if (item.identifier_type === 'intern') byIntern[val] = item;
+            else if (item.identifier_type === 'vehicle_id') byId[val] = item;
+          }
+
+          for (const v of mappedVehicles) {
+            const plateKey = String(v.license_plate || '').toUpperCase().trim();
+            const internKey = String(v.intern || v.vehicle_id || '').toUpperCase().trim();
+            const idKey = String(v.id || v.vehicle_id || '').toUpperCase().trim();
+
+            const matched = (plateKey && byPlate[plateKey]) || (internKey && byIntern[internKey]) || (idKey && byId[idKey]);
+            if (matched) {
+              if (matched.override_linea) {
+                v.linea = matched.override_linea;
+                v.route_short_name = matched.override_route_short_name || matched.override_linea;
+              }
+              if (matched.override_route_id) v.route_id = matched.override_route_id;
+              if (matched.override_trip_headsign) v.trip_headsign = matched.override_trip_headsign;
+              if (matched.override_agency_name) v.agency_name = matched.override_agency_name;
+              if (matched.override_agency_id) v.agency_id = matched.override_agency_id;
+              v.is_overridden = true;
+              v.override_notes = matched.notes || 'Excepción manual aplicada';
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error applying vehicle_overrides in telemetry:', e);
+    }
+
     const payload = {
       success: true,
       total: mappedVehicles.length,
@@ -2768,6 +2812,141 @@ app.get('/v1/redsube/vehicles', async (c) => {
 
     c.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     return c.json(payload);
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// ==============================================================================
+// CRUD ENDPOINTS: Excepciones de Unidades RedSUBE (arg.redsube.vehicle_overrides)
+// ==============================================================================
+
+// 1. Obtener todas las reglas de excepción de unidades
+app.get('/v1/redsube/vehicle-overrides', async (c) => {
+  try {
+    if (!c.env.DB) return c.json({ success: false, error: 'Database binding not available' }, 500);
+    const res = await c.env.DB.prepare(
+      'SELECT * FROM "arg.redsube.vehicle_overrides" ORDER BY created_at DESC'
+    ).all();
+    return c.json({ success: true, overrides: res.results || [] });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// 2. Crear nueva regla de excepción de unidad
+app.post('/v1/redsube/vehicle-overrides', async (c) => {
+  try {
+    if (!c.env.DB) return c.json({ success: false, error: 'Database binding not available' }, 500);
+    const body = await c.req.json();
+    const {
+      identifier_type,
+      identifier_value,
+      override_linea,
+      override_route_short_name,
+      override_route_id,
+      override_trip_headsign,
+      override_agency_id,
+      override_agency_name,
+      notes,
+      is_active
+    } = body;
+
+    if (!identifier_type || !identifier_value || !override_linea) {
+      return c.json({ success: false, error: 'Campos obligatorios requeridos: identifier_type, identifier_value, override_linea' }, 400);
+    }
+
+    const newId = `override-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const activeVal = is_active !== undefined ? (is_active ? 1 : 0) : 1;
+
+    await c.env.DB.prepare(
+      `INSERT INTO "arg.redsube.vehicle_overrides" (
+        id, identifier_type, identifier_value, override_linea, override_route_short_name,
+        override_route_id, override_trip_headsign, override_agency_id, override_agency_name,
+        notes, is_active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+    ).bind(
+      newId,
+      identifier_type,
+      String(identifier_value).trim(),
+      String(override_linea).trim(),
+      override_route_short_name ? String(override_route_short_name).trim() : String(override_linea).trim(),
+      override_route_id || '',
+      override_trip_headsign || '',
+      override_agency_id || '',
+      override_agency_name || '',
+      notes || '',
+      activeVal
+    ).run();
+
+    return c.json({ success: true, id: newId, message: 'Excepción de unidad creada exitosamente' });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// 3. Actualizar regla de excepción existente
+app.put('/v1/redsube/vehicle-overrides/:id', async (c) => {
+  try {
+    if (!c.env.DB) return c.json({ success: false, error: 'Database binding not available' }, 500);
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const {
+      identifier_type,
+      identifier_value,
+      override_linea,
+      override_route_short_name,
+      override_route_id,
+      override_trip_headsign,
+      override_agency_id,
+      override_agency_name,
+      notes,
+      is_active
+    } = body;
+
+    const activeVal = is_active !== undefined ? (is_active ? 1 : 0) : 1;
+
+    await c.env.DB.prepare(
+      `UPDATE "arg.redsube.vehicle_overrides" SET
+        identifier_type = COALESCE(?, identifier_type),
+        identifier_value = COALESCE(?, identifier_value),
+        override_linea = COALESCE(?, override_linea),
+        override_route_short_name = COALESCE(?, override_route_short_name),
+        override_route_id = COALESCE(?, override_route_id),
+        override_trip_headsign = COALESCE(?, override_trip_headsign),
+        override_agency_id = COALESCE(?, override_agency_id),
+        override_agency_name = COALESCE(?, override_agency_name),
+        notes = COALESCE(?, notes),
+        is_active = ?,
+        updated_at = datetime('now')
+      WHERE id = ?`
+    ).bind(
+      identifier_type || null,
+      identifier_value ? String(identifier_value).trim() : null,
+      override_linea ? String(override_linea).trim() : null,
+      override_route_short_name ? String(override_route_short_name).trim() : null,
+      override_route_id || null,
+      override_trip_headsign || null,
+      override_agency_id || null,
+      override_agency_name || null,
+      notes || null,
+      activeVal,
+      id
+    ).run();
+
+    return c.json({ success: true, message: 'Excepción actualizada correctamente' });
+  } catch (err: any) {
+    return c.json({ success: false, error: err.message }, 500);
+  }
+});
+
+// 4. Eliminar regla de excepción
+app.delete('/v1/redsube/vehicle-overrides/:id', async (c) => {
+  try {
+    if (!c.env.DB) return c.json({ success: false, error: 'Database binding not available' }, 500);
+    const id = c.req.param('id');
+    await c.env.DB.prepare('DELETE FROM "arg.redsube.vehicle_overrides" WHERE id = ?').bind(id).run();
+    return c.json({ success: true, message: 'Excepción eliminada correctamente' });
   } catch (err: any) {
     return c.json({ success: false, error: err.message }, 500);
   }
