@@ -2624,27 +2624,16 @@ app.get('/v1/redsube/vehicles', async (c) => {
         let agencyName = (agenciesMap as any)[agencyId] || '';
         let tripHeadsign = '';
 
-        // 1. Prioridad Máxima: Búsqueda canónica determinística por Trip ID en GTFS estático oficial
-        const tripLookup = lookupTripId(tripId);
-        if (tripLookup && routeIdToGtfsMap[tripLookup.routeId]) {
-          const candidate = routeIdToGtfsMap[tripLookup.routeId];
-          routeId = tripLookup.routeId;
-          linea = candidate.lineCode;
-          routeShortName = candidate.shortName;
-          agencyName = candidate.agencyName || agencyName || (agencyToLineMap[agencyId]?.agencyName || '');
-          tripHeadsign = direction === 0 ? (candidate.headsignIda || candidate.longName || '') : (candidate.headsignVuelta || candidate.longName || '');
-        }
-
-        // 2. Prioridad Secundaria: Resolución directa por Route ID
-        if (!linea && routeId && routeIdToGtfsMap[routeId]) {
+        // 1. Resolución canónica Nacional por Route ID en catálogo RedSUBE
+        if (routeId && routeIdToGtfsMap[routeId]) {
           const g = routeIdToGtfsMap[routeId];
           linea = g.lineCode;
           routeShortName = g.shortName;
           agencyName = g.agencyName || agencyName || (agencyToLineMap[agencyId]?.agencyName || '');
-          tripHeadsign = tripHeadsign || (direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || ''));
+          tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
         }
 
-        // 3. Prioridad Terciaria (Playones / En Espera / Sin Viaje Activo): Resolución por Agencia (SUBE / CABA)
+        // 2. Resolución por Empresa / Agencia SUBE Nacional (433 agencias a nivel país)
         if (!linea && agencyId && agencyToLineMap[agencyId]) {
           const a = agencyToLineMap[agencyId];
           linea = a.line;
@@ -2653,7 +2642,7 @@ app.get('/v1/redsube/vehicles', async (c) => {
           tripHeadsign = tripHeadsign || 'En Circulación / En Espera';
         }
 
-        // 4. Fallback: Extracción por expresión regular en nombre de agencia
+        // 3. Fallback: Extracción por expresión regular en nombre de agencia
         if (!linea && agencyName) {
           const matchLine = agencyName.match(/LINEA\s+(\d+)/i);
           if (matchLine) {
