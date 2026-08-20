@@ -2627,10 +2627,20 @@ app.get('/v1/redsube/vehicles', async (c) => {
         // 1. Resolución canónica Nacional por Route ID en catálogo RedSUBE
         if (routeId && routeIdToGtfsMap[routeId]) {
           const g = routeIdToGtfsMap[routeId];
-          linea = g.lineCode;
-          routeShortName = g.shortName;
-          agencyName = g.agencyName || agencyName || (agencyToLineMap[agencyId]?.agencyName || '');
-          tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
+          const vehicleAgencyName = (agencyToLineMap[agencyId]?.agencyName || (agenciesMap as any)[agencyId] || '').toUpperCase();
+          const routeAgencyName = (g.agencyName || '').toUpperCase();
+          
+          const isAgencyCompatible = !vehicleAgencyName || !routeAgencyName || 
+            vehicleAgencyName.includes(routeAgencyName) || 
+            routeAgencyName.includes(vehicleAgencyName) ||
+            (vehicleAgencyName.includes('METROPOL') && routeAgencyName.includes('METROPOL'));
+
+          if (isAgencyCompatible) {
+            linea = g.lineCode;
+            routeShortName = g.shortName;
+            agencyName = g.agencyName || agencyName || (agencyToLineMap[agencyId]?.agencyName || '');
+            tripHeadsign = direction === 0 ? (g.headsignIda || g.longName || '') : (g.headsignVuelta || g.longName || '');
+          }
         }
 
         // 2. Resolución por Empresa / Agencia SUBE Nacional (433 agencias a nivel país)
