@@ -18,7 +18,7 @@ export interface VehicleOverride {
 }
 
 interface Props {
-  showNotification?: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  showNotification?: (type: 'success' | 'error' | 'info', msg: string) => void;
   initialPreFillData?: Partial<VehicleOverride> | null;
   onClosePreFillModal?: () => void;
 }
@@ -53,11 +53,11 @@ export default function RedSubeVehicleOverridesPanel({ showNotification, initial
       if (data.success && Array.isArray(data.overrides)) {
         setOverrides(data.overrides);
       } else {
-        if (showNotification) showNotification('No se pudieron cargar las excepciones de unidades', 'error');
+        if (showNotification) showNotification('error', 'No se pudieron cargar las excepciones de unidades');
       }
     } catch (err) {
       console.error(err);
-      if (showNotification) showNotification('Error de conexión al cargar excepciones', 'error');
+      if (showNotification) showNotification('error', 'Error de conexión al cargar excepciones');
     } finally {
       setIsLoading(false);
     }
@@ -112,7 +112,7 @@ export default function RedSubeVehicleOverridesPanel({ showNotification, initial
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.identifier_value || !formData.override_linea) {
-      if (showNotification) showNotification('Por favor completa los campos obligatorios', 'error');
+      if (showNotification) showNotification('error', 'Por favor completa los campos obligatorios');
       return;
     }
 
@@ -131,16 +131,16 @@ export default function RedSubeVehicleOverridesPanel({ showNotification, initial
       const data = await res.json();
 
       if (data.success) {
-        if (showNotification) showNotification(editingItem ? 'Excepción actualizada' : 'Excepción creada correctamente', 'success');
+        if (showNotification) showNotification('success', editingItem ? 'Excepción actualizada' : 'Excepción creada correctamente');
         setIsModalOpen(false);
         if (onClosePreFillModal) onClosePreFillModal();
         loadOverrides();
       } else {
-        if (showNotification) showNotification(data.error || 'Error al guardar la excepción', 'error');
+        if (showNotification) showNotification('error', data.error || 'Error al guardar la excepción');
       }
     } catch (err) {
       console.error(err);
-      if (showNotification) showNotification('Error de red al guardar la excepción', 'error');
+      if (showNotification) showNotification('error', 'Error de red al guardar la excepción');
     } finally {
       setIsSaving(false);
     }
@@ -158,7 +158,7 @@ export default function RedSubeVehicleOverridesPanel({ showNotification, initial
       const data = await res.json();
       if (data.success) {
         setOverrides(prev => prev.map(o => o.id === item.id ? { ...o, is_active: updatedStatus } : o));
-        if (showNotification) showNotification(`Excepción ${updatedStatus === 1 ? 'activada' : 'desactivada'}`, 'info');
+        if (showNotification) showNotification('info', `Excepción ${updatedStatus === 1 ? 'activada' : 'desactivada'}`);
       }
     } catch (err) {
       console.error(err);
@@ -172,7 +172,7 @@ export default function RedSubeVehicleOverridesPanel({ showNotification, initial
       const res = await fetch(`/v1/redsube/vehicle-overrides/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        if (showNotification) showNotification('Excepción eliminada', 'success');
+        if (showNotification) showNotification('success', 'Excepción eliminada');
         setOverrides(prev => prev.filter(o => o.id !== id));
       }
     } catch (err) {
